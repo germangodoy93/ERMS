@@ -32,7 +32,7 @@ jobs:
     env:
       ERMS_TEST_DATABASE_URL: postgresql://erms:ci-only-password@localhost:5432/erms_test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
         with:
           version: "0.13.9"
@@ -56,7 +56,7 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -76,7 +76,7 @@ jobs:
       # Job-level so every compose command (including cleanup) can interpolate it.
       POSTGRES_PASSWORD: ci-only-password
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Smoke test with docker compose
         run: |
           docker compose up --build -d --wait
