@@ -72,11 +72,12 @@ jobs:
   docker:
     runs-on: ubuntu-24.04
     needs: [backend, frontend]
+    env:
+      # Job-level so every compose command (including cleanup) can interpolate it.
+      POSTGRES_PASSWORD: ci-only-password
     steps:
       - uses: actions/checkout@v4
       - name: Smoke test with docker compose
-        env:
-          POSTGRES_PASSWORD: ci-only-password
         run: |
           docker compose up --build -d --wait
           bash scripts/smoke-test.sh
