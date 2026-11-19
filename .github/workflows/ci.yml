@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: erms_test
+          POSTGRES_USER: erms
+          POSTGRES_PASSWORD: ci-only-password
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U erms -d erms_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      ERMS_TEST_DATABASE_URL: postgresql://erms:ci-only-password@localhost:5432/erms_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.9"
+          enable-cache: true
+      - run: uv python install 3.13
+      - run: uv sync --frozen
+      - name: Lint
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: Type check
+        run: uv run mypy app tests
+      - name: Tests (unit + integration)
+        run: uv run pytest --cov --cov-report=term-missing
+      - name: OpenAPI contract is up to date
+        run: |
+          uv run python -m scripts.export_openapi ../docs/api/openapi.json
+          git diff --exit-code -- ../docs/api/openapi.json
+
+  frontend:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  docker:
+    runs-on: ubuntu-24.04
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Smoke test with docker compose
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+        run: |
+          docker compose up --build -d --wait
+          bash scripts/smoke-test.sh
+      - name: Build production images
+        run: |
+          docker build --target prod -t erms-backend:ci backend
+          docker build --target prod -t erms-frontend:ci frontend
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+      - if: always()
+        run: docker compose down -v
