@@ -50,6 +50,29 @@ class PermissionDeniedError(AppError):
     title = "Permiso denegado"
 
 
+class AuthenticationError(AppError):
+    status_code = HTTPStatus.UNAUTHORIZED
+    code = "not_authenticated"
+    title = "No autenticado"
+
+
+class InvalidCredentialsError(AuthenticationError):
+    code = "invalid_credentials"
+    title = "Credenciales inválidas"
+
+
+class PasswordChangeRequiredError(AppError):
+    status_code = HTTPStatus.FORBIDDEN
+    code = "password_change_required"
+    title = "Debe cambiar su contraseña"
+
+
+class BusinessRuleError(AppError):
+    status_code = HTTPStatus.UNPROCESSABLE_ENTITY
+    code = "business_rule_violation"
+    title = "Operación no permitida"
+
+
 def problem_response(
     request: Request,
     *,
@@ -74,7 +97,7 @@ def problem_response(
 
 async def _app_error_handler(request: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, AppError)  # noqa: S101 - registered only for AppError
-    return problem_response(
+    response = problem_response(
         request,
         status=exc.status_code,
         code=exc.code,
@@ -82,6 +105,9 @@ async def _app_error_handler(request: Request, exc: Exception) -> JSONResponse:
         detail=exc.detail,
         errors=exc.errors,
     )
+    if isinstance(exc, AuthenticationError):
+        response.headers["WWW-Authenticate"] = "Bearer"
+    return response
 
 
 async def _validation_error_handler(request: Request, exc: Exception) -> JSONResponse:

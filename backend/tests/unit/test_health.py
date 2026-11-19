@@ -64,8 +64,9 @@ def test_database_check_reports_unreachable_server() -> None:
     assert "base de datos" in (result.detail or "")
 
 
-def test_alembic_head_is_initial_revision() -> None:
-    assert alembic_head_revision() == "0001_initial"
+def test_alembic_has_a_single_head() -> None:
+    # get_current_head raises if migrations branch into several heads.
+    assert alembic_head_revision() is not None
 
 
 @pytest.fixture

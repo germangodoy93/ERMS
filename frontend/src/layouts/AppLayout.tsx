@@ -4,11 +4,20 @@ import { NavLink, Outlet } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { can } from "@/modules/auth/permissions";
+import { useAuthStore } from "@/stores/auth";
 
 import { NAVIGATION, type NavItem } from "./navigation";
+import { UserMenu } from "./UserMenu";
 
 export function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const user = useAuthStore((s) => s.user);
+
+  const sections = NAVIGATION.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => !item.permission || can(user, item.permission)),
+  })).filter((section) => section.items.length > 0);
 
   return (
     <div className="flex min-h-dvh">
@@ -30,12 +39,21 @@ export function AppLayout() {
             <X className="size-5" />
           </button>
         </div>
-        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2">
-          {NAVIGATION.map((item) => (
-            <SidebarItem key={item.label} item={item} onNavigate={() => setMobileOpen(false)} />
+        <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-2">
+          {sections.map((section, index) => (
+            <div key={section.title ?? index} className="space-y-0.5">
+              {section.title && (
+                <p className="text-sidebar-muted px-3 pb-1 text-[11px] font-medium tracking-wider uppercase">
+                  {section.title}
+                </p>
+              )}
+              {section.items.map((item) => (
+                <SidebarItem key={item.label} item={item} onNavigate={() => setMobileOpen(false)} />
+              ))}
+            </div>
           ))}
         </nav>
-        <p className="text-sidebar-muted px-5 py-4 text-xs">Electronic Repair Management System</p>
+        <p className="text-sidebar-muted truncate px-5 py-4 text-xs">{user?.organization.name}</p>
       </aside>
 
       {mobileOpen && (
@@ -58,6 +76,9 @@ export function AppLayout() {
             <Menu />
           </Button>
           <span className="text-muted-foreground text-sm">Taller · Bogotá</span>
+          <div className="ml-auto">
+            <UserMenu />
+          </div>
         </header>
         <main className="flex-1 px-4 py-6 md:px-8">
           <Outlet />

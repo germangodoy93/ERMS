@@ -1,7 +1,8 @@
 # ERMS local development environment.
-#   cp .env.example .env   (then set POSTGRES_PASSWORD)
+#   cp .env.example .env   (then set POSTGRES_PASSWORD and JWT_SECRET)
 #   docker compose up --build
 # Web: http://localhost:5173 · API docs: http://localhost:8000/api/v1/docs
+# Email inbox (Mailpit): http://localhost:8025
 name: erms
 
 services:
@@ -34,6 +35,12 @@ services:
       timeout: 3s
       retries: 10
 
+  # Captures outgoing email in development. Inbox: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:v1.33.1
+    ports:
+      - "8025:8025"
+
   backend:
     build:
       context: ./backend
@@ -45,6 +52,11 @@ services:
       REDIS_URL: redis://redis:6379/0
       RUN_MIGRATIONS: "true"
       LOG_JSON: "${LOG_JSON:-false}"
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (openssl rand -hex 32)}
+      FRONTEND_URL: http://localhost:5173
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_STARTTLS: "false"
     ports:
       - "8000:8000"
     volumes:
@@ -56,6 +68,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mailpit:
+        condition: service_started
     healthcheck:
       test:
         [

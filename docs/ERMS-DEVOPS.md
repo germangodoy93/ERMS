@@ -28,6 +28,11 @@ verificadas el 2026-11-19:
 | PostgreSQL (imagen) | 17-alpine | Igual a la versión local instalada |
 | Redis (imagen) | 8-alpine | |
 | Caddy (imagen) | 2.10-alpine | Servidor web de producción |
+| PyJWT / pwdlib (argon2) | 2.15.1 / 0.4.2 | Sprint 1 (ADR-002) |
+| email-validator | 2.4.0 | Valida `EmailStr`; rechaza dominios reservados como `.test` y `.local` |
+| zustand / react-hook-form / zod | 5.1.0 / 7.92.0 / 4.6.7 | Sprint 1 |
+| @hookform/resolvers / sonner | 7.0.7 / 2.0.8 | Sprint 1 |
+| Mailpit (imagen) | v1.33.1 | Correo de desarrollo; no se usa la v1.34.0 por ser de hace 2 días |
 
 ### Decisiones de compatibilidad
 
@@ -37,8 +42,11 @@ verificadas el 2026-11-19:
 - **httpx en TestClient:** Starlette 1.10 avisa que `httpx` está deprecado en `TestClient` y
   recomienda `httpx2`. Ese paquete aún no se ha evaluado, así que se mantiene `httpx` y se
   filtra solo esa advertencia en `pyproject.toml`. Todas las demás advertencias son errores.
-- **shadcn CLI:** necesita el alias `@/*` también en el `tsconfig.json` raíz. Sin él crea
-  archivos en una carpeta `@/` e instala un paquete npm ajeno llamado `cn`.
+- **shadcn CLI:** necesita el alias `@/*` también en el `tsconfig.json` raíz. Aun así, la
+  versión 4.23 **instala un paquete npm ajeno llamado `cn`** y lo importa en los componentes.
+  Después de cada `npx shadcn add …` hay que ejecutar `npm uninstall cn` y reemplazar
+  `from "cn"` por `from "@/lib/utils"` en `src/components/ui/`.
+- **Radix en pruebas:** jsdom no trae `ResizeObserver`; `src/test/setup.ts` define un stub.
 
 ## 2. Entornos
 
@@ -60,6 +68,14 @@ verificadas el 2026-11-19:
 | `LOG_LEVEL` / `LOG_JSON` | No | `INFO` / `true` |
 | `RUN_MIGRATIONS` | No | `true` aplica `alembic upgrade head` al arrancar (Compose) |
 | `PORT` | No | Puerto HTTP; Railway lo inyecta |
+| `JWT_SECRET` | **Sí** | Clave de firma de los access tokens, mínimo 32 caracteres (`openssl rand -hex 32`). Cambiarla cierra todas las sesiones. |
+| `ACCESS_TOKEN_TTL_MINUTES` · `SESSION_MAX_HOURS` · `SESSION_IDLE_MINUTES` | No | 15 · 12 · 120 |
+| `LOGIN_MAX_ATTEMPTS` · `LOGIN_LOCKOUT_MINUTES` | No | 5 · 15 |
+| `PASSWORD_MIN_LENGTH` · `PASSWORD_RESET_TTL_MINUTES` | No | 12 · 30 |
+| `REFRESH_COOKIE_SECURE` | No | Por defecto `true` solo en producción |
+| `FRONTEND_URL` | Sí en producción | Base de los enlaces enviados por correo (p. ej. el dominio de `web` en Railway) |
+| `SMTP_HOST` · `SMTP_PORT` · `SMTP_USERNAME` · `SMTP_PASSWORD` · `SMTP_STARTTLS` · `SMTP_FROM` | Para recuperar contraseñas | Sin `SMTP_HOST` no se envían correos: se registra el intento sin el enlace. |
+| `ERMS_ADMIN_PASSWORD` | Solo `bootstrap` | Contraseña temporal del primer administrador |
 | `ERMS_TEST_DATABASE_URL` | Solo pruebas | Base **desechable** para las pruebas de integración |
 
 Frontend: `VITE_API_PROXY_TARGET` (proxy de desarrollo) y `VITE_API_BASE_URL` (opcional).
@@ -71,7 +87,21 @@ Servidor web de producción: `API_UPSTREAM` y `PORT`.
 |---|---|
 | `backend` | ruff, mypy, pytest (unitarias + integración contra PostgreSQL), verificación de que `docs/api/openapi.json` está actualizado |
 | `frontend` | eslint, prettier, tsc, vitest, build |
-| `docker` | `docker compose up --wait` + `scripts/smoke-test.sh`; build de las imágenes `prod` |
+| `docker` | `docker compose up --wait` + `scripts/smoke-test.sh` + `scripts/smoke-auth.sh` (bootstrap → login por el proxy web → correo de recuperación en Mailpit); build de las imágenes `prod` |
+
+### Pruebas de integración en Windows sin Docker
+
+El PostgreSQL 17 instalado trae `initdb` y `pg_ctl`, así que se puede crear un clúster
+**desechable** en otro puerto sin tocar el servidor principal ni conocer su contraseña:
+
+```powershell
+$pg = "C:\Program Files\PostgreSQL\17\bin"; $data = "$env:TEMP\erms-pg"
+& "$pg\initdb.exe" -D $data -U erms --auth=trust -E UTF8 --locale=C
+& "$pg\pg_ctl.exe" -D $data -o "-p 54329 -c listen_addresses=127.0.0.1" -l "$data.log" start
+& "$pg\createdb.exe" -h 127.0.0.1 -p 54329 -U erms erms_test
+cd backend; $env:ERMS_TEST_DATABASE_URL = "postgresql://erms@127.0.0.1:54329/erms_test"; uv run pytest
+& "$pg\pg_ctl.exe" -D $data stop   # al terminar
+```
 
 ## 5. Despliegue en Railway
 
@@ -103,6 +133,17 @@ Code" (vigente solo hasta el 2026-12-01).
 | `ENVIRONMENT` | `production` |
 | `PORT` | `8000` (puerto fijo para la red privada) |
 | `FORWARDED_ALLOW_IPS` | `*` (la API solo es accesible por la red privada) |
+| `JWT_SECRET` | Valor aleatorio propio de 64 caracteres hex (*Generate* en Railway o `openssl rand -hex 32`) |
+| `FRONTEND_URL` | `https://<dominio-del-servicio-web>` |
+| `SMTP_*` | Cuando se defina el proveedor gratuito; sin ellas no se envían correos de recuperación |
+
+Primer administrador, una sola vez. Se ejecuta desde la consola del servicio `backend` en
+Railway (o con `railway ssh`):
+
+```bash
+ERMS_ADMIN_PASSWORD='<temporal>' python -m app.cli bootstrap \
+  --org-name "<Razón social>" --org-slug <slug> --admin-email <correo> --admin-name "<Nombre>"
+```
 
 ### Servicio `web`
 

@@ -6,7 +6,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import Settings, get_settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import configure_logging
+from app.modules.audit.router import router as audit_router
+from app.modules.auth.router import router as auth_router
 from app.modules.health.router import router as health_router
+from app.modules.roles.router import router as roles_router
+from app.modules.users.router import router as users_router
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -32,7 +36,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
 
     register_exception_handlers(app)
-    app.include_router(health_router, prefix=settings.api_prefix)
+    for router in (health_router, auth_router, users_router, roles_router, audit_router):
+        app.include_router(router, prefix=settings.api_prefix)
     return app
 
 

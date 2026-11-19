@@ -4,7 +4,7 @@ Plataforma para gestionar un centro de diagnóstico, mantenimiento y reparación
 computadores, celulares, tablets y consolas: desde la recepción del equipo hasta su entrega y
 garantía.
 
-**Estado:** Sprint 0 (fundaciones). Ver [roadmap](docs/ERMS-ROADMAP.md).
+**Estado:** Sprint 1 terminado (identidad y acceso). Ver [roadmap](docs/ERMS-ROADMAP.md).
 
 | Capa | Tecnología |
 |---|---|
@@ -18,7 +18,7 @@ garantía.
 Requisitos: Docker Desktop con WSL2 (Windows) o Docker Engine con Compose v2.
 
 ```bash
-cp .env.example .env          # y define POSTGRES_PASSWORD
+cp .env.example .env          # y define POSTGRES_PASSWORD y JWT_SECRET (openssl rand -hex 32)
 docker compose up --build
 ```
 
@@ -26,10 +26,23 @@ docker compose up --build
 |---|---|
 | Web | http://localhost:5173 |
 | API (Swagger) | http://localhost:8000/api/v1/docs |
+| Correo de desarrollo (Mailpit) | http://localhost:8025 |
 | PostgreSQL | `localhost:5433` (usuario y base `erms`) |
 
-Las migraciones se aplican automáticamente al arrancar el backend. Para verificar la
-comunicación de punta a punta (Git Bash o Linux):
+Las migraciones se aplican automáticamente al arrancar el backend.
+
+**Primer acceso:** crea la organización, la sede Bogotá y el primer administrador. Usa una
+contraseña temporal de al menos 12 caracteres que no contenga el usuario del correo; deberás
+cambiarla al ingresar.
+
+```bash
+docker compose exec backend python -m app.cli bootstrap \
+  --org-name "Nombre del taller" --org-slug mi-taller \
+  --admin-email tu-correo@dominio.com --admin-name "Tu nombre"
+# La contraseña temporal se pide por consola (no queda en el historial)
+```
+
+Para verificar la comunicación de punta a punta (Git Bash o Linux):
 
 ```bash
 bash scripts/smoke-test.sh     # debe terminar en "All checks passed"
@@ -60,9 +73,10 @@ Crea un usuario y las bases `erms` y `erms_test` con tu usuario `postgres`. Reem
 
 ```powershell
 cd backend
-copy .env.example .env         # y reemplaza CHANGE_ME por la contraseña anterior
+copy .env.example .env         # reemplaza CHANGE_ME y define JWT_SECRET (≥ 32 caracteres)
 uv sync
 uv run alembic upgrade head
+uv run python -m app.cli bootstrap --org-name "Nombre del taller" --org-slug mi-taller --admin-email tu-correo@dominio.com --admin-name "Tu nombre"
 uv run uvicorn app.main:app --reload --port 8000
 ```
 

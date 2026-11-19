@@ -72,10 +72,20 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 
 ## 4. Seguridad (resumen)
 
-- Argon2id (`pwdlib`) para contraseñas; JWT con PyJWT.
-- Access token de 15 minutos en memoria del cliente; refresh token en cookie `httpOnly`,
-  `Secure`, `SameSite=Strict`, con rotación y revocación en base de datos.
-- RBAC con permisos granulares (`work_orders:create`, …) asignados a roles.
+- Argon2id (`pwdlib`) para contraseñas; JWT con PyJWT. Política: mínimo 12 caracteres y no
+  puede contener el usuario del correo. Bloqueo de 15 min tras 5 intentos fallidos.
+- Access token de 15 minutos guardado solo en memoria del cliente. El refresh token va en
+  cookie `httpOnly`, `Secure`, `SameSite=Strict`, limitada a `/api/v1/auth`, con rotación y
+  revocación en BD. La sesión dura máx. 12 h y se cierra tras 2 h sin actividad.
+- Detección de robo: reutilizar un refresh token ya rotado revoca toda la sesión. Hay una
+  gracia de 30 s para que dos pestañas que renuevan a la vez no se cierren mutuamente.
+- El access token se invalida al cerrar sesión: cada petición verifica que la sesión siga activa.
+- RBAC con permisos granulares (`users:read`, …) asignados a roles. Los permisos se consultan
+  en cada petición y **no viajan en el JWT**, así que retirar un permiso aplica de inmediato.
+- Protección de privilegios: solo `roles:manage` (Administrador) asigna el rol Administrador o
+  gestiona a un administrador. Siempre queda al menos un administrador activo.
+- Contraseña temporal al crear usuarios, con cambio obligatorio en el primer ingreso (el
+  backend responde 403 `password_change_required` a todo lo demás).
 - Aislamiento por organización en la capa de repositorio; RLS de PostgreSQL como refuerzo
   en una fase posterior.
 - Auditoría de solo inserción (`audit_logs`) con actor, acción, entidad, diff e IP.
@@ -100,6 +110,10 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 | 010 | IVA por ítem de cotización (19 % o 0 %/exento) | Tarifa global | El negocio cobra IVA en unos casos y en otros no. |
 | 011 | Correo: Mailpit en desarrollo; SMTP genérico en producción (plan gratuito) | Proveedor de pago | Restricción de costo cero. |
 | 012 | Almacenamiento de objetos: abstracción S3 con proveedor a decidir en el Sprint 3 | MinIO fijo | MinIO cambió su licencia y distribución en 2025; se evaluarán alternativas gratuitas. |
+| 013 | Correo de usuario único en todo el sistema | Único por organización | Login sin elegir organización; preparado para multiempresa. |
+| 014 | Catálogo de permisos en código e insertado por migraciones | Sincronizar al arrancar la API | Mismo catálogo en todos los entornos, sin escrituras concurrentes al arrancar varias instancias. |
+| 015 | Contraseña temporal + cambio obligatorio al crear usuarios | Invitación por correo | Funciona sin SMTP en producción. La invitación por correo puede agregarse cuando haya proveedor. |
+| 016 | Período de gracia de 30 s en la rotación del refresh token | Revocación estricta | Evita cerrar la sesión cuando dos pestañas renuevan a la vez, sin perder la detección de robo. |
 
 ## 6. Riesgos
 

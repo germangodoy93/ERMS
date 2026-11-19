@@ -19,6 +19,7 @@ def main() -> None:
 
     # The schema does not depend on the database; a placeholder URL avoids requiring one.
     os.environ.setdefault("DATABASE_URL", "postgresql://openapi:openapi@127.0.0.1:1/openapi")
+    os.environ.setdefault("JWT_SECRET", "openapi-export-placeholder-not-used-for-signing")
     from app.main import create_app  # imported here: must run after the env setup above
 
     output = Path(sys.argv[1])

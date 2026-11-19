@@ -1,51 +1,15 @@
-"""Integration tests against a real PostgreSQL.
+"""Migrations against a real PostgreSQL (ERMS_TEST_DATABASE_URL, disposable)."""
 
-Set ERMS_TEST_DATABASE_URL to a DISPOSABLE database: these tests downgrade it to an
-empty schema and migrate it back to head.
-"""
-
-import os
-from collections.abc import Iterator
-
-import pytest
 from alembic import command
+from alembic.autogenerate import compare_metadata
 from alembic.config import Config
-from sqlalchemy import Engine, create_engine, inspect
+from alembic.migration import MigrationContext
+from sqlalchemy import Engine, inspect, text
 
-from app.core.config import Settings, get_settings
-from app.modules.health.checks import BACKEND_ROOT, DatabaseCheck, alembic_head_revision
+from app.modules.health.checks import DatabaseCheck, alembic_head_revision
 from app.modules.health.schemas import ComponentStatus
-
-TEST_DB_URL = os.environ.get("ERMS_TEST_DATABASE_URL")
-
-pytestmark = [
-    pytest.mark.integration,
-    pytest.mark.skipif(not TEST_DB_URL, reason="ERMS_TEST_DATABASE_URL is not set"),
-]
-
-
-@pytest.fixture(scope="module")
-def db_url() -> Iterator[str]:
-    assert TEST_DB_URL
-    previous = os.environ.get("DATABASE_URL")
-    os.environ["DATABASE_URL"] = TEST_DB_URL
-    get_settings.cache_clear()
-    yield Settings().database_url
-    if previous is not None:
-        os.environ["DATABASE_URL"] = previous
-    get_settings.cache_clear()
-
-
-@pytest.fixture(scope="module")
-def alembic_config(db_url: str) -> Config:
-    return Config(str(BACKEND_ROOT / "alembic.ini"))
-
-
-@pytest.fixture(scope="module")
-def engine(db_url: str) -> Iterator[Engine]:
-    eng = create_engine(db_url)
-    yield eng
-    eng.dispose()
+from app.modules.roles.catalog import Perm
+from app.shared.registry import Base
 
 
 def test_migrations_upgrade_downgrade_roundtrip(alembic_config: Config, engine: Engine) -> None:
@@ -53,13 +17,25 @@ def test_migrations_upgrade_downgrade_roundtrip(alembic_config: Config, engine: 
     assert "organizations" not in inspect(engine).get_table_names()
 
     command.upgrade(alembic_config, "head")
-    tables = inspect(engine).get_table_names()
-    assert "organizations" in tables
-    assert "alembic_version" in tables
+    tables = set(inspect(engine).get_table_names())
+    assert {"organizations", "users", "roles", "audit_logs", "alembic_version"} <= tables
 
 
-def test_database_check_ok_when_migrated(alembic_config: Config, engine: Engine) -> None:
-    command.upgrade(alembic_config, "head")
+def test_permission_catalog_is_seeded(engine: Engine) -> None:
+    with engine.connect() as conn:
+        codes = set(conn.scalars(text("SELECT code FROM permissions")))
+    assert codes == {str(p) for p in Perm}
+
+
+def test_models_match_migrations(engine: Engine) -> None:
+    """Autogenerate must find nothing: ORM models and migrations describe the same schema."""
+    with engine.connect() as conn:
+        context = MigrationContext.configure(conn, opts={"compare_type": True})
+        diff = compare_metadata(context, Base.metadata)
+    assert diff == [], f"Models and migrations differ: {diff}"
+
+
+def test_database_check_ok_when_migrated(engine: Engine) -> None:
     result = DatabaseCheck(engine, alembic_head_revision()).run()
     assert result.status is ComponentStatus.OK, result.detail
 

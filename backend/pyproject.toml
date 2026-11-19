@@ -1,14 +1,17 @@
 [project]
 name = "erms-backend"
 version = "0.1.0"
-description = "ERMS â€“ Electronic Repair Management System: API backend"
+description = "ERMS – Electronic Repair Management System: API backend"
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "alembic>=1.20.1",
+    "email-validator>=2.4.0",
     "fastapi>=0.165.0",
     "psycopg[binary]>=3.3.9",
+    "pwdlib[argon2]>=0.4.2",
     "pydantic>=2.14.4",
     "pydantic-settings>=2.16.3",
+    "pyjwt>=2.15.1",
     "redis>=8.1.0",
     "sqlalchemy>=2.1.9",
     "uvicorn[standard]>=0.54.0",

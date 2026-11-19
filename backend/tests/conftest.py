@@ -8,3 +8,4 @@ import os
 
 os.environ.setdefault("DATABASE_URL", "postgresql://unit:unit@127.0.0.1:1/unit")
 os.environ.setdefault("LOG_JSON", "false")
+os.environ.setdefault("JWT_SECRET", "test-only-secret-with-at-least-32-characters!")

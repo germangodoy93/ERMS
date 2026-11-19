@@ -36,3 +36,23 @@
 | Página de estado | `frontend/src/modules/system/pages/SystemStatusPage.test.tsx` | Estados OK, no disponible y sin conexión |
 | Contrato | `frontend/src/types/api.contract.test.ts` | Enums y campos iguales al OpenAPI |
 | Humo E2E | `scripts/smoke-test.sh` | 6 verificaciones de punta a punta |
+
+## 4. Pruebas del Sprint 1
+
+Resultado local del 2026-11-19: **71 pruebas de backend** (93 % de cobertura; servicios entre
+87 % y 100 %) y **45 de frontend**, todas en verde.
+
+| Prueba | Archivo | Verifica |
+|---|---|---|
+| Criptografía | `backend/tests/unit/test_security.py` | Argon2id; JWT expirado, con otra clave, de otro tipo o sin firma (`alg=none`) rechazado; política de contraseñas; `JWT_SECRET` corto rechazado |
+| Esquema | `backend/tests/integration/test_database.py` | Migraciones en ambos sentidos; catálogo de permisos sembrado; **modelos ORM = migraciones** (autogenerate vacío) |
+| Login y sesión | `backend/tests/integration/test_auth_api.py` | Cookie segura; mismo error para correo inexistente o clave errada; bloqueo tras 5 fallos; usuario inactivo; rotación; gracia de 30 s y luego detección de robo; expiración absoluta; logout invalida el access token |
+| Contraseñas | `backend/tests/integration/test_auth_api.py` | Contraseña temporal bloquea la app hasta cambiarla; política aplicada; recuperación por correo de un solo uso que cierra sesiones |
+| Usuarios | `backend/tests/integration/test_users_api.py` | Alta con correo normalizado; duplicados (409); supervisor sin escalada a Administrador; técnico/recepción sin acceso; último administrador protegido; desactivar cierra sesiones; filtros, paginación y comodines LIKE; **aislamiento entre organizaciones** |
+| Roles y auditoría | `backend/tests/integration/test_roles_audit_api.py` | Cambios de permisos efectivos sin nuevo token; rol Administrador inmutable; filtros de auditoría por acción, entidad, actor y fechas |
+| Bootstrap | `backend/tests/integration/test_cli.py` | Crea organización, sede, roles y administrador; no se ejecuta dos veces; aplica la política de contraseñas |
+| Cliente HTTP | `frontend/src/services/http.test.ts` | Bearer automático; un solo refresh para peticiones concurrentes; reintento tras refresh; sesión limpia si el refresh falla; sin refresh tras login fallido |
+| Rutas | `frontend/src/modules/auth/components/RouteGuards.test.tsx` | Carga, redirección a login con `next`, cambio de contraseña obligatorio, acceso restringido |
+| Login | `frontend/src/modules/auth/pages/LoginPage.test.tsx` | Validaciones; redirección a `next`; **bloqueo de open redirect**; mensaje del servidor |
+| Usuarios (UI) | `frontend/src/modules/users/pages/UsersPage.test.tsx` | Estados; supervisor sin acciones sobre administradores y con el rol Administrador deshabilitado; solo lectura sin acciones |
+| Humo de autenticación | `scripts/smoke-auth.sh` (CI, Docker Compose) | Bootstrap → login por el proxy web → correo de recuperación entregado a Mailpit |

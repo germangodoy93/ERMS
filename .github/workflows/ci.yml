@@ -73,14 +73,19 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [backend, frontend]
     env:
-      # Job-level so every compose command (including cleanup) can interpolate it.
+      # Job-level so every compose command (including cleanup) can interpolate them.
       POSTGRES_PASSWORD: ci-only-password
+      JWT_SECRET: ci-only-jwt-secret-not-used-anywhere-else-0123456789
     steps:
       - uses: actions/checkout@v5
       - name: Smoke test with docker compose
         run: |
           docker compose up --build -d --wait
           bash scripts/smoke-test.sh
+      - name: Authentication smoke test
+        env:
+          ERMS_ADMIN_PASSWORD: Ci-only-admin-password-2026
+        run: bash scripts/smoke-auth.sh
       - name: Build production images
         run: |
           docker build --target prod -t erms-backend:ci backend

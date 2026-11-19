@@ -46,14 +46,14 @@ erDiagram
 | Tabla | Sprint | Columnas clave | Restricciones |
 |---|---|---|---|
 | `organizations` | ✅ 0 | name, slug, tax_id (NIT), timezone, is_active | `uq(slug)` |
-| `branches` | 📐 1 | name, address, city, phone, is_active | `uq(organization_id, name)` |
-| `users` | 📐 1 | email, full_name, password_hash, is_active, last_login_at | `uq(organization_id, email)` |
-| `roles` | 📐 1 | code (ADMIN, SUPERVISOR, TECHNICIAN, RECEPTIONIST), name | `uq(organization_id, code)` |
-| `permissions` | 📐 1 | code (`work_orders:create`), description | `uq(code)`; catálogo global |
-| `user_roles`, `role_permissions` | 📐 1 | tablas puente | PK compuesta |
-| `refresh_tokens` | 📐 1 | user_id, token_hash, expires_at, revoked_at, replaced_by_id | índice por token_hash |
-| `password_reset_tokens` | 📐 1 | user_id, token_hash, expires_at, used_at | — |
-| `audit_logs` | 📐 1 | actor_user_id, action, entity_type, entity_id, changes JSONB, ip, user_agent | solo inserción; índice (entity_type, entity_id) |
+| `branches` | ✅ 1 | name, city, address, phone, is_active | `uq(organization_id, name)` |
+| `users` | ✅ 1 | email, full_name, phone, password_hash, must_change_password, is_active, failed_login_count, locked_until, last_login_at, password_changed_at | `uq(email)` **global**; `ck(email = lower(email))` |
+| `roles` | ✅ 1 | code (ADMIN, SUPERVISOR, TECHNICIAN, RECEPTIONIST), name, is_system | `uq(organization_id, code)` |
+| `permissions` | ✅ 1 | code (`users:read`…), description | `uq(code)`; catálogo global insertado por migraciones |
+| `user_roles`, `role_permissions` | ✅ 1 | tablas puente | PK compuesta; índice por la segunda columna |
+| `refresh_tokens` | ✅ 1 | user_id, family_id (sesión), token_hash (SHA-256), expires_at (inactividad), session_expires_at (absoluta), revoked_at, replaced_by_id, ip, user_agent | `uq(token_hash)`; índices por user_id y family_id |
+| `password_reset_tokens` | ✅ 1 | user_id, token_hash (SHA-256), expires_at, used_at | `uq(token_hash)` |
+| `audit_logs` | ✅ 1 | organization_id, actor_user_id, action, entity_type, entity_id, changes JSONB, ip, user_agent, created_at | solo inserción; índices (entity_type, entity_id), (organization_id, created_at), action, actor |
 
 ### Clientes y dispositivos
 

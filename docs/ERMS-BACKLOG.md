@@ -17,16 +17,16 @@ Prioridad: **P1** imprescindible para el MVP · **P2** importante · **P3** dese
 
 ## Sprint 1 – Identidad y acceso (P1)
 
-| ID | Historia | Criterios de aceptación |
-|---|---|---|
-| S1-01 | Como usuario, quiero iniciar sesión con correo y contraseña | Hash Argon2id; access token de 15 min; refresh token en cookie `httpOnly`; bloqueo temporal tras 5 intentos fallidos |
-| S1-02 | Como usuario, quiero que mi sesión se renueve y poder cerrarla | Rotación de refresh token; reutilización detectada revoca la familia de tokens; logout revoca |
-| S1-03 | Como usuario, quiero recuperar mi contraseña | Token de un solo uso con vigencia de 30 min enviado por correo (Mailpit en desarrollo); respuesta idéntica exista o no el correo |
-| S1-04 | Como administrador, quiero gestionar usuarios | CRUD, activar/desactivar; un usuario no puede desactivarse a sí mismo |
-| S1-05 | Como administrador, quiero gestionar roles y permisos | 4 roles semilla (Administrador, Supervisor, Técnico, Recepcionista); permisos granulares; endpoints protegidos con 403 |
-| S1-06 | Como supervisor, quiero auditoría de acciones | Login, logout y cambios de usuarios y roles quedan en `audit_logs` con actor, IP y diff |
-| S1-07 | Como administrador, quiero registrar la organización y su sede | Comando de arranque crea la organización y la sede Bogotá y el primer administrador (sin contraseñas en el repositorio) |
-| S1-08 | Como usuario, quiero pantallas de login y gestión de usuarios | React Hook Form + Zod; rutas protegidas; menú según permisos |
+| ID | Historia | Criterios de aceptación | Estado |
+|---|---|---|---|
+| S1-01 | Como usuario, quiero iniciar sesión con correo y contraseña | Hash Argon2id; access token de 15 min; refresh token en cookie `httpOnly`; bloqueo de 15 min tras 5 intentos fallidos; mismo mensaje para correo inexistente o clave errada | ✅ |
+| S1-02 | Como usuario, quiero que mi sesión se renueve y poder cerrarla | Sesión máx. 12 h y 2 h de inactividad; rotación de refresh token; reutilización revoca la sesión (gracia de 30 s para pestañas simultáneas); logout invalida también el access token | ✅ |
+| S1-03 | Como usuario, quiero recuperar mi contraseña | Token de un solo uso, 30 min, por correo (Mailpit en desarrollo); respuesta idéntica exista o no el correo; cierra todas las sesiones | ✅ |
+| S1-04 | Como administrador o supervisor, quiero gestionar usuarios | Crear con contraseña temporal (cambio obligatorio), editar, activar/desactivar, asignar roles; nadie se desactiva a sí mismo; siempre queda un administrador activo; el supervisor no puede asignar ni gestionar el rol Administrador | ✅ |
+| S1-05 | Como administrador, quiero gestionar roles y permisos | 4 roles de sistema; matriz de permisos editable salvo el rol Administrador; cambios efectivos de inmediato; 403 sin permiso | ✅ |
+| S1-06 | Como supervisor, quiero auditoría de acciones | Login (exitoso y fallido), logout, cambios de usuarios, roles y contraseñas en `audit_logs` con actor, IP y diff; consulta con filtros | ✅ |
+| S1-07 | Como administrador, quiero registrar la organización y su sede | `python -m app.cli bootstrap` crea organización, sede Bogotá, roles y primer administrador; la contraseña se lee de variable o consola, nunca de argumentos | ✅ |
+| S1-08 | Como usuario, quiero pantallas de login y gestión de usuarios | Login, recuperación, restablecimiento y cambio de contraseña; usuarios, roles y auditoría; React Hook Form + Zod; rutas protegidas; menú según permisos | ✅ |
 
 ## Sprints 2 – 6
 

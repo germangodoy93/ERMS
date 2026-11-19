@@ -8,7 +8,7 @@ from enum import StrEnum
 from functools import lru_cache
 from typing import Annotated
 
-from pydantic import Field, field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -46,6 +46,47 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     log_json: bool = True
 
+    # --- Authentication (docs/ERMS-HLD.md §4) ---------------------------------
+    jwt_secret: SecretStr = Field(
+        description="HMAC key for access tokens. Generate with: openssl rand -hex 32",
+    )
+    jwt_algorithm: str = "HS256"
+    access_token_ttl_minutes: int = Field(default=15, ge=1, le=60)
+    session_max_hours: int = Field(default=12, ge=1, le=24 * 30)
+    session_idle_minutes: int = Field(default=120, ge=5)
+    refresh_reuse_grace_seconds: int = Field(
+        default=30,
+        ge=0,
+        le=120,
+        description="A just-rotated refresh token reused within this window (another tab) "
+        "is rejected without revoking the session.",
+    )
+    login_max_attempts: int = Field(default=5, ge=1)
+    login_lockout_minutes: int = Field(default=15, ge=1)
+    password_reset_ttl_minutes: int = Field(default=30, ge=5, le=24 * 60)
+    password_min_length: int = Field(default=12, ge=8)
+    refresh_cookie_secure: bool | None = Field(
+        default=None, description="Defaults to true in production, false otherwise."
+    )
+
+    # --- Email ---------------------------------------------------------------
+    frontend_url: str = Field(
+        default="http://localhost:5173", description="Base URL used in links sent by email."
+    )
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: SecretStr | None = None
+    smtp_starttls: bool = True
+    smtp_from: str = "ERMS <no-reply@erms.local>"
+
+    @field_validator("jwt_secret")
+    @classmethod
+    def _strong_jwt_secret(cls, value: SecretStr) -> SecretStr:
+        if len(value.get_secret_value()) < 32:
+            raise ValueError("JWT_SECRET must be at least 32 characters")
+        return value
+
     @field_validator("database_url")
     @classmethod
     def _use_psycopg_driver(cls, value: str) -> str:
@@ -66,6 +107,12 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.environment is Environment.PRODUCTION
+
+    @property
+    def cookie_secure(self) -> bool:
+        if self.refresh_cookie_secure is not None:
+            return self.refresh_cookie_secure
+        return self.is_production
 
 
 @lru_cache
