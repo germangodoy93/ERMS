@@ -55,7 +55,7 @@ verificadas el 2026-11-19:
 | Local con Docker | `docker compose up --build` | Contenedor `postgres:17-alpine` (puerto host 5433) |
 | Local sin Docker | `uv run uvicorn` + `npm run dev` | PostgreSQL 17 instalado (puerto 5432) |
 | CI | GitHub Actions (`.github/workflows/ci.yml`) | Servicio PostgreSQL efímero |
-| Producción | Railway (Sprint 6) | PostgreSQL gestionado por Railway |
+| Producción | Railway, desplegado desde el 2026-11-19 (Sprint 1) | PostgreSQL gestionado por Railway |
 
 ## 3. Variables de entorno (backend)
 
@@ -137,12 +137,15 @@ Code" (vigente solo hasta el 2026-12-01).
 | `FRONTEND_URL` | `https://<dominio-del-servicio-web>` |
 | `SMTP_*` | Cuando se defina el proveedor gratuito; sin ellas no se envían correos de recuperación |
 
-Primer administrador, una sola vez. Se ejecuta desde la consola del servicio `backend` en
-Railway (o con `railway ssh`):
+Primer administrador, una sola vez. Se ejecuta desde la pestaña **Console** del servicio
+`backend` en Railway (o con `railway ssh`). Esa consola no hereda el `PATH` de la imagen, así
+que hay que usar el Python del entorno virtual por su ruta completa:
 
 ```bash
-ERMS_ADMIN_PASSWORD='<temporal>' python -m app.cli bootstrap \
+bind 'set enable-bracketed-paste off'   # escribirlo a mano: evita que se pegue "^[[200~"
+/opt/venv/bin/python -m app.cli bootstrap \
   --org-name "<Razón social>" --org-slug <slug> --admin-email <correo> --admin-name "<Nombre>"
+# Pide la contraseña temporal por consola (no queda en el historial)
 ```
 
 ### Servicio `web`
@@ -161,6 +164,17 @@ ERMS_ADMIN_PASSWORD='<temporal>' python -m app.cli bootstrap \
 
 ### Notas
 
+- **Un repositorio, dos servicios.** Ambos se conectan al mismo repo y cada uno usa su
+  *Root Directory*. Un solo servicio no puede ejecutar la web y la API.
+- **Variables sugeridas:** Railway propone las variables que encuentra en `.env.example`
+  (`POSTGRES_*`, `LOG_JSON`…). Son para Docker local; no se usan. Conviene cargar las de las
+  tablas con el *Raw Editor*.
+- `RAILWAY_ENVIRONMENT` la crea Railway; la app lee **`ENVIRONMENT`**, que debe definirse.
+- **Renombrar un servicio no cambia su dirección privada.** Se edita en *Settings →
+  Networking → Private Networking* para que sea `backend.railway.internal`.
+- Diagnóstico rápido desde el dominio de `web`: un **503 sin contenido** en `/api/*` indica que
+  falta `API_UPSTREAM`, porque Caddy no tiene a dónde reenviar. Si `/api/v1/health/ready`
+  dice "no tiene migraciones", falta el *Pre-deploy Command*.
 - La API no tiene dominio público: el navegador solo habla con `web`, y `/api` viaja por la
   red privada (mismo origen, sin CORS).
 - Los Dockerfiles no usan cache mounts de BuildKit: Railway solo los acepta con un `id`
