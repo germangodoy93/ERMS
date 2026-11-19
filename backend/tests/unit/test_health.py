@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 
-from app.core.config import Settings
+from app.core.config import Environment, Settings
 from app.main import create_app
 from app.modules.health.checks import DatabaseCheck, RedisCheck, alembic_head_revision
 from app.modules.health.dependencies import get_health_service
@@ -133,3 +133,11 @@ def test_unhandled_errors_do_not_leak_details(client: TestClient) -> None:
 def test_openapi_and_swagger_are_exposed(client: TestClient) -> None:
     assert client.get("/api/v1/openapi.json").status_code == 200
     assert client.get("/api/v1/docs").status_code == 200
+
+
+def test_openapi_and_swagger_are_hidden_in_production() -> None:
+    settings = Settings(environment=Environment.PRODUCTION)
+    with TestClient(create_app(settings)) as prod_client:
+        for path in ("/api/v1/openapi.json", "/api/v1/docs", "/api/v1/redoc"):
+            assert prod_client.get(path).status_code == 404, path
+        assert prod_client.get("/api/v1/health/live").status_code == 200

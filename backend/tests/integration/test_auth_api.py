@@ -41,7 +41,15 @@ def test_me_returns_roles_and_effective_permissions(client: TestClient, tenant: 
     headers = login(client, tenant.users[RoleCode.SUPERVISOR].email)
     me = client.get("/api/v1/auth/me", headers=headers).json()
     assert [r["code"] for r in me["roles"]] == ["SUPERVISOR"]
-    assert me["permissions"] == ["audit:read", "users:manage", "users:read"]
+    assert me["permissions"] == [
+        "audit:read",
+        "catalog:manage",
+        "customers:manage",
+        "customers:read",
+        "devices:manage",
+        "users:manage",
+        "users:read",
+    ]
     assert me["organization"]["name"] == tenant.organization.name
 
 

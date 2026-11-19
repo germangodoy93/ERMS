@@ -16,6 +16,12 @@ class Organization(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     tax_id: Mapped[str | None] = mapped_column(
         String(32), nullable=True, comment="NIT de la organización"
     )
+    # Data of the "Responsable del tratamiento" required by Ley 1581 de 2012 (Sprint 2).
+    legal_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    address: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    city: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    email: Mapped[str | None] = mapped_column(String(254), nullable=True)
     timezone: Mapped[str] = mapped_column(
         String(64), nullable=False, default="America/Bogota", server_default="America/Bogota"
     )

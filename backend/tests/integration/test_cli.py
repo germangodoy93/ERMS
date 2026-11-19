@@ -4,6 +4,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.cli import main
+from app.modules.devices.catalog import DEFAULT_MANUFACTURERS
+from app.modules.devices.models import Manufacturer
 from app.modules.organizations.models import Branch, Organization
 from app.modules.users.models import User
 
@@ -36,6 +38,10 @@ def test_bootstrap_creates_org_branch_roles_and_admin(
     assert admin is not None
     assert admin.must_change_password is True
     assert admin.role_codes == {"ADMIN"}
+    manufacturers = db.scalars(
+        select(Manufacturer.name).where(Manufacturer.organization_id == org.id)
+    ).all()
+    assert set(manufacturers) == set(DEFAULT_MANUFACTURERS)
 
     response = client.post(
         "/api/v1/auth/login", json={"email": "admin@example.com", "password": ADMIN_PASSWORD}

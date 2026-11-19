@@ -21,6 +21,7 @@ from app.core.config import Settings, get_settings
 from app.core.email import OutgoingEmail, get_mailer
 from app.core.security import hash_password
 from app.main import create_app
+from app.modules.devices.catalog import seed_manufacturers
 from app.modules.health.checks import BACKEND_ROOT
 from app.modules.organizations.models import Branch, Organization
 from app.modules.roles.catalog import RoleCode
@@ -32,6 +33,12 @@ TEST_DB_URL = os.environ.get("ERMS_TEST_DATABASE_URL")
 PASSWORD = "Contraseña-de-prueba-123"
 
 BUSINESS_TABLES = (
+    "devices",
+    "device_models",
+    "manufacturers",
+    "customer_consents",
+    "customers",
+    "privacy_policies",
     "audit_logs",
     "password_reset_tokens",
     "refresh_tokens",
@@ -127,6 +134,7 @@ def make_tenant(db: Session, slug: str = "taller-prueba") -> Tenant:
     db.flush()
     db.add(Branch(organization_id=organization.id, name="Sede Bogotá", city="Bogotá"))
     roles = create_system_roles(db, organization.id)
+    seed_manufacturers(db, organization.id)
     db.commit()
     return Tenant(organization=organization, roles=roles)
 
@@ -166,3 +174,41 @@ def login(client: TestClient, email: str, password: str = PASSWORD) -> dict[str,
     response = client.post("/api/v1/auth/login", json={"email": email, "password": password})
     assert response.status_code == 200, response.text
     return {"Authorization": f"Bearer {response.json()['access_token']}"}
+
+
+# Obviously fictitious workshop data (docs/ERMS-TEST-PLAN.md, rules).
+WORKSHOP_DATA = {
+    "legal_name": "Taller Ficticio de Pruebas SAS",
+    "tax_id": "890903938",
+    "address": "Calle Ficticia 1 # 2-3",
+    "city": "Bogotá",
+    "phone": "601 000 0000",
+    "email": "datos@example.com",
+}
+
+
+def publish_policy(client: TestClient, admin_headers: dict[str, str]) -> dict[str, object]:
+    """Completes the workshop data and publishes the policy template as-is."""
+    response = client.patch("/api/v1/organization", headers=admin_headers, json=WORKSHOP_DATA)
+    assert response.status_code == 200, response.text
+    draft = client.get("/api/v1/privacy-policy/draft", headers=admin_headers).json()
+    assert draft["missing_fields"] == []
+    response = client.post(
+        "/api/v1/privacy-policy", headers=admin_headers, json={"content": draft["content"]}
+    )
+    assert response.status_code == 201, response.text
+    body: dict[str, object] = response.json()
+    return body
+
+
+def new_customer(**overrides: object) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "kind": "PERSON",
+        "full_name": "  Cliente   Ficticio Pérez ",
+        "id_type": "CC",
+        "id_number": "1.000.000.001",
+        "phone": "300 000 0001",
+        "consents": [{"purpose": "DATA_PROCESSING", "channel": "SCREEN"}],
+    }
+    payload.update(overrides)
+    return payload

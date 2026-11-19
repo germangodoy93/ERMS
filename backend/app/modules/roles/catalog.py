@@ -20,6 +20,12 @@ class Perm(StrEnum):
     USERS_MANAGE = "users:manage"
     ROLES_MANAGE = "roles:manage"
     AUDIT_READ = "audit:read"
+    ORGANIZATION_MANAGE = "organization:manage"
+    CUSTOMERS_READ = "customers:read"
+    CUSTOMERS_MANAGE = "customers:manage"
+    CUSTOMERS_ANONYMIZE = "customers:anonymize"
+    DEVICES_MANAGE = "devices:manage"
+    CATALOG_MANAGE = "catalog:manage"
 
 
 PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
@@ -27,14 +33,36 @@ PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
     Perm.USERS_MANAGE: "Crear y editar usuarios y asignar roles (excepto Administrador)",
     Perm.ROLES_MANAGE: "Editar permisos de roles y asignar el rol Administrador",
     Perm.AUDIT_READ: "Consultar la auditoría",
+    Perm.ORGANIZATION_MANAGE: "Editar los datos del taller y publicar la política de datos",
+    Perm.CUSTOMERS_READ: "Consultar clientes, sus equipos y consentimientos",
+    Perm.CUSTOMERS_MANAGE: "Crear y editar clientes y registrar consentimientos",
+    Perm.CUSTOMERS_ANONYMIZE: "Anonimizar clientes (derecho de supresión)",
+    Perm.DEVICES_MANAGE: "Registrar y editar equipos de clientes",
+    Perm.CATALOG_MANAGE: "Administrar fabricantes y modelos",
 }
 
 SYSTEM_ROLES: dict[RoleCode, tuple[str, frozenset[Perm]]] = {
     RoleCode.ADMIN: ("Administrador", frozenset(Perm)),
     RoleCode.SUPERVISOR: (
         "Supervisor",
-        frozenset({Perm.USERS_READ, Perm.USERS_MANAGE, Perm.AUDIT_READ}),
+        frozenset(
+            {
+                Perm.USERS_READ,
+                Perm.USERS_MANAGE,
+                Perm.AUDIT_READ,
+                Perm.CUSTOMERS_READ,
+                Perm.CUSTOMERS_MANAGE,
+                Perm.DEVICES_MANAGE,
+                Perm.CATALOG_MANAGE,
+            }
+        ),
     ),
-    RoleCode.TECHNICIAN: ("Técnico", frozenset()),
-    RoleCode.RECEPTIONIST: ("Recepcionista", frozenset()),
+    RoleCode.TECHNICIAN: (
+        "Técnico",
+        frozenset({Perm.CUSTOMERS_READ, Perm.DEVICES_MANAGE}),
+    ),
+    RoleCode.RECEPTIONIST: (
+        "Recepcionista",
+        frozenset({Perm.CUSTOMERS_READ, Perm.CUSTOMERS_MANAGE, Perm.DEVICES_MANAGE}),
+    ),
 }

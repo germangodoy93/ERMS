@@ -20,6 +20,7 @@ from app.core.config import get_settings
 from app.core.database import get_session_factory
 from app.core.security import hash_password
 from app.modules.audit.service import AuditService
+from app.modules.devices.catalog import seed_manufacturers
 from app.modules.organizations.models import Branch, Organization
 from app.modules.roles.catalog import RoleCode
 from app.modules.roles.service import create_system_roles
@@ -59,6 +60,7 @@ def bootstrap(args: argparse.Namespace) -> None:
             Branch(organization_id=organization.id, name=args.branch_name, city=args.branch_city)
         )
         roles = create_system_roles(session, organization.id)
+        seed_manufacturers(session, organization.id)
         admin = User(
             organization_id=organization.id,
             email=email,
