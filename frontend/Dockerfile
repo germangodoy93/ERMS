@@ -4,7 +4,7 @@
 FROM node:24-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci
+RUN npm ci
 
 # --- Development: Vite dev server with HMR, source mounted as a volume -------
 FROM deps AS dev

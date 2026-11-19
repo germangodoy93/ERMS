@@ -73,16 +73,60 @@ Servidor web de producción: `API_UPSTREAM` y `PORT`.
 | `frontend` | eslint, prettier, tsc, vitest, build |
 | `docker` | `docker compose up --wait` + `scripts/smoke-test.sh`; build de las imágenes `prod` |
 
-## 5. Despliegue en Railway (plan para el Sprint 6)
+## 5. Despliegue en Railway
 
-| Servicio Railway | Origen | Configuración |
-|---|---|---|
-| `backend` | `backend/Dockerfile` (target `prod`) | Pre-deploy: `alembic upgrade head`; healthcheck `/api/v1/health/ready`; `DATABASE_URL=${{Postgres.DATABASE_URL}}` |
-| `web` | `frontend/Dockerfile` (target `prod`) | `API_UPSTREAM=http://backend.railway.internal:8000`; dominio público con HTTPS de Railway |
-| `Postgres` | Plantilla de Railway | Backups programados (R-09) |
-| `Redis` | Plantilla de Railway | Desde el Sprint 3 |
+El repositorio es un monorepo: **cada servicio debe apuntar a su carpeta** mediante *Root
+Directory*. Sin eso, Railway construye la raíz con Railpack y falla con
+`railpack process exited with an error`. Railway usa el Dockerfile automáticamente cuando lo
+encuentra en el Root Directory y construye la última etapa (`prod`).
 
-La API no necesita dominio público: solo `web` se expone, y `/api` viaja por la red privada.
+La configuración se hace en el panel, sin `railway.json`, porque Railway deprecó "Config as
+Code" (vigente solo hasta el 2026-12-01).
+
+### Servicio `Postgres`
+
+*New → Database → PostgreSQL*. Backups programados en el Sprint 6 (R-09).
+
+### Servicio `backend` (nombre exacto: `backend`, se usa en la red privada)
+
+| Ajuste (Settings) | Valor |
+|---|---|
+| Source → Root Directory | `/backend` |
+| Build → Watch Paths | `/backend/**` |
+| Deploy → Pre-deploy Command | `alembic upgrade head` |
+| Deploy → Healthcheck Path | `/api/v1/health/ready` |
+| Networking | **Sin dominio público** |
+
+| Variable | Valor |
+|---|---|
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (referencia, no se copia) |
+| `ENVIRONMENT` | `production` |
+| `PORT` | `8000` (puerto fijo para la red privada) |
+| `FORWARDED_ALLOW_IPS` | `*` (la API solo es accesible por la red privada) |
+
+### Servicio `web`
+
+| Ajuste (Settings) | Valor |
+|---|---|
+| Source → Root Directory | `/frontend` |
+| Build → Watch Paths | `/frontend/**` |
+| Deploy → Healthcheck Path | `/` |
+| Networking | *Generate Domain* con puerto destino `8080` |
+
+| Variable | Valor |
+|---|---|
+| `API_UPSTREAM` | `http://backend.railway.internal:8000` |
+| `PORT` | `8080` |
+
+### Notas
+
+- La API no tiene dominio público: el navegador solo habla con `web`, y `/api` viaja por la
+  red privada (mismo origen, sin CORS).
+- Los Dockerfiles no usan cache mounts de BuildKit: Railway solo los acepta con un `id`
+  prefijado por el ID del servicio.
+- La red privada de Railway solo existe en tiempo de ejecución, no durante el build.
+- Los entornos creados después del 16-oct-2025 resuelven IPv4 en la red privada, por eso el
+  backend escucha en `0.0.0.0`. En un entorno anterior (solo IPv6) habría que escuchar en `::`.
 
 ## 6. Secretos
 

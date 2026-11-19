@@ -16,11 +16,11 @@ COPY --from=uv /uv /usr/local/bin/uv
 # --- Dependencies layer (cached unless pyproject/uv.lock change) -------------
 FROM base AS deps
 COPY pyproject.toml uv.lock ./
-RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-dev --no-install-project
+RUN uv sync --frozen --no-dev --no-install-project
 
 # --- Development: includes test/lint tooling, code mounted as a volume -------
 FROM deps AS dev
-RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-install-project
+RUN uv sync --frozen --no-install-project
 COPY . .
 CMD ["sh", "scripts/start.sh", "--reload"]
 
