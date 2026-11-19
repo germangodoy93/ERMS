@@ -75,7 +75,7 @@ export function AppLayout() {
           >
             <Menu />
           </Button>
-          <span className="text-muted-foreground text-sm">Taller · Bogotá</span>
+          <span className="text-muted-foreground truncate text-sm">{user?.organization.name}</span>
           <div className="ml-auto">
             <UserMenu />
           </div>

@@ -45,7 +45,7 @@ erDiagram
 
 | Tabla | Sprint | Columnas clave | Restricciones |
 |---|---|---|---|
-| `organizations` | ✅ 0 | name, slug, tax_id (NIT), timezone, is_active | `uq(slug)` |
+| `organizations` | ✅ 0 · 2 | name, slug, tax_id (NIT), timezone, is_active; desde el Sprint 2: legal_name, address, city, phone, email (responsable del tratamiento) | `uq(slug)` |
 | `branches` | ✅ 1 | name, city, address, phone, is_active | `uq(organization_id, name)` |
 | `users` | ✅ 1 | email, full_name, phone, password_hash, must_change_password, is_active, failed_login_count, locked_until, last_login_at, password_changed_at | `uq(email)` **global**; `ck(email = lower(email))` |
 | `roles` | ✅ 1 | code (ADMIN, SUPERVISOR, TECHNICIAN, RECEPTIONIST), name, is_system | `uq(organization_id, code)` |
@@ -59,12 +59,13 @@ erDiagram
 
 | Tabla | Sprint | Columnas clave | Restricciones |
 |---|---|---|---|
-| `customers` | 📐 2 | kind (PERSON/COMPANY), name, id_type (CC, CE, NIT, PAS, TI, PPT), id_number, phone, email, address, notes, status | `uq(organization_id, id_type, id_number)`; índice trigram por nombre |
-| `customer_consents` | 📐 2 | customer_id, purpose (DATA_PROCESSING, DIAGNOSTIC_AGENT, PHOTOS), granted_at, revoked_at, evidence_attachment_id | Ley 1581 de 2012 |
-| `manufacturers` | 📐 2 | name, is_active | `uq(organization_id, name)` |
-| `device_categories` | 📐 2 | code, name | `uq(organization_id, code)` |
-| `device_models` | 📐 2 | manufacturer_id, category_id, name, release_year | `uq(manufacturer_id, name)` |
-| `devices` | 📐 2 | customer_id, model_id, serial_number, imei, os, capacity, color, notes | IMEI validado con Luhn; índices por serial e IMEI |
+| `privacy_policies` | ✅ 2 | version, content, published_at, published_by_id | `uq(organization_id, version)`; versiones inmutables |
+| `customers` | ✅ 2 | kind (PERSON/COMPANY), full_name, search_name (sin tildes), id_type (CC, CE, NIT, PAS, TI, PPT), id_number, phone (E.164), email, address, notes, is_active, anonymized_at, created_by_id | `uq(organization_id, id_type, id_number)` (documento opcional); `ck` tipo y número juntos; índice GIN trigram (`pg_trgm`) por `search_name` |
+| `customer_consents` | ✅ 2 | customer_id, purpose (DATA_PROCESSING, PHOTOS, DIAGNOSTIC_AGENT), granted, channel (SCREEN, PAPER, VERBAL), policy_id, recorded_by_id, recorded_at | Ley 1581 de 2012; **solo inserción**: el estado vigente es el último registro por finalidad. La evidencia en archivo llega con `attachments` (Sprint 3). |
+| `device_categories` | ✅ 2 | code (PK), name, sort_order | **Catálogo global** fijo: LAPTOP, DESKTOP, PHONE, TABLET, CONSOLE, OTHER |
+| `manufacturers` | ✅ 2 | name, is_active | `uq(organization_id, name)`; 13 precargados por taller |
+| `device_models` | ✅ 2 | manufacturer_id, category_code, name, release_year, is_active | `uq(manufacturer_id, name)` |
+| `devices` | ✅ 2 | customer_id, model_id, serial_number, imei, operating_system, storage, color, notes, is_active | IMEI validado con Luhn; `uq(organization_id, imei)`; `uq(organization_id, model_id, serial_number)` |
 
 ### Órdenes de servicio
 

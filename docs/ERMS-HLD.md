@@ -89,8 +89,10 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 - Aislamiento por organización en la capa de repositorio; RLS de PostgreSQL como refuerzo
   en una fase posterior.
 - Auditoría de solo inserción (`audit_logs`) con actor, acción, entidad, diff e IP.
-- **Habeas Data (Ley 1581 de 2012):** el consentimiento del cliente queda registrado
-  (`customer_consents`) antes de tratar datos personales o ejecutar el agente en su equipo.
+- **Habeas Data (Ley 1581 de 2012):** el cliente solo se registra con su autorización de
+  tratamiento, ligada a la versión publicada de la política (`privacy_policies`,
+  `customer_consents`). Las autorizaciones de fotos y del agente son separadas. La supresión
+  se atiende anonimizando, y la auditoría nunca guarda los valores de los datos personales.
 - El agente nunca ejecuta formateos, borrados ni cambios de firmware: esas operaciones no
   existen en su interfaz.
 
@@ -114,6 +116,11 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 | 014 | Catálogo de permisos en código e insertado por migraciones | Sincronizar al arrancar la API | Mismo catálogo en todos los entornos, sin escrituras concurrentes al arrancar varias instancias. |
 | 015 | Contraseña temporal + cambio obligatorio al crear usuarios | Invitación por correo | Funciona sin SMTP en producción. La invitación por correo puede agregarse cuando haya proveedor. |
 | 016 | Período de gracia de 30 s en la rotación del refresh token | Revocación estricta | Evita cerrar la sesión cuando dos pestañas renuevan a la vez, sin perder la detección de robo. |
+| 017 | Política de datos versionada en la base, con plantilla; sin política publicada no se registran clientes | Texto fijo en el código | Cada autorización queda ligada al texto exacto que aceptó el cliente. El taller no tenía política: la plantilla cubre los mínimos legales y se advierte que no es asesoría legal. |
+| 018 | La auditoría de clientes registra los nombres de los campos, no sus valores | Diff completo como en usuarios | Al anonimizar no queda ningún dato personal en `audit_logs`, que es de solo inserción. |
+| 019 | Supresión mediante anonimización | Borrado físico | Se conserva el historial técnico y comercial que exigen las normas contables, sin datos personales. |
+| 020 | Categorías de equipo globales y fijas; fabricantes y modelos por taller | Todo por taller | Las categorías anclan checklists y pruebas de diagnóstico (Sprint 4) que deben ser iguales en todos los entornos. |
+| 021 | Swagger y OpenAPI deshabilitados en producción | Publicarlos | Reducen la superficie expuesta; el contrato está en `docs/api/openapi.json`. |
 
 ## 6. Riesgos
 

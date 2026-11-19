@@ -1,10 +1,12 @@
 import {
   Activity,
+  Building2,
   ClipboardList,
   Cpu,
   History,
   LayoutDashboard,
   Package,
+  Tags,
   Receipt,
   ShieldCheck,
   Stethoscope,
@@ -38,8 +40,13 @@ export const NAVIGATION: NavSection[] = [
       { label: "Estado del sistema", icon: Activity, to: "/" },
       { label: "Dashboard", icon: LayoutDashboard, plannedSprint: 6 },
       { label: "Órdenes de servicio", icon: ClipboardList, plannedSprint: 3 },
-      { label: "Clientes", icon: Users, plannedSprint: 2 },
-      { label: "Dispositivos", icon: Cpu, plannedSprint: 2 },
+      { label: "Clientes", icon: Users, to: "/clientes", permission: PERMS.CUSTOMERS_READ },
+      {
+        label: "Dispositivos",
+        icon: Cpu,
+        to: "/dispositivos",
+        permission: PERMS.CUSTOMERS_READ,
+      },
       { label: "Diagnósticos", icon: Stethoscope, plannedSprint: 4 },
       { label: "Reparaciones", icon: Wrench, plannedSprint: 5 },
       { label: "Inventario", icon: Package, plannedSprint: 5 },
@@ -50,6 +57,13 @@ export const NAVIGATION: NavSection[] = [
   {
     title: "Administración",
     items: [
+      {
+        label: "Datos del taller",
+        icon: Building2,
+        to: "/taller",
+        permission: PERMS.ORGANIZATION_MANAGE,
+      },
+      { label: "Catálogo", icon: Tags, to: "/catalogo", permission: PERMS.CATALOG_MANAGE },
       { label: "Usuarios", icon: UserCog, to: "/usuarios", permission: PERMS.USERS_READ },
       { label: "Roles y permisos", icon: ShieldCheck, to: "/roles", permission: PERMS.USERS_READ },
       { label: "Auditoría", icon: History, to: "/auditoria", permission: PERMS.AUDIT_READ },

@@ -56,3 +56,27 @@ Resultado local del 2026-11-19: **71 pruebas de backend** (93 % de cobertura; se
 | Login | `frontend/src/modules/auth/pages/LoginPage.test.tsx` | Validaciones; redirección a `next`; **bloqueo de open redirect**; mensaje del servidor |
 | Usuarios (UI) | `frontend/src/modules/users/pages/UsersPage.test.tsx` | Estados; supervisor sin acciones sobre administradores y con el rol Administrador deshabilitado; solo lectura sin acciones |
 | Humo de autenticación | `scripts/smoke-auth.sh` (CI, Docker Compose) | Bootstrap → login por el proxy web → correo de recuperación entregado a Mailpit |
+
+## 5. Pruebas del Sprint 2
+
+Resultado local del 2026-11-19: **129 pruebas de backend** (94 % de cobertura; servicios entre
+85 % y 100 %) y **79 de frontend**, todas en verde. Además se recorrió el flujo completo por el
+proxy web contra PostgreSQL: política → cliente → equipo → anonimización.
+
+| Prueba | Archivo | Verifica |
+|---|---|---|
+| Identificadores colombianos | `backend/tests/unit/test_identifiers.py` | Dígito de verificación del NIT contra NIT públicos; CC, CE, pasaporte; teléfonos (celular, fijo 60X, +57, extranjeros); IMEI con Luhn; serial; búsqueda sin tildes |
+| Plantilla de la política | `backend/tests/unit/test_identifiers.py` | Datos del responsable, plazos de 10 y 15 días hábiles, SIC; textos de autorización con la versión |
+| Esquema | `backend/tests/integration/test_database.py` | Migración 0003 en ambos sentidos; modelos = migraciones (incluye índice GIN trigram) |
+| Datos del taller y política | `backend/tests/integration/test_customers_api.py` | NIT y teléfono normalizados; no se publica con datos faltantes; versiones; solo el administrador |
+| Clientes | `backend/tests/integration/test_customers_api.py` | Sin política no hay registro; autorización obligatoria; validaciones; documento opcional pero único; búsqueda por nombre sin tildes, documento, teléfono y comodines; edición; revocar/otorgar con historial de solo inserción; **anonimización sin datos personales en la auditoría**; permisos por rol; aislamiento entre talleres |
+| Equipos y catálogo | `backend/tests/integration/test_devices_api.py` | Catálogo precargado; permisos de catálogo; filtros de modelos; IMEI y serial normalizados; IMEI inválido o repetido; serial único por modelo; cliente sin autorización bloqueado; búsqueda; notas borradas al anonimizar; aislamiento entre talleres |
+| Producción | `backend/tests/unit/test_health.py` | Swagger, ReDoc y OpenAPI responden 404 en producción |
+| Bootstrap | `backend/tests/integration/test_cli.py` | Precarga los fabricantes |
+| Contrato | `frontend/src/types/api.contract.test.ts` | 24 esquemas y 4 enums nuevos iguales al OpenAPI |
+| Presentación | `frontend/src/modules/customers/presentation.test.ts` | Formato de teléfono y documento; estado del cliente; IMEI (igual al backend) |
+| Clientes (UI) | `frontend/src/modules/customers/pages/CustomersPage.test.tsx` | Listado; registro bloqueado sin política; autorización obligatoria y consentimientos enviados; técnico sin botón de registro |
+
+**Windows:** si la terminal abre la carpeta como `c:\...` (minúscula), Vitest carga dos copias de
+sí mismo y las pruebas de interfaz fallan con `Invalid Chai property: toBeInTheDocument`.
+Ejecute las pruebas desde una terminal en `C:\...` (ver ERMS-DEVOPS).

@@ -47,6 +47,13 @@ verificadas el 2026-11-19:
   Después de cada `npx shadcn add …` hay que ejecutar `npm uninstall cn` y reemplazar
   `from "cn"` por `from "@/lib/utils"` en `src/components/ui/`.
 - **Radix en pruebas:** jsdom no trae `ResizeObserver`; `src/test/setup.ts` define un stub.
+- **Vitest en Windows:** si el directorio actual usa la unidad en minúscula (`c:\Users\...`,
+  como lo abre a veces VS Code), Vitest carga dos instancias de `vitest` y fallan los
+  matchers de jest-dom (`Invalid Chai property`). Solución: abrir la terminal en `C:\...` o
+  ejecutar `cmd /c "cd /d C:\ruta\frontend && npm test"`. En CI (Linux) no ocurre.
+- **PostgreSQL:** la migración 0003 ejecuta `CREATE EXTENSION IF NOT EXISTS pg_trgm`. El
+  usuario de Railway, Docker y CI puede crearla; en un servidor propio requiere un rol con ese
+  privilegio.
 
 ## 2. Entornos
 

@@ -17,8 +17,8 @@ export function errorMessage(error: unknown, fallback = "Ocurrió un error inesp
   const problem = getProblem(error);
   if (problem) {
     const details = problem.errors
-      ?.filter((e) => e.type === "password_policy")
-      .map((e) => e.message);
+      ?.filter((e) => e.type === "password_policy" || e.type === "value_error")
+      .map((e) => e.message.replace(/^Value error, /, ""));
     return details?.length ? `${problem.detail} ${details.join(" ")}` : problem.detail;
   }
   if (isAxiosError(error) && !error.response) {

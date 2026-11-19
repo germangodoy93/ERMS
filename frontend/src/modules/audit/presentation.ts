@@ -13,6 +13,19 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   "user.temporary_password_set": "Contraseña temporal asignada",
   "role.permissions_changed": "Permisos de rol modificados",
   "organization.bootstrapped": "Organización creada",
+  "organization.updated": "Datos del taller actualizados",
+  "privacy_policy.published": "Política de datos publicada",
+  "customer.created": "Cliente registrado",
+  "customer.updated": "Cliente actualizado",
+  "customer.consent_granted": "Autorización otorgada",
+  "customer.consent_revoked": "Autorización revocada",
+  "customer.anonymized": "Cliente anonimizado",
+  "catalog.manufacturer_created": "Fabricante creado",
+  "catalog.manufacturer_updated": "Fabricante actualizado",
+  "catalog.model_created": "Modelo creado",
+  "catalog.model_updated": "Modelo actualizado",
+  "device.created": "Equipo registrado",
+  "device.updated": "Equipo actualizado",
 };
 
 export function auditActionLabel(action: string): string {

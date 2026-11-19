@@ -2,6 +2,7 @@
 
 - **Base:** `/api/v1`
 - **Swagger UI:** `/api/v1/docs` · **ReDoc:** `/api/v1/redoc` · **OpenAPI:** `/api/v1/openapi.json`
+  (solo fuera de producción; en producción responden 404)
 - **Copia versionada:** [`docs/api/openapi.json`](api/openapi.json). CI falla si no coincide con
   el código.
 
@@ -44,7 +45,7 @@ Todas las respuestas de error usan `Content-Type: application/problem+json`:
 | `password_change_required` | 403 | El usuario tiene contraseña temporal; solo puede usar `/auth/me`, `/auth/password/change` y `/auth/logout` |
 | `permission_denied` | 403 | RBAC |
 | `not_found` | 404 | Recurso inexistente o de otra organización |
-| `conflict` | 409 | Unicidad (p. ej. correo ya registrado) |
+| `conflict` | 409 | Unicidad (correo, documento del cliente, IMEI, serial, fabricante o modelo ya registrado) |
 | `internal_error` | 500 | Error inesperado; no expone detalles internos |
 
 ## Endpoints implementados
@@ -110,8 +111,85 @@ Los cambios de permisos aplican de inmediato: los permisos no viajan en el JWT.
 Acciones registradas: `auth.login`, `auth.login_failed`, `auth.logout`,
 `auth.refresh_reuse_detected`, `auth.password_reset_requested`, `auth.password_reset`,
 `auth.password_changed`, `user.created`, `user.updated`, `user.roles_changed`,
-`user.temporary_password_set`, `role.permissions_changed`, `organization.bootstrapped`.
-Las contraseñas y los tokens nunca se registran.
+`user.temporary_password_set`, `role.permissions_changed`, `organization.bootstrapped`,
+`organization.updated`, `privacy_policy.published`, `customer.created`, `customer.updated`,
+`customer.consent_granted`, `customer.consent_revoked`, `customer.anonymized`,
+`catalog.manufacturer_created`, `catalog.manufacturer_updated`, `catalog.model_created`,
+`catalog.model_updated`, `device.created`, `device.updated`.
+Las contraseñas y los tokens nunca se registran. De los clientes solo se registran los
+**nombres de los campos** que cambiaron, nunca sus valores (ADR-018).
+
+### Datos del taller y política de datos
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET /organization` | autenticado | 200 `OrganizationRead` (`name`, `legal_name`, `tax_id`, `address`, `city`, `phone`, `email`) |
+| `PATCH /organization` | `organization:manage` | 200 `OrganizationRead`. NIT con dígito de verificación validado o calculado; teléfono en E.164. |
+| `GET /privacy-policy` | autenticado | 200 `{policy, authorizations}`: política vigente (o `null`) y textos de autorización que se muestran en recepción |
+| `GET /privacy-policy/draft` | `organization:manage` | 200 `{content, missing_fields[]}`: plantilla con los datos del taller |
+| `POST /privacy-policy` | `organization:manage` | 201 `PrivacyPolicyRead`: `{content}` publica la versión siguiente. 422 si faltan datos del taller o quedan marcadores `[...]`. |
+| `GET /privacy-policy/versions` | `customers:read` | 200 `[{id, version, published_at}]` |
+| `GET /privacy-policy/versions/{n}` | `customers:read` | 200 `PrivacyPolicyRead` |
+
+Las versiones publicadas no se editan: un cambio publica una versión nueva.
+
+### Clientes (`/customers`)
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET /customers?q=&is_active=&page=&size=` | `customers:read` | 200 `Page[CustomerListItem]`. `q` busca por nombre (sin tildes), documento (prefijo) o teléfono. |
+| `POST /customers` | `customers:manage` | 201 `CustomerRead` |
+| `GET /customers/{id}` | `customers:read` | 200 `CustomerRead` (incluye `consents[]` vigentes y `can_be_served`) |
+| `PATCH /customers/{id}` | `customers:manage` | 200 `CustomerRead`: cambia solo los campos enviados, incluido `is_active` |
+| `GET /customers/{id}/consents` | `customers:read` | 200 historial de autorizaciones, del más reciente al más antiguo |
+| `POST /customers/{id}/consents` | `customers:manage` | 200 `CustomerRead`: `{purpose, granted, channel}` |
+| `POST /customers/{id}/anonymize` | `customers:anonymize` | 200 `CustomerRead`: `{channel}`. Irreversible. |
+
+```json
+// POST /customers
+{ "kind": "PERSON", "full_name": "…", "id_type": "CC", "id_number": "1.000.000.001",
+  "phone": "300 000 0001", "email": null, "address": null, "notes": null,
+  "consents": [{ "purpose": "DATA_PROCESSING", "channel": "SCREEN" }] }
+```
+
+Reglas:
+
+- Sin política publicada no se registran clientes (422).
+- `consents` debe incluir `DATA_PROCESSING`; `PHOTOS` y `DIAGNOSTIC_AGENT` son opcionales.
+  `channel`: `SCREEN` (en pantalla), `PAPER` (firmado) o `VERBAL`.
+- El documento es opcional; si se envía, tipo y número van juntos y no se repiten en el taller
+  (409). Tipos: `CC`, `CE`, `NIT`, `PAS`, `TI`, `PPT`. El NIT se guarda como `900123456-7`.
+- Se exige al menos un teléfono o un correo. Teléfonos colombianos: 10 dígitos (celular 3XX o
+  fijo 60X); se guardan como `+57…`. Los extranjeros deben empezar con `+`.
+- Las autorizaciones son de solo inserción: revocar agrega un registro.
+- Anonimizar borra nombre, documento, contacto, dirección y notas (también las notas de sus
+  equipos), revoca las autorizaciones y desactiva al cliente. El historial técnico se conserva.
+
+### Catálogo de equipos (`/catalog`)
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET /catalog/categories` | autenticado | 200 `[{code, name}]`: `LAPTOP`, `DESKTOP`, `PHONE`, `TABLET`, `CONSOLE`, `OTHER` |
+| `GET /catalog/manufacturers?include_inactive=` | autenticado | 200 `ManufacturerRead[]` |
+| `POST /catalog/manufacturers` | `catalog:manage` | 201: `{name}` (único sin distinguir mayúsculas) |
+| `PATCH /catalog/manufacturers/{id}` | `catalog:manage` | 200: `{name?, is_active?}` |
+| `GET /catalog/models?manufacturer_id=&category=&q=&include_inactive=` | autenticado | 200 `DeviceModelRead[]` (máx. 200) |
+| `POST /catalog/models` | `devices:manage` | 201: `{manufacturer_id, category_code, name, release_year?}` |
+| `PATCH /catalog/models/{id}` | `catalog:manage` | 200: `{name?, category_code?, release_year?, is_active?}` |
+
+### Equipos
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET /customers/{id}/devices` | `customers:read` | 200 `DeviceRead[]` |
+| `POST /customers/{id}/devices` | `devices:manage` | 201 `DeviceRead`: `{model_id, imei?, serial_number?, operating_system?, storage?, color?, notes?}` |
+| `GET /devices?q=&page=&size=` | `customers:read` | 200 `Page[DeviceSearchItem]`: busca por IMEI, serial o modelo (mínimo 3 caracteres) |
+| `GET /devices/{id}` | `customers:read` | 200 `DeviceRead` |
+| `PATCH /devices/{id}` | `devices:manage` | 200 `DeviceRead`. El propietario no cambia. |
+
+Reglas: solo se registran equipos de clientes activos, no anonimizados y con autorización
+de datos vigente (422). El IMEI tiene 15 dígitos con dígito de control Luhn y es único en el
+taller; el serial es único por modelo (409 con el nombre del propietario actual).
 
 ### Salud
 

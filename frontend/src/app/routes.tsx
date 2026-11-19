@@ -8,6 +8,11 @@ import { ForgotPasswordPage } from "@/modules/auth/pages/ForgotPasswordPage";
 import { LoginPage } from "@/modules/auth/pages/LoginPage";
 import { ResetPasswordPage } from "@/modules/auth/pages/ResetPasswordPage";
 import { PERMS } from "@/modules/auth/permissions";
+import { CustomerDetailPage } from "@/modules/customers/pages/CustomerDetailPage";
+import { CustomersPage } from "@/modules/customers/pages/CustomersPage";
+import { CatalogPage } from "@/modules/devices/pages/CatalogPage";
+import { DevicesPage } from "@/modules/devices/pages/DevicesPage";
+import { OrganizationPage } from "@/modules/organization/pages/OrganizationPage";
 import { RolesPage } from "@/modules/roles/pages/RolesPage";
 import { SystemStatusPage } from "@/modules/system/pages/SystemStatusPage";
 import { UsersPage } from "@/modules/users/pages/UsersPage";
@@ -27,6 +32,46 @@ export const routes: RouteObject[] = [
         element: <AppLayout />,
         children: [
           { index: true, element: <SystemStatusPage /> },
+          {
+            path: "clientes",
+            element: (
+              <RequirePermission permission={PERMS.CUSTOMERS_READ}>
+                <CustomersPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "clientes/:customerId",
+            element: (
+              <RequirePermission permission={PERMS.CUSTOMERS_READ}>
+                <CustomerDetailPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "dispositivos",
+            element: (
+              <RequirePermission permission={PERMS.CUSTOMERS_READ}>
+                <DevicesPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "taller",
+            element: (
+              <RequirePermission permission={PERMS.ORGANIZATION_MANAGE}>
+                <OrganizationPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "catalogo",
+            element: (
+              <RequirePermission permission={PERMS.CATALOG_MANAGE}>
+                <CatalogPage />
+              </RequirePermission>
+            ),
+          },
           {
             path: "usuarios",
             element: (

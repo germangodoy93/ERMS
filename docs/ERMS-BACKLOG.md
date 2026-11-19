@@ -28,7 +28,20 @@ Prioridad: **P1** imprescindible para el MVP · **P2** importante · **P3** dese
 | S1-07 | Como administrador, quiero registrar la organización y su sede | `python -m app.cli bootstrap` crea organización, sede Bogotá, roles y primer administrador; la contraseña se lee de variable o consola, nunca de argumentos | ✅ |
 | S1-08 | Como usuario, quiero pantallas de login y gestión de usuarios | Login, recuperación, restablecimiento y cambio de contraseña; usuarios, roles y auditoría; React Hook Form + Zod; rutas protegidas; menú según permisos | ✅ |
 
-## Sprints 2 – 6
+## Sprint 2 – Clientes y equipos (P1)
+
+| ID | Historia | Criterios de aceptación | Estado |
+|---|---|---|---|
+| S2-01 | Como administrador, quiero registrar los datos del taller y publicar la política de datos | Razón social, NIT (con dígito de verificación), dirección, ciudad, teléfono y correo; plantilla con los mínimos de la Ley 1581 y el Decreto 1377; versiones inmutables; sin política no se registran clientes | ✅ |
+| S2-02 | Como recepcionista, quiero registrar clientes con su autorización | Persona o empresa; documento opcional y único; al menos teléfono o correo; autorización de tratamiento obligatoria y opcionales para fotos y agente; medio (pantalla, papel, verbal) y versión de la política | ✅ |
+| S2-03 | Como recepcionista, quiero buscar clientes | Por nombre sin tildes, documento o teléfono; filtros y paginación | ✅ |
+| S2-04 | Como recepcionista, quiero gestionar las autorizaciones | Otorgar y revocar con historial de solo inserción; sin autorización vigente no se registran equipos | ✅ |
+| S2-05 | Como administrador, quiero atender el derecho de supresión | Anonimizar (irreversible) borra los datos personales y conserva el historial técnico; la auditoría no guarda datos personales | ✅ |
+| S2-06 | Como recepcionista o técnico, quiero registrar los equipos del cliente | Categoría → fabricante → modelo (creable en el formulario); IMEI con Luhn y único; serial único por modelo; búsqueda por IMEI, serial o modelo | ✅ |
+| S2-07 | Como supervisor, quiero administrar el catálogo | Fabricantes precargados, renombrar y desactivar; corregir y desactivar modelos | ✅ |
+| S2-08 | Pendientes del Sprint 1 | Nombre del taller en el encabezado; Swagger y OpenAPI ocultos en producción | ✅ |
+
+## Sprints 3 – 6
 
 Las historias se detallan en la planificación de cada sprint, a partir de los módulos 2 – 11
 del documento de requerimientos y del modelo de [ERMS-ERD.md](ERMS-ERD.md). Se agregan
@@ -36,7 +49,7 @@ estos requerimientos detectados en el análisis:
 
 | ID | Requerimiento | Sprint |
 |---|---|---|
-| R-01 | Consentimiento de tratamiento de datos (Ley 1581 de 2012) | 2 |
+| R-01 | Consentimiento de tratamiento de datos (Ley 1581 de 2012) | 2 ✅ |
 | R-02 | Estado `COTIZACION_RECHAZADA` y devolución sin reparar | 3 |
 | R-03 | Numeración de documentos sin colisiones (`document_sequences`) | 3 |
 | R-04 | Consentimiento antes de ejecutar el agente en el equipo del cliente | 4 |
