@@ -8,11 +8,11 @@ Prioridad: **P1** imprescindible para el MVP · **P2** importante · **P3** dese
 |---|---|---|---|
 | S0-01 | Como equipo, quiero un repositorio con estructura y convenciones definidas | Estructura según LLD; `.gitignore`, `.editorconfig`, pre-commit | ✅ |
 | S0-02 | Como equipo, quiero la API base | FastAPI con config por entorno, logging JSON, errores RFC 9457, Swagger en `/api/v1/docs` | ✅ |
-| S0-03 | Como equipo, quiero migraciones de base de datos | Alembic configurado; migración `0001_initial`; prueba upgrade/downgrade | ✅ código · ⏳ prueba contra PostgreSQL real |
+| S0-03 | Como equipo, quiero migraciones de base de datos | Alembic configurado; migración `0001_initial`; prueba upgrade/downgrade | ✅ probado en CI contra PostgreSQL 17 |
 | S0-04 | Como operador, quiero endpoints de salud | `/health/live` = 200; `/health/ready` = 200 solo si la BD responde y está en `head`, si no 503 | ✅ |
 | S0-05 | Como usuario, quiero una primera pantalla | Layout con sidebar responsive; página "Estado del sistema" consumiendo `/health/ready` | ✅ |
-| S0-06 | Como equipo, quiero el entorno en Docker | `docker compose up` levanta db, redis, backend y frontend con healthchecks; `scripts/smoke-test.sh` pasa | ⏳ requiere Docker |
-| S0-07 | Como equipo, quiero CI | Lint, tipos, pruebas, contrato OpenAPI, smoke test con Compose y build de imágenes | ✅ definido · ⏳ primer run requiere remoto en GitHub |
+| S0-06 | Como equipo, quiero el entorno en Docker | `docker compose up` levanta db, redis, backend y frontend con healthchecks; `scripts/smoke-test.sh` pasa | ✅ verificado en CI (GitHub Actions) |
+| S0-07 | Como equipo, quiero CI | Lint, tipos, pruebas, contrato OpenAPI, smoke test con Compose y build de imágenes | ✅ en verde (run 44569035697) |
 | S0-08 | Como equipo, quiero documentación reproducible | README + 8 documentos | ✅ |
 
 ## Sprint 1 – Identidad y acceso (P1)
