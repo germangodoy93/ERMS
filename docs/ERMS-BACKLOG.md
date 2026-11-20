@@ -115,7 +115,22 @@ estos requerimientos detectados en el análisis:
 
 ## Después del MVP
 
+Prioridad propuesta (2026-11-20). El orden de los puestos 2 y 3 está pendiente de confirmar:
+¿el taller está obligado a facturar electrónicamente? ¿Basta el correo para los avisos?
+
+| Puesto | Sprint | Contenido |
+|---|---|---|
+| 1 | Bases operativas | Almacenamiento definitivo de fotos y proveedor de correo (hoy las fotos están en modo demostración y la recuperación de contraseña no envía correos en producción) |
+| 2 | Avisos al cliente | Correo por cambio de estado, cotización enviada y equipo listo; WhatsApp/SMS después (costo por mensaje) |
+| 3 | Facturación electrónica DIAN | Mediante proveedor autorizado (costo mensual o por factura) |
+| 4 | Agente v2 – mantenimiento | PM-01 |
+| 5 | Ensamble de equipos | PM-03 |
+| 6 | IA por fotos | PM-02 (requiere el puesto 1) |
+| 7 | Android | Diagnóstico por ADB |
+| 8 | Crecimiento | Órdenes de compra (R-08), varias sedes con RLS, Celery y Redis |
+
 | ID | Historia | Criterios de aceptación propuestos |
 |---|---|---|
 | PM-01 | **Agente v2 – mantenimiento.** Como técnico, quiero analizar virus y limpiar el sistema desde el agente | Modo separado del diagnóstico (que sigue siendo solo lectura). Autorización nueva y separada del cliente ("Mantenimiento del equipo"). Cada acción la ordena el técnico desde ERMS **y** se confirma en el equipo mostrando exactamente qué se hará. Antivirus: estado, firmas, amenazas y análisis rápido con Microsoft Defender; eliminar o poner en cuarentena solo con confirmación. Limpieza: vista previa con tamaño (temporales de Windows, papelera, caché de Windows Update, miniaturas); **nunca** documentos, fotos, descargas ni datos de navegación. Todo queda registrado en la orden. |
 | PM-02 | Revisión del equipo con IA a partir de fotos | Proveedor de IA y almacenamiento definitivos; resultados `AI_SUGGESTION`, nunca comprobados |
+| PM-03 | **Ensamble de equipos (PC de escritorio).** Como asesor del taller, quiero armar un PC a la medida con validación de compatibilidad | Solo lo usa el asesor (sin página pública). Componentes: procesador, board, RAM, almacenamiento, tarjeta gráfica, fuente, chasis y refrigeración, con especificaciones técnicas en el inventario. **Reglas de compatibilidad:** socket procesador–board, tipo y velocidad de RAM soportados por la board y el procesador, ranuras de RAM y M.2, potencia de la fuente con margen frente al consumo, tamaño de la tarjeta gráfica y de la board frente al chasis. **Cuellos de botella:** aviso cuando el procesador y la tarjeta gráfica están muy desbalanceados para el uso (oficina, diseño, gaming) o la RAM es insuficiente. Precios registrados a mano (cambian); se permiten componentes por pedir al proveedor. Cotización con IVA opcional; si el cliente compra, se registra como orden de ensamble que descuenta inventario, registra el trabajo, las pruebas finales (agente de diagnóstico) y crea la garantía. Especificaciones: evaluar cargarlas desde una base abierta (BuildCores OpenDB o pc-builder-parts, CC BY 4.0) revisando su licencia; precios en línea quedan fuera hasta encontrar una fuente oficial. |
