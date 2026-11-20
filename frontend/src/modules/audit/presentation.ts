@@ -55,6 +55,9 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   "repair.quality_checked": "Control de calidad",
   "payment.registered": "Pago registrado",
   "work_order.delivered_with_balance": "Entrega con saldo pendiente",
+  "warranty.created": "Garantía creada",
+  "warranty.claim_opened": "Reclamo de garantía abierto",
+  "warranty.claim_decided": "Reclamo de garantía resuelto",
 };
 
 export function auditActionLabel(action: string): string {

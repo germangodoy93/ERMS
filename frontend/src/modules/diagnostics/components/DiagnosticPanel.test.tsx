@@ -121,6 +121,35 @@ describe("DiagnosticPanel", () => {
     expect(closeDiagnostic).toHaveBeenCalledWith("o1", "No enciende: falla de placa.", null);
   });
 
+  it("keeps the typed conclusion when results are saved", async () => {
+    const saved = diagnostic({
+      state: "OPEN",
+      results: [
+        test("POWER_ON", "Encendido", { result: "FAIL", recorded_at: "2026-11-20T15:00:00Z" }),
+        test("KEYBOARD", "Teclado"),
+      ],
+    });
+    vi.mocked(saveResults).mockResolvedValue(saved);
+    renderPanel();
+    const power = await screen.findByRole("radiogroup", { name: "Encendido" });
+    fireEvent.change(screen.getByLabelText("Conclusión del técnico"), {
+      target: { value: "Falla de placa." },
+    });
+    fireEvent.click(within(power).getByRole("radio", { name: "Falla" }));
+    vi.mocked(getDiagnostic).mockResolvedValue(saved);
+    fireEvent.click(screen.getByRole("button", { name: /Guardar resultados/ }));
+    await waitFor(() => expect(saveResults).toHaveBeenCalled());
+    // The editor remounts with the saved results; the conclusion survives.
+    await waitFor(() =>
+      expect(
+        within(screen.getByRole("radiogroup", { name: "Encendido" })).getByRole("radio", {
+          name: "Falla",
+        }),
+      ).toHaveAttribute("aria-checked", "true"),
+    );
+    expect(screen.getByLabelText("Conclusión del técnico")).toHaveValue("Falla de placa.");
+  });
+
   it("generates a one-time code for the agent", async () => {
     vi.mocked(createAgentPairing).mockResolvedValue({
       code: "ABCD-2345",

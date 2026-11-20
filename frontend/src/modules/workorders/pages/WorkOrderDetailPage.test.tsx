@@ -53,6 +53,15 @@ vi.mock("@/modules/workshop/api", () => ({
     can_register: false,
   }),
 }));
+vi.mock("@/modules/reports/api", () => ({
+  getWarranty: vi.fn().mockResolvedValue({
+    warranty: null,
+    claims: [],
+    is_claim_order: false,
+    can_claim: false,
+    can_decide: false,
+  }),
+}));
 vi.mock("../api", () => ({
   getWorkOrder: vi.fn(),
   changeStatus: vi.fn(),

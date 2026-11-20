@@ -81,6 +81,7 @@ function OrganizationForm({ organization }: { organization: Organization }) {
       city: organization.city ?? "",
       phone: organization.phone ?? "",
       email: organization.email ?? "",
+      warranty_days: String(organization.warranty_days),
     },
   });
 
@@ -94,6 +95,7 @@ function OrganizationForm({ organization }: { organization: Organization }) {
       city: values.city || null,
       phone: values.phone || null,
       email: values.email || null,
+      warranty_days: Number(values.warranty_days),
     };
     try {
       const saved = await update.mutateAsync(payload);
@@ -105,6 +107,7 @@ function OrganizationForm({ organization }: { organization: Organization }) {
         city: saved.city ?? "",
         phone: saved.phone ?? "",
         email: saved.email ?? "",
+        warranty_days: String(saved.warranty_days),
       });
       toast.success("Datos del taller guardados.");
     } catch (error) {
@@ -154,6 +157,13 @@ function OrganizationForm({ organization }: { organization: Organization }) {
               type="tel"
               error={errors.phone?.message}
               {...register("phone")}
+            />
+            <FormField
+              label="Días de garantía por defecto"
+              inputMode="numeric"
+              hint="Se aplica al entregar un equipo reparado; se puede ajustar en cada entrega."
+              error={errors.warranty_days?.message}
+              {...register("warranty_days")}
             />
             <FormField
               label="Correo para consultas y reclamos"

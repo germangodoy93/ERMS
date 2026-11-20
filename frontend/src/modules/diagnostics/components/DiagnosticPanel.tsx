@@ -49,8 +49,15 @@ function initialDraft(diagnostic: Diagnostic): Draft {
   );
 }
 
+interface Notes {
+  conclusion: string;
+  recommendation: string;
+}
+
 export function DiagnosticPanel({ order }: { order: WorkOrder }) {
   const diagnostic = useDiagnostic(order.id);
+  // Typed here, not in the editor: the editor remounts on every save and would lose them.
+  const [notes, setNotes] = useState<Notes | null>(null);
   if (diagnostic.isPending) return <Skeleton className="h-64" />;
   if (diagnostic.isError) {
     return <p className="text-destructive text-sm">{errorMessage(diagnostic.error)}</p>;
@@ -59,13 +66,33 @@ export function DiagnosticPanel({ order }: { order: WorkOrder }) {
   const version = `${diagnostic.data.state}-${diagnostic.data.agent_reported_at}-${diagnostic.data.results
     .map((r) => r.recorded_at)
     .join()}`;
-  return <DiagnosticEditor key={version} order={order} diagnostic={diagnostic.data} />;
+  return (
+    <DiagnosticEditor
+      key={version}
+      order={order}
+      diagnostic={diagnostic.data}
+      notes={notes}
+      onNotesChange={setNotes}
+    />
+  );
 }
 
-function DiagnosticEditor({ order, diagnostic }: { order: WorkOrder; diagnostic: Diagnostic }) {
+function DiagnosticEditor({
+  order,
+  diagnostic,
+  notes,
+  onNotesChange,
+}: {
+  order: WorkOrder;
+  diagnostic: Diagnostic;
+  notes: Notes | null;
+  onNotesChange: (notes: Notes) => void;
+}) {
   const [draft, setDraft] = useState<Draft>(() => initialDraft(diagnostic));
-  const [conclusion, setConclusion] = useState(diagnostic.conclusion ?? "");
-  const [recommendation, setRecommendation] = useState(diagnostic.recommendation ?? "");
+  const conclusion = notes?.conclusion ?? diagnostic.conclusion ?? "";
+  const recommendation = notes?.recommendation ?? diagnostic.recommendation ?? "";
+  const setConclusion = (value: string) => onNotesChange({ conclusion: value, recommendation });
+  const setRecommendation = (value: string) => onNotesChange({ conclusion, recommendation: value });
   const [error, setError] = useState<string | null>(null);
   const [agentOpen, setAgentOpen] = useState(false);
   const [agentStartedAt, setAgentStartedAt] = useState<string | null>(null);

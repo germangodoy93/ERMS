@@ -158,9 +158,11 @@ export interface Organization {
   city: string | null;
   phone: string | null;
   email: string | null;
+  warranty_days: number;
 }
 
 export interface OrganizationUpdate {
+  warranty_days?: number | null;
   name?: string | null;
   legal_name?: string | null;
   tax_id?: string | null;
@@ -497,6 +499,7 @@ export interface DeliveryRequest {
   document?: string | null;
   notes?: string | null;
   balance_reason?: string | null;
+  warranty_days?: number | null;
 }
 
 export interface ReceptionTerms {
@@ -796,4 +799,77 @@ export interface Billing {
   balance: string;
   payments: PaymentItem[];
   can_register: boolean;
+}
+
+// --- Warranties, dashboard and reports (Sprint 6) -------------------------------------
+
+export interface Warranty {
+  id: string;
+  work_order_id: string;
+  work_order_number: string;
+  days: number;
+  starts_on: string;
+  ends_on: string;
+  active: boolean;
+}
+
+export interface WarrantyClaim {
+  id: string;
+  claim_order_id: string;
+  claim_order_number: string;
+  reported_issue: string;
+  status: "OPEN" | "ACCEPTED" | "REJECTED";
+  resolution: string | null;
+  decided_by: PersonRef | null;
+  decided_at: string | null;
+  created_at: string;
+}
+
+export interface WarrantyOverview {
+  warranty: Warranty | null;
+  claims: WarrantyClaim[];
+  is_claim_order: boolean;
+  can_claim: boolean;
+  can_decide: boolean;
+}
+
+export interface ClaimCreate {
+  reported_issue: string;
+  physical_condition: string;
+  accessories?: AccessoryItem[];
+  unlock_method: UnlockMethod;
+}
+
+export interface Dashboard {
+  scope: "WORKSHOP" | "MINE";
+  open_by_status: { status: WorkOrderStatus; count: number }[];
+  received_today: number;
+  received_week: number;
+  overdue: number;
+  awaiting_customer: number;
+  expired_quotes: number;
+  ready_for_delivery: number;
+  ready_balance: string | null;
+  income_month: { method: PaymentMethod; amount: string }[] | null;
+  income_month_total: string | null;
+  avg_turnaround_days: number | null;
+  technician_load: { technician: PersonRef | null; open_orders: number }[] | null;
+  low_stock: number | null;
+  warranties_expiring: number | null;
+  open_claims: number | null;
+}
+
+export const REPORT_KINDS = ["income", "orders", "inventory", "technicians"] as const;
+export type ReportKind = (typeof REPORT_KINDS)[number];
+
+export interface Report {
+  kind: ReportKind;
+  title: string;
+  date_from: string;
+  date_to: string;
+  columns: string[];
+  rows: string[][];
+  summary: [string, string][];
+  /** Column indexes holding peso amounts (plain numbers, for Excel). */
+  money_columns: number[];
 }

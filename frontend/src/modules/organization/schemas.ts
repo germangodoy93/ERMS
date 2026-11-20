@@ -14,6 +14,11 @@ export const organizationSchema = z.object({
   city: optionalText(80),
   phone: optionalText(30),
   email: z.union([z.literal(""), z.email("Ingrese un correo electrónico válido.")]),
+  warranty_days: z
+    .string()
+    .trim()
+    .regex(/^\d{1,4}$/, "Use días completos.")
+    .refine((v) => Number(v) >= 1 && Number(v) <= 3650, "Entre 1 y 3650 días."),
 });
 export type OrganizationValues = z.infer<typeof organizationSchema>;
 

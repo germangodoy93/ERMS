@@ -12,6 +12,7 @@ import { saveBlob } from "@/lib/download";
 import { formatDateTime, formatPhone } from "@/lib/format";
 import { PERMS, useCan } from "@/modules/auth/permissions";
 import { DiagnosticPanel } from "@/modules/diagnostics/components/DiagnosticPanel";
+import { WarrantyPanel } from "@/modules/reports/components/WarrantyPanel";
 import { BillingPanel } from "@/modules/workshop/components/BillingPanel";
 import { QuotesPanel } from "@/modules/workshop/components/QuotesPanel";
 import { RepairPanel } from "@/modules/workshop/components/RepairPanel";
@@ -234,6 +235,15 @@ function OrderDetail({ order }: { order: WorkOrder }) {
         </CardHeader>
         <CardContent>
           <BillingPanel order={order} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Garantía</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <WarrantyPanel order={order} />
         </CardContent>
       </Card>
 

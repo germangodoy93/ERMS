@@ -17,6 +17,27 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
     },
+    build: {
+      // Libraries change less often than our code: separate chunks keep them
+      // cached in the browser across deploys.
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: [
+              {
+                name: "react",
+                test: /node_modules[\\/](react|react-dom|scheduler|react-router)[\\/]/,
+              },
+              {
+                name: "ui",
+                test: /node_modules[\\/](radix-ui|@radix-ui|lucide-react|sonner)[\\/]/,
+              },
+              { name: "vendor", test: /node_modules[\\/]/ },
+            ],
+          },
+        },
+      },
+    },
     server: {
       host: true,
       port: 5173,

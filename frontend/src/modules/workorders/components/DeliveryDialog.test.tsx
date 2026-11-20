@@ -82,6 +82,7 @@ describe("DeliveryDialog", () => {
         document: null,
         notes: null,
         balance_reason: "Se condona el diagnóstico",
+        warranty_days: null,
       }),
     );
   });

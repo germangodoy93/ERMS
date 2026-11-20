@@ -1,8 +1,9 @@
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { NavLink, Outlet } from "react-router";
 
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { can } from "@/modules/auth/permissions";
 import { useAuthStore } from "@/stores/auth";
@@ -81,7 +82,9 @@ export function AppLayout() {
           </div>
         </header>
         <main className="flex-1 px-4 py-6 md:px-8">
-          <Outlet />
+          <Suspense fallback={<Skeleton className="mx-auto h-64 w-full max-w-6xl" />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

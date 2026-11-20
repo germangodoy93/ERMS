@@ -106,6 +106,7 @@ export function DeliveryDialog({ order, onClose }: { order: WorkOrder; onClose: 
   const billing = useBilling(order.id);
   const canWaive = useCan(PERMS.WORK_ORDERS_DELIVER_WITH_BALANCE);
   const [balanceReason, setBalanceReason] = useState("");
+  const [warrantyDays, setWarrantyDays] = useState("");
   const [byCustomer, setByCustomer] = useState(true);
   const [name, setName] = useState("");
   const [document, setDocument] = useState("");
@@ -129,6 +130,7 @@ export function DeliveryDialog({ order, onClose }: { order: WorkOrder; onClose: 
           document: byCustomer ? null : document.trim(),
           notes: notes.trim() || null,
           balance_reason: owes ? balanceReason.trim() : null,
+          warranty_days: warrantyDays ? Number(warrantyDays) : null,
         },
       });
       toast.success("Equipo entregado.");
@@ -193,6 +195,14 @@ export function DeliveryDialog({ order, onClose }: { order: WorkOrder; onClose: 
             />
           </div>
         )}
+        <FormField
+          label="Días de garantía (opcional)"
+          inputMode="numeric"
+          placeholder="Por defecto, los del taller"
+          hint="Solo aplica si el equipo se reparó."
+          value={warrantyDays}
+          onChange={(e) => setWarrantyDays(e.target.value.replace(/\D/g, "").slice(0, 4))}
+        />
         <div className="grid gap-1.5">
           <Label htmlFor="delivery-notes">Observaciones (opcional)</Label>
           <Textarea id="delivery-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />

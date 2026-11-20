@@ -71,7 +71,10 @@ export function BillingPanel({ order }: { order: WorkOrder }) {
           ))}
         </ul>
       )}
-      {data.can_register && <PaymentForm orderId={order.id} billing={data} />}
+      {data.can_register && (
+        // Remount when the balance changes so the suggested amount is always current.
+        <PaymentForm key={data.balance} orderId={order.id} billing={data} />
+      )}
       <p className="text-muted-foreground text-xs">
         Los comprobantes son internos y no reemplazan la factura electrónica.
       </p>

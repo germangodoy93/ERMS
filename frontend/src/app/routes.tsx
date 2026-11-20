@@ -1,27 +1,39 @@
+import type { ReactNode } from "react";
 import type { RouteObject } from "react-router";
 
 import { AppLayout } from "@/layouts/AppLayout";
-import { AuditPage } from "@/modules/audit/pages/AuditPage";
 import { RequireAuth, RequirePermission } from "@/modules/auth/components/RouteGuards";
 import { ChangePasswordPage } from "@/modules/auth/pages/ChangePasswordPage";
 import { ForgotPasswordPage } from "@/modules/auth/pages/ForgotPasswordPage";
 import { LoginPage } from "@/modules/auth/pages/LoginPage";
 import { ResetPasswordPage } from "@/modules/auth/pages/ResetPasswordPage";
-import { PERMS } from "@/modules/auth/permissions";
-import { CustomerDetailPage } from "@/modules/customers/pages/CustomerDetailPage";
-import { CustomersPage } from "@/modules/customers/pages/CustomersPage";
-import { CatalogPage } from "@/modules/devices/pages/CatalogPage";
-import { DevicesPage } from "@/modules/devices/pages/DevicesPage";
-import { InventoryPage } from "@/modules/inventory/pages/InventoryPage";
-import { OrganizationPage } from "@/modules/organization/pages/OrganizationPage";
-import { RolesPage } from "@/modules/roles/pages/RolesPage";
-import { NewWorkOrderPage } from "@/modules/workorders/pages/NewWorkOrderPage";
-import { WorkOrderDetailPage } from "@/modules/workorders/pages/WorkOrderDetailPage";
-import { WorkOrdersPage } from "@/modules/workorders/pages/WorkOrdersPage";
-import { SystemStatusPage } from "@/modules/system/pages/SystemStatusPage";
-import { UsersPage } from "@/modules/users/pages/UsersPage";
+import { PERMS, type PermissionCode } from "@/modules/auth/permissions";
 
 import { NotFoundPage } from "./NotFoundPage";
+import {
+  AuditPage,
+  CatalogPage,
+  CustomerDetailPage,
+  CustomersPage,
+  DashboardPage,
+  DevicesPage,
+  InventoryPage,
+  NewWorkOrderPage,
+  OrganizationPage,
+  ReportsPage,
+  RolesPage,
+  SystemStatusPage,
+  UsersPage,
+  WorkOrderDetailPage,
+  WorkOrdersPage,
+} from "./pages";
+
+function guarded(path: string, permission: PermissionCode, element: ReactNode): RouteObject {
+  return {
+    path,
+    element: <RequirePermission permission={permission}>{element}</RequirePermission>,
+  };
+}
 
 export const routes: RouteObject[] = [
   { path: "/login", element: <LoginPage /> },
@@ -35,103 +47,28 @@ export const routes: RouteObject[] = [
         path: "/",
         element: <AppLayout />,
         children: [
-          { index: true, element: <SystemStatusPage /> },
           {
-            path: "ordenes",
+            index: true,
             element: (
               <RequirePermission permission={PERMS.WORK_ORDERS_READ}>
-                <WorkOrdersPage />
+                <DashboardPage />
               </RequirePermission>
             ),
           },
-          {
-            path: "ordenes/nueva",
-            element: (
-              <RequirePermission permission={PERMS.WORK_ORDERS_CREATE}>
-                <NewWorkOrderPage />
-              </RequirePermission>
-            ),
-          },
-          {
-            path: "ordenes/:orderId",
-            element: (
-              <RequirePermission permission={PERMS.WORK_ORDERS_READ}>
-                <WorkOrderDetailPage />
-              </RequirePermission>
-            ),
-          },
-          {
-            path: "inventario",
-            element: (
-              <RequirePermission permission={PERMS.INVENTORY_READ}>
-                <InventoryPage />
-              </RequirePermission>
-            ),
-          },
-          {
-            path: "clientes",
-            element: (
-              <RequirePermission permission={PERMS.CUSTOMERS_READ}>
-                <CustomersPage />
-              </RequirePermission>
-            ),
-          },
-          {
-            path: "clientes/:customerId",
-            element: (
-              <RequirePermission permission={PERMS.CUSTOMERS_READ}>
-                <CustomerDetailPage />
-              </RequirePermission>
-            ),
-          },
-          {
-            path: "dispositivos",
-            element: (
-              <RequirePermission permission={PERMS.CUSTOMERS_READ}>
-                <DevicesPage />
-              </RequirePermission>
-            ),
-          },
-          {
-            path: "taller",
-            element: (
-              <RequirePermission permission={PERMS.ORGANIZATION_MANAGE}>
-                <OrganizationPage />
-              </RequirePermission>
-            ),
-          },
-          {
-            path: "catalogo",
-            element: (
-              <RequirePermission permission={PERMS.CATALOG_MANAGE}>
-                <CatalogPage />
-              </RequirePermission>
-            ),
-          },
-          {
-            path: "usuarios",
-            element: (
-              <RequirePermission permission={PERMS.USERS_READ}>
-                <UsersPage />
-              </RequirePermission>
-            ),
-          },
-          {
-            path: "roles",
-            element: (
-              <RequirePermission permission={PERMS.USERS_READ}>
-                <RolesPage />
-              </RequirePermission>
-            ),
-          },
-          {
-            path: "auditoria",
-            element: (
-              <RequirePermission permission={PERMS.AUDIT_READ}>
-                <AuditPage />
-              </RequirePermission>
-            ),
-          },
+          { path: "sistema", element: <SystemStatusPage /> },
+          guarded("ordenes", PERMS.WORK_ORDERS_READ, <WorkOrdersPage />),
+          guarded("ordenes/nueva", PERMS.WORK_ORDERS_CREATE, <NewWorkOrderPage />),
+          guarded("ordenes/:orderId", PERMS.WORK_ORDERS_READ, <WorkOrderDetailPage />),
+          guarded("clientes", PERMS.CUSTOMERS_READ, <CustomersPage />),
+          guarded("clientes/:customerId", PERMS.CUSTOMERS_READ, <CustomerDetailPage />),
+          guarded("dispositivos", PERMS.CUSTOMERS_READ, <DevicesPage />),
+          guarded("inventario", PERMS.INVENTORY_READ, <InventoryPage />),
+          guarded("reportes", PERMS.REPORTS_READ, <ReportsPage />),
+          guarded("taller", PERMS.ORGANIZATION_MANAGE, <OrganizationPage />),
+          guarded("catalogo", PERMS.CATALOG_MANAGE, <CatalogPage />),
+          guarded("usuarios", PERMS.USERS_READ, <UsersPage />),
+          guarded("roles", PERMS.USERS_READ, <RolesPage />),
+          guarded("auditoria", PERMS.AUDIT_READ, <AuditPage />),
           { path: "*", element: <NotFoundPage /> },
         ],
       },

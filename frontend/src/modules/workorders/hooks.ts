@@ -67,12 +67,23 @@ export function usePublishReceptionTerms() {
   });
 }
 
-/** Store the returned order as the detail and refresh every list. */
+/**
+ * Store the returned order as the detail and refresh every list, the dashboard and the
+ * order's panels (diagnostic, quotes, repair, billing, warranty: keyed
+ * ["work-orders", panel, orderId]), whose editability depends on the order status.
+ */
 function useOnOrderSaved() {
   const queryClient = useQueryClient();
   return async (order: WorkOrder) => {
     queryClient.setQueryData(workOrderKeys.detail(order.id), order);
-    await queryClient.invalidateQueries({ queryKey: ["work-orders", "list"] });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["work-orders", "list"] }),
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+      queryClient.invalidateQueries({
+        predicate: ({ queryKey }) =>
+          queryKey[0] === "work-orders" && queryKey[1] !== "detail" && queryKey[2] === order.id,
+      }),
+    ]);
   };
 }
 

@@ -1,5 +1,6 @@
 import {
   Activity,
+  BarChart3,
   Building2,
   ClipboardList,
   Cpu,
@@ -8,7 +9,6 @@ import {
   Package,
   Tags,
   ShieldCheck,
-  Stethoscope,
   UserCog,
   Users,
   type LucideIcon,
@@ -35,8 +35,7 @@ export interface NavSection {
 export const NAVIGATION: NavSection[] = [
   {
     items: [
-      { label: "Estado del sistema", icon: Activity, to: "/" },
-      { label: "Dashboard", icon: LayoutDashboard, plannedSprint: 6 },
+      { label: "Inicio", icon: LayoutDashboard, to: "/", permission: PERMS.WORK_ORDERS_READ },
       {
         label: "Órdenes de servicio",
         icon: ClipboardList,
@@ -50,14 +49,13 @@ export const NAVIGATION: NavSection[] = [
         to: "/dispositivos",
         permission: PERMS.CUSTOMERS_READ,
       },
-      { label: "Diagnósticos", icon: Stethoscope, plannedSprint: 4 },
       {
         label: "Inventario",
         icon: Package,
         to: "/inventario",
         permission: PERMS.INVENTORY_READ,
       },
-      { label: "Garantías", icon: ShieldCheck, plannedSprint: 6 },
+      { label: "Reportes", icon: BarChart3, to: "/reportes", permission: PERMS.REPORTS_READ },
     ],
   },
   {
@@ -73,6 +71,7 @@ export const NAVIGATION: NavSection[] = [
       { label: "Usuarios", icon: UserCog, to: "/usuarios", permission: PERMS.USERS_READ },
       { label: "Roles y permisos", icon: ShieldCheck, to: "/roles", permission: PERMS.USERS_READ },
       { label: "Auditoría", icon: History, to: "/auditoria", permission: PERMS.AUDIT_READ },
+      { label: "Estado del sistema", icon: Activity, to: "/sistema" },
     ],
   },
 ];
