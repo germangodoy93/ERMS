@@ -57,6 +57,13 @@ export const NEGATIVE_TRANSITIONS: ReadonlySet<WorkOrderStatus> = new Set([
   "COTIZACION_RECHAZADA",
 ]);
 
+/** Changed through the quotation (send / customer answer), never with the status buttons. */
+export const QUOTE_DRIVEN: ReadonlySet<WorkOrderStatus> = new Set([
+  "PENDIENTE_AUTORIZACION",
+  "APROBADO",
+  "COTIZACION_RECHAZADA",
+]);
+
 export type StatusTone = "neutral" | "info" | "warning" | "success" | "danger";
 
 export function statusTone(status: WorkOrderStatus): StatusTone {

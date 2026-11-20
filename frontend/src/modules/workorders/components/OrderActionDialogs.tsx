@@ -19,8 +19,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { errorMessage } from "@/services/errors";
 import type { WorkOrder, WorkOrderStatus } from "@/types/api";
 
+import { PERMS, useCan } from "@/modules/auth/permissions";
+import { useBilling } from "@/modules/workshop/hooks";
+
 import { useChangeStatus, useDeliver } from "../hooks";
 import {
+  formatMoney,
   NEGATIVE_TRANSITIONS,
   reasonRequired,
   STATUS_LABELS,
@@ -99,12 +103,20 @@ export function StatusChangeDialog({
 /** Delivery: by the customer, or by a third party with name and document. */
 export function DeliveryDialog({ order, onClose }: { order: WorkOrder; onClose: () => void }) {
   const deliver = useDeliver();
+  const billing = useBilling(order.id);
+  const canWaive = useCan(PERMS.WORK_ORDERS_DELIVER_WITH_BALANCE);
+  const [balanceReason, setBalanceReason] = useState("");
   const [byCustomer, setByCustomer] = useState(true);
   const [name, setName] = useState("");
   const [document, setDocument] = useState("");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const valid = byCustomer || (name.trim() && document.trim());
+  const balance = Number(billing.data?.balance ?? 0);
+  const owes = balance > 0;
+  const valid =
+    Boolean(billing.data) &&
+    (byCustomer || (name.trim() && document.trim())) &&
+    (!owes || (canWaive && balanceReason.trim()));
 
   const submit = async () => {
     setError(null);
@@ -116,6 +128,7 @@ export function DeliveryDialog({ order, onClose }: { order: WorkOrder; onClose: 
           name: byCustomer ? null : name.trim(),
           document: byCustomer ? null : document.trim(),
           notes: notes.trim() || null,
+          balance_reason: owes ? balanceReason.trim() : null,
         },
       });
       toast.success("Equipo entregado.");
@@ -139,6 +152,27 @@ export function DeliveryDialog({ order, onClose }: { order: WorkOrder; onClose: 
             <AlertCircle />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
+        )}
+        {owes && (
+          <Alert variant="destructive">
+            <AlertCircle />
+            <AlertDescription>
+              Saldo pendiente de {formatMoney(billing.data?.balance)}.{" "}
+              {canWaive
+                ? "Puede entregar indicando el motivo."
+                : "Registre el pago antes de entregar o pida autorización a un supervisor."}
+            </AlertDescription>
+          </Alert>
+        )}
+        {owes && canWaive && (
+          <div className="grid gap-1.5">
+            <Label htmlFor="balance-reason">Motivo de la entrega con saldo</Label>
+            <Textarea
+              id="balance-reason"
+              value={balanceReason}
+              onChange={(e) => setBalanceReason(e.target.value)}
+            />
+          </div>
         )}
         <Label className="flex items-center gap-2 font-normal">
           <Checkbox checked={byCustomer} onCheckedChange={(v) => setByCustomer(v === true)} />

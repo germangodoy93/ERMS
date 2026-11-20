@@ -96,7 +96,9 @@ def build_quote(organization: Organization, order: WorkOrderRead, quote: QuoteRe
                 ("Equipo", f"{order.device.manufacturer} {order.device.model}"),
                 (
                     "Válida hasta",
-                    quote.valid_until.strftime("%d/%m/%Y") if quote.valid_until else None,
+                    quote.valid_until.strftime("%d/%m/%Y")
+                    if quote.valid_until
+                    else "Borrador: aún no enviada",
                 ),
             ],
             (width * 0.3, width * 0.7),
@@ -106,8 +108,8 @@ def build_quote(organization: Organization, order: WorkOrderRead, quote: QuoteRe
         Spacer(1, 3 * mm),
         _grid(
             [
-                ("Subtotal (sin IVA)", money(quote.subtotal)),
-                ("Descuentos", money(quote.discount_total)),
+                ("Descuentos aplicados", money(quote.discount_total)),
+                ("Subtotal sin IVA (después de descuentos)", money(quote.subtotal)),
                 ("IVA", money(quote.tax_total)),
                 ("Total", money(quote.total)),
             ],

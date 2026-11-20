@@ -4,8 +4,8 @@ Plataforma para gestionar un centro de diagnóstico, mantenimiento y reparación
 computadores, celulares, tablets y consolas: desde la recepción del equipo hasta su entrega y
 garantía.
 
-**Estado:** Sprint 4 terminado (diagnóstico manual y agente portable de Windows). Ver
-[roadmap](docs/ERMS-ROADMAP.md).
+**Estado:** Sprint 5 terminado (inventario, cotizaciones con IVA, reparación, calidad y
+pagos). Ver [roadmap](docs/ERMS-ROADMAP.md).
 
 | Capa | Tecnología |
 |---|---|

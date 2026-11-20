@@ -117,17 +117,17 @@ asignar (al moverla se le asigna).
 
 | Tabla | Sprint | Columnas clave | Restricciones |
 |---|---|---|---|
-| `repair_tasks` | 📐 5 | work_order_id, technician_id, description, procedure, labor_minutes, status | — |
-| `qc_checklists`, `qc_results` | 📐 5 | ítems requeridos por categoría; resultado por ítem | no se finaliza sin QC completo |
-| `parts` | 📐 5 | sku, name, kind (PART, COMPONENT, ACCESSORY, CONSUMABLE), unit_cost, sale_price, min_stock | `uq(organization_id, sku)` |
-| `suppliers` | 📐 5 | name, nit, contact, phone, email | — |
-| `stock_levels` | 📐 5 | part_id, branch_id, quantity | `ck(quantity >= 0)`, `uq(part_id, branch_id)` |
-| `inventory_movements` | 📐 5 | part_id, branch_id, type (IN, OUT, ADJUSTMENT, RETURN), quantity, unit_cost, reference_type, reference_id, created_by | solo inserción |
-| `purchase_orders`, `purchase_order_items` | 📐 5 | supplier_id, status, items | — |
-| `repair_task_parts` | 📐 5 | repair_task_id, part_id, quantity, movement_id | FK al movimiento que descontó el stock |
-| `quotations` | 📐 5 | work_order_id, number, version, status (DRAFT, SENT, ACCEPTED, REJECTED, EXPIRED), subtotal, discount_total, tax_total, total, discount_authorized_by | montos `NUMERIC(14,2)` |
-| `quotation_items` | 📐 5 | quotation_id, kind (LABOR, PART), part_id, description, quantity, unit_price, discount, **tax_rate** (0 o 0.19) | IVA por ítem (ADR-010) |
-| `payments` | 📐 5 | work_order_id, amount, method (CASH, TRANSFER, CARD, NEQUI, DAVIPLATA), reference, received_by, paid_at | `ck(amount > 0)` |
+| `suppliers` | ✅ 5 | name, tax_id (NIT), contact_name, phone, email, is_active | `uq(organization_id, name)` |
+| `parts` | ✅ 5 | sku, name, kind (PART, COMPONENT, ACCESSORY, CONSUMABLE), unit_cost, sale_price, tax_rate (0/19), price_includes_tax, min_stock, notes, is_active | `uq(organization_id, sku)` |
+| `stock_levels` | ✅ 5 | part_id, branch_id, quantity | `ck(quantity >= 0)`, `uq(part_id, branch_id)`; bloqueo de fila en cada movimiento |
+| `stock_entries` | ✅ 5 | branch_id, supplier_id, invoice_number, received_on, notes, created_by_id | Entrada simple (sin órdenes de compra, decisión del Sprint 5) |
+| `inventory_movements` | ✅ 5 | part_id, branch_id, kind (IN, OUT, ADJUSTMENT, RETURN), quantity con signo, stock_after, unit_cost, reference_type, reference_id, reason, created_by_id | solo inserción; `ck(stock_after >= 0)` |
+| `quotations` | ✅ 5 | work_order_id, version, status (DRAFT, SENT, ACCEPTED, REJECTED, SUPERSEDED; EXPIRED se calcula), valid_until, notes, subtotal, discount_total, tax_total, total, discount_authorized_by_id, sent_at/by, responded_at/by, response_channel | `uq(work_order_id, version)`; montos `NUMERIC(14,2)` |
+| `quotation_items` | ✅ 5 | quotation_id, position, kind (LABOR, PART), part_id (opcional: "por pedir"), description, quantity, unit_price, discount_percent, **tax_rate** (0 o 19), price_includes_tax, discount/base/tax/total_amount | IVA por ítem opcional (ADR-010, ADR-032) |
+| `repair_tasks` | ✅ 5 | work_order_id, technician_id, description, labor_minutes, created_at | — |
+| `repair_parts` | ✅ 5 | task_id, part_id, quantity, unit_cost, movement_id, returned_movement_id | FK a los movimientos de salida y devolución |
+| `quality_checks` | ✅ 5 | work_order_id, passed, results JSONB, notes, checked_by_id, checked_at | Lista manual de la categoría; LISTO_ENTREGA exige el último aprobado |
+| `payments` | ✅ 5 | work_order_id, receipt_number (`RC-2026-000001`), kind (ADVANCE, PAYMENT), amount, method (CASH, TRANSFER, CARD, NEQUI, DAVIPLATA), reference, notes, received_by_id, paid_at | `ck(amount > 0)`; `uq(organization_id, receipt_number)` |
 | `warranties` | 📐 6 | work_order_id, starts_at, ends_at, conditions | — |
 | `warranty_claims` | 📐 6 | warranty_id, reported_issue, diagnosis, resolution, new_work_order_id | — |
 

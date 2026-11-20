@@ -496,6 +496,7 @@ export interface DeliveryRequest {
   name?: string | null;
   document?: string | null;
   notes?: string | null;
+  balance_reason?: string | null;
 }
 
 export interface ReceptionTerms {
@@ -571,4 +572,228 @@ export interface AgentPairing {
   code: string;
   expires_at: string;
   download_url: string;
+}
+
+// --- Inventory (Sprint 5) ---------------------------------------------------------------
+
+export const PART_KINDS = ["PART", "COMPONENT", "ACCESSORY", "CONSUMABLE"] as const;
+export type PartKind = (typeof PART_KINDS)[number];
+
+export interface PartItem {
+  id: string;
+  sku: string;
+  name: string;
+  kind: PartKind;
+  unit_cost: string;
+  sale_price: string;
+  tax_rate: number;
+  price_includes_tax: boolean;
+  min_stock: number;
+  notes: string | null;
+  is_active: boolean;
+  stock: number;
+  low_stock: boolean;
+}
+
+export interface PartWrite {
+  sku: string;
+  name: string;
+  kind: PartKind;
+  unit_cost: string;
+  sale_price: string;
+  tax_rate: 0 | 19;
+  price_includes_tax: boolean;
+  min_stock: number;
+  notes?: string | null;
+  is_active: boolean;
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  tax_id: string | null;
+  contact_name: string | null;
+  phone: string | null;
+  email: string | null;
+  is_active: boolean;
+}
+
+export interface SupplierWrite {
+  name: string;
+  tax_id?: string | null;
+  contact_name?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  is_active?: boolean;
+}
+
+export interface StockEntryCreate {
+  supplier_id?: string | null;
+  invoice_number?: string | null;
+  received_on: string;
+  notes?: string | null;
+  lines: { part_id: string; quantity: number; unit_cost: string }[];
+}
+
+export interface StockEntry {
+  id: string;
+  supplier: string | null;
+  invoice_number: string | null;
+  received_on: string;
+  lines: number;
+  total_cost: string;
+}
+
+export const MOVEMENT_KINDS = ["IN", "OUT", "ADJUSTMENT", "RETURN"] as const;
+export type MovementKind = (typeof MOVEMENT_KINDS)[number];
+
+export interface Movement {
+  id: string;
+  kind: MovementKind;
+  quantity: number;
+  stock_after: number;
+  unit_cost: string | null;
+  reference_type: string | null;
+  reference_id: string | null;
+  reference_label: string | null;
+  reason: string | null;
+  created_by: PersonRef | null;
+  created_at: string;
+}
+
+// --- Quotations ---------------------------------------------------------------------------
+
+export const QUOTE_STATUSES = [
+  "DRAFT",
+  "SENT",
+  "ACCEPTED",
+  "REJECTED",
+  "SUPERSEDED",
+  "EXPIRED",
+] as const;
+export type QuoteStatus = (typeof QUOTE_STATUSES)[number];
+
+export interface QuoteItemInput {
+  kind: "LABOR" | "PART";
+  part_id?: string | null;
+  description?: string | null;
+  quantity: string;
+  unit_price: string;
+  discount_percent?: string;
+  apply_tax?: boolean;
+  price_includes_tax?: boolean;
+}
+
+export interface QuoteItem {
+  id: string;
+  position: number;
+  kind: "LABOR" | "PART";
+  part_id: string | null;
+  sku: string | null;
+  in_stock: number | null;
+  description: string;
+  quantity: string;
+  unit_price: string;
+  discount_percent: string;
+  tax_rate: number;
+  price_includes_tax: boolean;
+  discount_amount: string;
+  base_amount: string;
+  tax_amount: string;
+  total_amount: string;
+}
+
+export interface Quote {
+  id: string;
+  version: number;
+  status: QuoteStatus;
+  valid_until: string | null;
+  notes: string | null;
+  subtotal: string;
+  discount_total: string;
+  tax_total: string;
+  total: string;
+  discount_authorized_by: PersonRef | null;
+  created_by: PersonRef | null;
+  created_at: string;
+  sent_at: string | null;
+  responded_at: string | null;
+  response_channel: ConsentChannel | null;
+  items: QuoteItem[];
+}
+
+export interface QuoteOverview {
+  diagnostic_fee: string;
+  quotes: Quote[];
+  can_edit: boolean;
+  can_send: boolean;
+  can_respond: boolean;
+  max_discount_percent: number;
+}
+
+// --- Repairs and quality control ----------------------------------------------------------
+
+export interface RepairPartUsed {
+  id: string;
+  part_id: string;
+  sku: string;
+  name: string;
+  quantity: number;
+  unit_cost: string;
+  returned: boolean;
+}
+
+export interface RepairTask {
+  id: string;
+  description: string;
+  labor_minutes: number | null;
+  technician: PersonRef | null;
+  created_at: string;
+  parts: RepairPartUsed[];
+}
+
+export interface QualityCheck {
+  id: string;
+  passed: boolean;
+  results: {
+    test_code: string;
+    name: string;
+    result: DiagnosticResultCode;
+    observation: string | null;
+  }[];
+  notes: string | null;
+  checked_by: PersonRef | null;
+  checked_at: string;
+}
+
+export interface RepairOverview {
+  tasks: RepairTask[];
+  quality_checks: QualityCheck[];
+  qc_tests: { test_code: string; name: string }[];
+  can_repair: boolean;
+  can_check: boolean;
+}
+
+// --- Payments -------------------------------------------------------------------------------
+
+export interface PaymentItem {
+  id: string;
+  receipt_number: string | null;
+  kind: "ADVANCE" | "PAYMENT";
+  amount: string;
+  method: PaymentMethod;
+  reference: string | null;
+  notes: string | null;
+  received_by: PersonRef | null;
+  paid_at: string;
+}
+
+export interface Billing {
+  diagnostic_fee: string;
+  accepted_quote_total: string | null;
+  amount_due: string;
+  paid: string;
+  balance: string;
+  payments: PaymentItem[];
+  can_register: boolean;
 }

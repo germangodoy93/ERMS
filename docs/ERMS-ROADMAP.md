@@ -9,7 +9,7 @@ Scrum con un Sprint 0 de 1 semana y 6 sprints de 2 semanas, unos 91 días.
 | **2** | 10 – 23 dic | Clientes y equipos | Clientes, consentimientos (Habeas Data), fabricantes, categorías, modelos, dispositivos |
 | **3** | 24 dic – 6 ene 2027 | Recepción | ✅ Órdenes de servicio, máquina de estados, acta de recepción en PDF, fotografías en modo demostración. Celery y el almacenamiento definitivo quedan para cuando se necesiten. |
 | **4** | 7 – 20 ene | Diagnóstico | ✅ Diagnóstico manual y visual con listas por categoría, agente portable de Windows (solo lectura), informe PDF. La IA por fotos queda para después del MVP. |
-| **5** | 21 ene – 3 feb | Taller | Reparaciones, control de calidad, inventario, cotizaciones con IVA por ítem, pagos |
+| **5** | 21 ene – 3 feb | Taller | ✅ Inventario con entradas simples, cotizaciones versionadas con IVA opcional por ítem, reparación con consumo de repuestos, control de calidad, pagos y comprobantes |
 | **6** | 4 – 17 feb | Cierre del MVP | Garantías, reportes PDF, dashboard, pruebas integrales, despliegue en Railway |
 
 **Riesgo de calendario:** los Sprints 2 y 3 coinciden con las festividades de diciembre y

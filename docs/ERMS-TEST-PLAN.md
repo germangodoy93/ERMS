@@ -117,6 +117,26 @@ administrador).
 | Contrato | `frontend/src/types/api.contract.test.ts` | Esquemas y enums de diagnóstico |
 | Panel (UI) | `frontend/src/modules/diagnostics/components/DiagnosticPanel.test.tsx` | Resultados del agente solo lectura; cierre bloqueado con pendientes; "No probado" masivo; guardar y cerrar; código del agente |
 
+## 8. Pruebas del Sprint 5
+
+Resultado local del 2026-11-20: **172 pruebas de backend** (módulos nuevos entre 85 % y 100 %)
+y **131 de frontend**, todas en verde. Recorrido completo por el proxy web: repuesto y entrada →
+orden con anticipo → diagnóstico → cotización (pantalla $238.000 IVA incluido + mano de obra
+$60.000 con 15 %: total $289.000) → aprobación → consumo de repuesto → control de calidad →
+pago con comprobante → entrega. La migración 0006 convirtió en pago el anticipo de una orden
+existente.
+
+| Prueba | Archivo | Verifica |
+|---|---|---|
+| Dinero e IVA | `backend/tests/unit/test_money.py` | Precio sin IVA, con IVA incluido, sin IVA, descuento y redondeo; base + IVA = total |
+| Inventario | `backend/tests/integration/test_commerce_api.py` | SKU normalizado y único; permisos; entradas con costo; ajuste con motivo; libro de movimientos; stock bajo; proveedores |
+| Cotizaciones | `test_commerce_api.py` | Totales con IVA opcional; límite de descuento y autorización; un borrador a la vez; técnico no envía; estados solo por cotización; versiones y reemplazo; rechazo con motivo; vencida no se aprueba; PDF |
+| Reparación y calidad | `test_commerce_api.py` | Solo en reparación; consumo y existencia insuficiente; devolución; control incompleto, fallido y aprobado; LISTO_ENTREGA exige control aprobado |
+| Pagos y entrega | `test_commerce_api.py` | Anticipo como primer pago con RC; saldo con cotización aprobada; pago mayor al saldo; entrega bloqueada con saldo; supervisor con motivo; comprobante PDF; aislamiento entre talleres |
+| Contrato | `frontend/src/types/api.contract.test.ts` | 16 esquemas y 20 rutas nuevas |
+| Cotización (UI) | `frontend/src/modules/workshop/quotePayload.test.ts` | Conversión de valores escritos ("50.000", "1,5"), validaciones, saldo |
+| Entrega (UI) | `frontend/src/modules/workorders/components/DeliveryDialog.test.tsx` | Recepción bloqueada con saldo; supervisor con motivo; sin saldo sin preguntas |
+
 **Windows:** si la terminal abre la carpeta como `c:\...` (minúscula), Vitest carga dos copias de
 sí mismo y las pruebas de interfaz fallan con `Invalid Chai property: toBeInTheDocument`.
 Ejecute las pruebas desde una terminal en `C:\...` (ver ERMS-DEVOPS).

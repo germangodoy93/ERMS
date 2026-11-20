@@ -7,12 +7,10 @@ import {
   LayoutDashboard,
   Package,
   Tags,
-  Receipt,
   ShieldCheck,
   Stethoscope,
   UserCog,
   Users,
-  Wrench,
   type LucideIcon,
 } from "lucide-react";
 
@@ -53,9 +51,12 @@ export const NAVIGATION: NavSection[] = [
         permission: PERMS.CUSTOMERS_READ,
       },
       { label: "Diagnósticos", icon: Stethoscope, plannedSprint: 4 },
-      { label: "Reparaciones", icon: Wrench, plannedSprint: 5 },
-      { label: "Inventario", icon: Package, plannedSprint: 5 },
-      { label: "Cotizaciones y pagos", icon: Receipt, plannedSprint: 5 },
+      {
+        label: "Inventario",
+        icon: Package,
+        to: "/inventario",
+        permission: PERMS.INVENTORY_READ,
+      },
       { label: "Garantías", icon: ShieldCheck, plannedSprint: 6 },
     ],
   },

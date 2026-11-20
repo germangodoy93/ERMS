@@ -39,6 +39,22 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   "diagnostic.agent_pairing_created": "Código de agente generado",
   "diagnostic.agent_paired": "Agente vinculado",
   "diagnostic.agent_reported": "Agente envió resultados",
+  "inventory.part_saved": "Repuesto guardado",
+  "inventory.supplier_saved": "Proveedor guardado",
+  "inventory.stock_received": "Entrada de inventario",
+  "inventory.adjusted": "Ajuste de inventario",
+  "quote.created": "Cotización creada",
+  "quote.saved": "Cotización guardada",
+  "quote.discarded": "Borrador de cotización descartado",
+  "quote.sent": "Cotización enviada",
+  "quote.accepted": "Cotización aprobada",
+  "quote.rejected": "Cotización rechazada",
+  "repair.task_added": "Trabajo de reparación",
+  "repair.part_consumed": "Repuesto consumido",
+  "repair.part_returned": "Repuesto devuelto",
+  "repair.quality_checked": "Control de calidad",
+  "payment.registered": "Pago registrado",
+  "work_order.delivered_with_balance": "Entrega con saldo pendiente",
 };
 
 export function auditActionLabel(action: string): string {

@@ -12,6 +12,7 @@ import { CustomerDetailPage } from "@/modules/customers/pages/CustomerDetailPage
 import { CustomersPage } from "@/modules/customers/pages/CustomersPage";
 import { CatalogPage } from "@/modules/devices/pages/CatalogPage";
 import { DevicesPage } from "@/modules/devices/pages/DevicesPage";
+import { InventoryPage } from "@/modules/inventory/pages/InventoryPage";
 import { OrganizationPage } from "@/modules/organization/pages/OrganizationPage";
 import { RolesPage } from "@/modules/roles/pages/RolesPage";
 import { NewWorkOrderPage } from "@/modules/workorders/pages/NewWorkOrderPage";
@@ -56,6 +57,14 @@ export const routes: RouteObject[] = [
             element: (
               <RequirePermission permission={PERMS.WORK_ORDERS_READ}>
                 <WorkOrderDetailPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "inventario",
+            element: (
+              <RequirePermission permission={PERMS.INVENTORY_READ}>
+                <InventoryPage />
               </RequirePermission>
             ),
           },

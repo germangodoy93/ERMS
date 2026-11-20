@@ -70,7 +70,19 @@ el proveedor de almacenamiento definitivo para las fotos (ADR-023).
 **Fuera de este sprint:** revisión del equipo con IA a partir de fotos (requiere un servicio
 de pago y almacenamiento definitivo; sus resultados serán `AI_SUGGESTION`, nunca comprobados).
 
-## Sprints 5 – 6
+## Sprint 5 – Taller y comercial (P1)
+
+| ID | Historia | Criterios de aceptación | Estado |
+|---|---|---|---|
+| S5-01 | Como supervisor, quiero administrar el inventario | Repuestos con costo, precio, IVA y stock mínimo; proveedores; entradas simples con factura; ajustes por conteo con motivo; libro de movimientos; alerta de stock bajo | ✅ |
+| S5-02 | Como técnico o recepcionista, quiero cotizar | Versiones; mano de obra y repuestos (del inventario o por pedir); IVA 19 % opcional por ítem con precio con o sin IVA; descuentos > 10 % solo con autorización; PDF; vigencia 15 días | ✅ |
+| S5-03 | Como recepcionista, quiero registrar la respuesta del cliente | Enviar, aprobar o rechazar (con motivo) desde la cotización, que mueve la orden; vencida no se aprueba | ✅ |
+| S5-04 | Como técnico, quiero registrar la reparación | Trabajos con tiempo; repuestos descontados del inventario sin existencias negativas; devolución | ✅ |
+| S5-05 | Como técnico, quiero hacer el control de calidad | Lista de la categoría; sin control aprobado no se marca listo para entrega | ✅ |
+| S5-06 | Como recepcionista, quiero cobrar | Saldo según cotización aprobada (incluye diagnóstico) o diagnóstico; pagos con comprobante RC; el anticipo es el primer pago | ✅ |
+| S5-07 | Como supervisor, quiero autorizar entregas con saldo | Solo con permiso y motivo registrado en el historial | ✅ |
+
+## Sprint 6
 
 Las historias se detallan en la planificación de cada sprint, a partir de los módulos 2 – 11
 del documento de requerimientos y del modelo de [ERMS-ERD.md](ERMS-ERD.md). Se agregan
@@ -83,9 +95,9 @@ estos requerimientos detectados en el análisis:
 | R-03 | Numeración de documentos sin colisiones (`document_sequences`) | 3 ✅ |
 | R-04 | Consentimiento antes de ejecutar el agente en el equipo del cliente | 4 ✅ |
 | R-05 | Token de agente de un solo uso, limitado a una sesión | 4 ✅ |
-| R-06 | IVA por ítem de cotización (19 % o 0 %) | 5 |
-| R-07 | Existencias por sede (`stock_levels`) | 5 |
-| R-08 | Compras a proveedores (`purchase_orders`) | 5 |
+| R-06 | IVA por ítem de cotización (19 % o 0 %) | 5 ✅ |
+| R-07 | Existencias por sede (`stock_levels`) | 5 ✅ |
+| R-08 | Compras a proveedores: entrada simple en el Sprint 5; órdenes de compra después del MVP | 5 ✅ (simple) |
 | R-09 | Backups programados de PostgreSQL | 6 |
 
 ## Después del MVP

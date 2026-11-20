@@ -18,6 +18,13 @@ export const PERMS = {
   WORK_ORDERS_ASSIGN: "work_orders:assign",
   WORK_ORDERS_PROGRESS: "work_orders:progress",
   WORK_ORDERS_DELIVER: "work_orders:deliver",
+  WORK_ORDERS_DELIVER_WITH_BALANCE: "work_orders:deliver_with_balance",
+  INVENTORY_READ: "inventory:read",
+  INVENTORY_MANAGE: "inventory:manage",
+  QUOTES_MANAGE: "quotes:manage",
+  QUOTES_DISCOUNT: "quotes:discount",
+  REPAIRS_MANAGE: "repairs:manage",
+  PAYMENTS_MANAGE: "payments:manage",
 } as const;
 
 export type PermissionCode = (typeof PERMS)[keyof typeof PERMS];

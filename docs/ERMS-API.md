@@ -119,7 +119,12 @@ Acciones registradas: `auth.login`, `auth.login_failed`, `auth.logout`,
 `work_order.created`, `work_order.updated`, `work_order.assigned`,
 `work_order.status_changed`, `work_order.photo_added`, `work_order.photo_deleted`,
 `diagnostic.results_saved`, `diagnostic.closed`, `diagnostic.reopened`,
-`diagnostic.agent_pairing_created`, `diagnostic.agent_paired`, `diagnostic.agent_reported`.
+`diagnostic.agent_pairing_created`, `diagnostic.agent_paired`, `diagnostic.agent_reported`,
+`inventory.part_saved`, `inventory.supplier_saved`, `inventory.stock_received`,
+`inventory.adjusted`, `quote.created`, `quote.saved`, `quote.discarded`, `quote.sent`,
+`quote.accepted`, `quote.rejected`, `repair.task_added`, `repair.part_consumed`,
+`repair.part_returned`, `repair.quality_checked`, `payment.registered`,
+`work_order.delivered_with_balance`.
 Las contraseñas y los tokens nunca se registran. De los clientes solo se registran los
 **nombres de los campos** que cambiaron, nunca sus valores (ADR-018).
 
@@ -281,6 +286,61 @@ Reglas:
 | `AGENT_DISK_SPACE` | < 10 % libre en algún volumen | — |
 | `AGENT_DISK_SMART` (solo como administrador) | errores de lectura/escritura, desgaste ≥ 80 %, temperatura ≥ 60 °C | — |
 | `AGENT_STABILITY` (30 días) | ≥ 1 apagado inesperado o ≥ 1 pantallazo azul | ≥ 5 pantallazos azules |
+
+### Inventario (`/inventory`)
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET /inventory/parts?q=&low_stock=&include_inactive=` | `inventory:read` | 200 `PartRead[]` con `stock` y `low_stock` |
+| `POST /inventory/parts` · `PUT /inventory/parts/{id}` | `inventory:manage` | `PartWrite`; SKU en mayúsculas y único |
+| `GET /inventory/parts/{id}/movements` | `inventory:read` | 200 movimientos (más reciente primero) |
+| `POST /inventory/parts/{id}/adjustments` | `inventory:manage` | `{counted_quantity, reason}` (conteo físico) |
+| `POST /inventory/entries` | `inventory:manage` | 201: `{supplier_id?, invoice_number?, received_on, lines: [{part_id, quantity, unit_cost}]}`; actualiza el costo del repuesto |
+| `GET/POST /inventory/suppliers` · `PUT /inventory/suppliers/{id}` | `inventory:read` / `inventory:manage` | Proveedores |
+
+La existencia nunca es negativa: si no alcanza, 422 "Existencia insuficiente".
+
+### Cotizaciones (`/work-orders/{id}/quotes`)
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET …/quotes` | `work_orders:read` | 200 `{diagnostic_fee, quotes[], can_edit, can_send, can_respond, max_discount_percent}` |
+| `POST …/quotes` | `quotes:manage` | 201 borrador (copia la versión anterior) |
+| `PUT …/quotes/{q}` | `quotes:manage` | 200: `{items: [{kind, part_id?, description?, quantity, unit_price, discount_percent, apply_tax, price_includes_tax}], notes?}` |
+| `DELETE …/quotes/{q}` | `quotes:manage` | 204 (solo borrador) |
+| `POST …/quotes/{q}/send` | `work_orders:deliver` | 200: la orden pasa a PENDIENTE_AUTORIZACION; vigencia 15 días |
+| `POST …/quotes/{q}/response` | `work_orders:deliver` | 200: `{accepted, channel, reason?}` → APROBADO o COTIZACION_RECHAZADA |
+| `GET …/quotes/{q}/pdf` | `work_orders:read` | PDF |
+
+Reglas: IVA opcional por ítem (19 %); el precio puede incluirlo o no y el servidor calcula
+base + IVA = total con redondeo `ROUND_HALF_UP`. Descuento > 10 % por ítem exige
+`quotes:discount` y queda registrado quién lo autorizó. Una cotización vencida no se acepta.
+Los estados PENDIENTE_AUTORIZACION, APROBADO y COTIZACION_RECHAZADA **solo** cambian por la
+cotización (`/status` responde 422). Si se aprueba, el diagnóstico queda incluido en el total.
+
+### Reparación y control de calidad (`/work-orders/{id}/repair`)
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET …/repair` | `work_orders:read` | 200 `{tasks[], quality_checks[], qc_tests[], can_repair, can_check}` |
+| `POST …/repair/tasks` | `repairs:manage` | 201: `{description, labor_minutes?}` (orden EN_REPARACION) |
+| `POST …/repair/tasks/{t}/parts` | `repairs:manage` | `{part_id, quantity}` → salida de inventario |
+| `POST …/repair/tasks/{t}/parts/{p}/return` | `repairs:manage` | devolución al inventario |
+| `POST …/repair/quality-checks` | `repairs:manage` | 201: `{results: [todas las pruebas manuales de la categoría], notes?}`; aprobado si ninguna es FAIL |
+
+`CONTROL_CALIDAD → LISTO_ENTREGA` exige que el último control esté aprobado.
+
+### Pagos (`/work-orders/{id}`)
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET …/billing` | `work_orders:read` | 200 `{diagnostic_fee, accepted_quote_total, amount_due, paid, balance, payments[], can_register}` |
+| `POST …/payments` | `payments:manage` | 201: `{amount, method, reference?, notes?}`; no puede superar el saldo |
+| `GET …/payments/{p}/receipt.pdf` | `work_orders:read` | Comprobante (no es factura electrónica) |
+
+Valor del servicio = total de la cotización aprobada (incluye el diagnóstico) o, sin cotización
+aprobada, el valor del diagnóstico. El anticipo de la recepción es el primer pago. Entregar con
+saldo > 0 exige `work_orders:deliver_with_balance` y `balance_reason` en `/delivery`.
 
 ### Salud
 

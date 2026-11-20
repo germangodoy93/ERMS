@@ -27,6 +27,32 @@ vi.mock("@/modules/diagnostics/api", () => ({
     results: [],
   }),
 }));
+vi.mock("@/modules/workshop/api", () => ({
+  getQuotes: vi.fn().mockResolvedValue({
+    diagnostic_fee: "50000.00",
+    quotes: [],
+    can_edit: false,
+    can_send: false,
+    can_respond: false,
+    max_discount_percent: 10,
+  }),
+  getRepair: vi.fn().mockResolvedValue({
+    tasks: [],
+    quality_checks: [],
+    qc_tests: [],
+    can_repair: false,
+    can_check: false,
+  }),
+  getBilling: vi.fn().mockResolvedValue({
+    diagnostic_fee: "50000.00",
+    accepted_quote_total: null,
+    amount_due: "50000.00",
+    paid: "20000.00",
+    balance: "30000.00",
+    payments: [],
+    can_register: false,
+  }),
+}));
 vi.mock("../api", () => ({
   getWorkOrder: vi.fn(),
   changeStatus: vi.fn(),

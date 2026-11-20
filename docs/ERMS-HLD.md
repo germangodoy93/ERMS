@@ -132,6 +132,11 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 | 029 | Ejecutable sin firma digital, publicado en GitHub Releases con SHA256 | Certificado de firma (~USD 200/año) | Decisión de costo. Windows SmartScreen advierte; la pantalla de ERMS explica cómo continuar. |
 | 030 | Catálogo de pruebas en código; umbrales evaluados en el servidor | Tablas editables; evaluar en el agente | Igual en todos los entornos y versionado con el código. Cambiar un umbral no exige publicar un nuevo agente. |
 | 031 | Agente sin permisos de administrador por defecto; SMART solo si se ejecuta elevado | Exigir administrador | Mínimo privilegio. Lo no leído queda `NOT_SUPPORTED`. |
+| 032 | IVA opcional por ítem; el precio puede incluirlo o no; el servidor calcula y redondea (`ROUND_HALF_UP`) | Precios siempre sin IVA | Decisión del negocio: unos ítems llevan IVA y otros no, y los precios se manejan de ambas formas. |
+| 033 | Los estados ligados a la cotización solo cambian desde la cotización | Botones de estado libres | La orden y la cotización no pueden contradecirse. |
+| 034 | Entradas de inventario simples (sin órdenes de compra) | Flujo de compras completo | Decisión del negocio para el MVP. |
+| 035 | Saldo = cotización aprobada (incluye el diagnóstico) o diagnóstico − pagos; entrega con saldo solo con permiso y motivo | Bloqueo total | Decisión del negocio; queda trazado en el historial y la auditoría. |
+| 036 | Comprobante de pago interno con numeración `RC-<año>-<consecutivo>` | Factura electrónica | La facturación DIAN está fuera del MVP; el comprobante lo aclara. |
 
 ## 6. Riesgos
 

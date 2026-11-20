@@ -12,6 +12,9 @@ import { saveBlob } from "@/lib/download";
 import { formatDateTime, formatPhone } from "@/lib/format";
 import { PERMS, useCan } from "@/modules/auth/permissions";
 import { DiagnosticPanel } from "@/modules/diagnostics/components/DiagnosticPanel";
+import { BillingPanel } from "@/modules/workshop/components/BillingPanel";
+import { QuotesPanel } from "@/modules/workshop/components/QuotesPanel";
+import { RepairPanel } from "@/modules/workshop/components/RepairPanel";
 import { ImeiCheckButton } from "@/modules/devices/components/ImeiCheckButton";
 import { errorMessage } from "@/services/errors";
 import type { WorkOrder, WorkOrderStatus } from "@/types/api";
@@ -25,6 +28,7 @@ import {
   accessoriesText,
   formatMoney,
   NEGATIVE_TRANSITIONS,
+  QUOTE_DRIVEN,
   PAYMENT_LABELS,
   PRIORITY_LABELS,
   STATUS_LABELS,
@@ -69,7 +73,10 @@ function OrderDetail({ order }: { order: WorkOrder }) {
   const [target, setTarget] = useState<WorkOrderStatus | null>(null);
   const [delivering, setDelivering] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const transitions = order.allowed_transitions.filter((s) => s !== "ENTREGADO");
+  // Delivery has its own dialog; quote-driven states are changed from the quotation.
+  const transitions = order.allowed_transitions.filter(
+    (s) => s !== "ENTREGADO" && !QUOTE_DRIVEN.has(s),
+  );
   const canDeliver = order.allowed_transitions.includes("ENTREGADO");
 
   const download = async () => {
@@ -200,6 +207,33 @@ function OrderDetail({ order }: { order: WorkOrder }) {
         </CardHeader>
         <CardContent>
           <DiagnosticPanel order={order} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Cotización</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <QuotesPanel order={order} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Reparación y control de calidad</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <RepairPanel order={order} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Pagos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <BillingPanel order={order} />
         </CardContent>
       </Card>
 
