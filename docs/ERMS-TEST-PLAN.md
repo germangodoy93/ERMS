@@ -98,6 +98,25 @@ foto → estados → entrega.
 | Presentación | `frontend/src/modules/workorders/presentation.test.ts` | Pesos, lectura de montos escritos a mano, motivos iguales al backend |
 | Detalle (UI) | `frontend/src/modules/workorders/pages/WorkOrderDetailPage.test.tsx` | Solo las acciones permitidas por la API; motivo obligatorio al devolver de control de calidad; aviso de modo demostración |
 
+## 7. Pruebas del Sprint 4
+
+Resultado local del 2026-11-20: **155 pruebas de backend**, **10 del agente** y **109 de
+frontend**, todas en verde; módulo de diagnóstico entre 93 % y 100 % de cobertura. Además se
+ejecutó el **agente real en Windows 11** (código fuente y `.exe` empaquetado) contra el entorno
+local: se vinculó con el código, leyó las 8 secciones sin permisos de administrador y registró 9
+resultados (por ejemplo, desgaste de batería 33,6 % → ADVERTENCIA; SMART → NO SOPORTADO sin
+administrador).
+
+| Prueba | Archivo | Verifica |
+|---|---|---|
+| Evaluación | `backend/tests/unit/test_diagnostic_evaluation.py` | Umbrales de batería, discos, espacio, SMART y estabilidad; secciones faltantes nunca quedan OK; catálogo por categoría |
+| Diagnóstico manual | `backend/tests/integration/test_diagnostics_api.py` | Solo en DIAGNÓSTICO; cotización bloqueada sin diagnóstico; cierre exige todas las pruebas y conclusión; pruebas ajenas o del agente rechazadas; reabrir; PDF |
+| Permisos | `test_diagnostics_api.py` | Recepción no registra; otro técnico no modifica |
+| Agente | `test_diagnostics_api.py` | Código de un solo uso, sin guion y en minúsculas; token de un solo reporte; código anterior invalidado; vencimiento; autorización del cliente; el cierre invalida el token; aislamiento entre talleres |
+| Recolección | `diagnostic-agent/tests/test_collect.py` | Respuestas de un objeto o de una lista; enums de disco como texto o número; truncado; SMART vacío; informe de batería; fallas aisladas por sección; **consultas sin comandos de escritura**; HTTPS obligatorio |
+| Contrato | `frontend/src/types/api.contract.test.ts` | Esquemas y enums de diagnóstico |
+| Panel (UI) | `frontend/src/modules/diagnostics/components/DiagnosticPanel.test.tsx` | Resultados del agente solo lectura; cierre bloqueado con pendientes; "No probado" masivo; guardar y cerrar; código del agente |
+
 **Windows:** si la terminal abre la carpeta como `c:\...` (minúscula), Vitest carga dos copias de
 sí mismo y las pruebas de interfaz fallan con `Invalid Chai property: toBeInTheDocument`.
 Ejecute las pruebas desde una terminal en `C:\...` (ver ERMS-DEVOPS).

@@ -117,7 +117,9 @@ Acciones registradas: `auth.login`, `auth.login_failed`, `auth.logout`,
 `catalog.manufacturer_created`, `catalog.manufacturer_updated`, `catalog.model_created`,
 `catalog.model_updated`, `device.created`, `device.updated`, `reception_terms.published`,
 `work_order.created`, `work_order.updated`, `work_order.assigned`,
-`work_order.status_changed`, `work_order.photo_added`, `work_order.photo_deleted`.
+`work_order.status_changed`, `work_order.photo_added`, `work_order.photo_deleted`,
+`diagnostic.results_saved`, `diagnostic.closed`, `diagnostic.reopened`,
+`diagnostic.agent_pairing_created`, `diagnostic.agent_paired`, `diagnostic.agent_reported`.
 Las contraseñas y los tokens nunca se registran. De los clientes solo se registran los
 **nombres de los campos** que cambiaron, nunca sus valores (ADR-018).
 
@@ -244,6 +246,41 @@ Reglas:
 - Fotos: exigen la autorización `PHOTOS` vigente del cliente; se re-codifican a JPEG de máx.
   2048 px **sin metadatos EXIF (incluido el GPS)**; máx. 20 por orden. Con `demo: true` se
   guardan en el disco del servidor y pueden perderse al redesplegar.
+
+### Diagnóstico
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET /work-orders/{id}/diagnostic` | `work_orders:read` | 200 `DiagnosticRead`: estado, pruebas de la categoría con su resultado, disponibilidad del agente |
+| `PUT /work-orders/{id}/diagnostic/results` | `work_orders:progress` | 200: `{results: [{test_code, result, observation?}]}` (solo pruebas manuales) |
+| `POST /work-orders/{id}/diagnostic/close` | `work_orders:progress` | 200: `{conclusion, recommendation?}` |
+| `POST /work-orders/{id}/diagnostic/reopen` | `work_orders:progress` | 200 |
+| `POST /work-orders/{id}/diagnostic/agent-pairing` | `work_orders:progress` | 201 `{code, expires_at, download_url}` |
+| `GET /work-orders/{id}/diagnostic-report.pdf` | `work_orders:read` | 200 `application/pdf` |
+| `POST /diagnostics/agent/pair` | código de emparejamiento | 200 `{token, expires_at, work_order_number, device}` |
+| `POST /diagnostics/agent/report` | `Bearer <token del agente>` | 200 `{results}` |
+
+Reglas:
+
+- Resultados: `OK`, `WARNING`, `FAIL`, `NOT_TESTED`, `NOT_SUPPORTED`. Se registran con la orden en
+  `DIAGNOSTICO` (el técnico, sobre sus órdenes). Para cerrar, **todas** las pruebas manuales de
+  la categoría deben tener resultado (`NOT_TESTED` es válido, por ejemplo si el equipo no
+  enciende) y se exige la conclusión. **No se pasa a `COTIZACION` sin diagnóstico cerrado.**
+- Las pruebas `AGENT_*` solo las llena el agente; a mano devuelven 422.
+- Agente: solo para `LAPTOP`/`DESKTOP`, con la orden en `DIAGNOSTICO` y la autorización
+  `DIAGNOSTIC_AGENT` vigente del cliente. Código `XXXX-XXXX` (alfabeto sin 0/O/1/I) de un solo
+  uso, válido 30 min; se canjea por un token válido 15 min para **un** reporte. Un código nuevo
+  o el cierre del diagnóstico invalidan los anteriores. Código o token inválido: 401.
+- El reporte del agente (`AgentReport`) trae solo lo que Windows permitió leer; el backend
+  evalúa con estos umbrales y lo que falta queda `NOT_SUPPORTED`:
+
+| Prueba | Advertencia | Falla |
+|---|---|---|
+| `AGENT_BATTERY` (desgaste = 1 − capacidad actual / diseño) | ≥ 20 % | ≥ 40 % |
+| `AGENT_DISK_HEALTH` (estado que reporta Windows) | Warning | Unhealthy |
+| `AGENT_DISK_SPACE` | < 10 % libre en algún volumen | — |
+| `AGENT_DISK_SMART` (solo como administrador) | errores de lectura/escritura, desgaste ≥ 80 %, temperatura ≥ 60 °C | — |
+| `AGENT_STABILITY` (30 días) | ≥ 1 apagado inesperado o ≥ 1 pantallazo azul | ≥ 5 pantallazos azules |
 
 ### Salud
 

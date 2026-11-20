@@ -50,6 +50,26 @@ jobs:
           uv run python -m scripts.export_openapi ../docs/api/openapi.json
           git diff --exit-code -- ../docs/api/openapi.json
 
+  agent:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: diagnostic-agent
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.9"
+          enable-cache: true
+      - run: uv python install 3.13
+      - run: uv sync --frozen
+      - name: Lint
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: Type check
+        run: uv run mypy erms_agent tests
+      - name: Tests
+        run: uv run pytest
+
   frontend:
     runs-on: ubuntu-24.04
     defaults:

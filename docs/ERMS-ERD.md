@@ -104,12 +104,12 @@ asignar (al moverla se le asigna).
 
 ### Diagnóstico
 
-| Tabla | Sprint | Columnas clave |
-|---|---|---|
-| `diagnostic_tests` | 📐 4 | code, component, adapter, mode (AUTOMATED/MANUAL), description; catálogo |
-| `checklist_templates` | 📐 4 | category_id, name, items JSONB (consolas, Apple) |
-| `diagnostic_sessions` | 📐 4 | work_order_id, started_by, agent_version, consent_id, started_at, finished_at |
-| `diagnostic_results` | 📐 4 | session_id, test_id, status (HEALTHY, WARNING, CRITICAL, NOT_TESTED, NOT_SUPPORTED), severity, tool, evidence JSONB, recommendation, source (AGENT, MANUAL, AI_SUGGESTION), executed_at |
+| Tabla | Sprint | Columnas clave | Restricciones |
+|---|---|---|---|
+| Catálogo de pruebas | ✅ 4 | En código (`backend/app/modules/diagnostics/catalog.py`): código, nombre, componente, categorías, automática o manual | Igual en todos los entornos (ADR-030) |
+| `diagnostic_sessions` | ✅ 4 | work_order_id, started_by_id, closed_at, closed_by_id, conclusion, recommendation, agent_version, agent_elevated, agent_reported_at | `uq(work_order_id)` |
+| `diagnostic_results` | ✅ 4 | session_id, test_code, result (OK, WARNING, FAIL, NOT_TESTED, NOT_SUPPORTED), observation, evidence JSONB, source (MANUAL, AGENT, AI_SUGGESTION), recorded_by_id, recorded_at | `uq(session_id, test_code)` |
+| `agent_pairings` | ✅ 4 | session_id, code_hash, expires_at, paired_at, token_hash, token_expires_at, reported_at | `uq(code_hash)`, `uq(token_hash)`; SHA-256 |
 
 `source = AI_SUGGESTION` nunca se presenta como resultado comprobado (Módulo 12).
 

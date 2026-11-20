@@ -32,3 +32,6 @@ Thumbs.db
 
 # Local attachments (demo storage)
 backend/var/
+
+# Agent build output (PyInstaller)
+diagnostic-agent/build/

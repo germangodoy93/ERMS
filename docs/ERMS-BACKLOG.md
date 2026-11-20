@@ -57,7 +57,20 @@ Prioridad: **P1** imprescindible para el MVP · **P2** importante · **P3** dese
 **Aplazado:** Celery + Redis (sin trabajo en segundo plano que lo justifique todavía; ADR-022) y
 el proveedor de almacenamiento definitivo para las fotos (ADR-023).
 
-## Sprints 4 – 6
+## Sprint 4 – Diagnóstico (P1)
+
+| ID | Historia | Criterios de aceptación | Estado |
+|---|---|---|---|
+| S4-01 | Como técnico, quiero registrar un diagnóstico manual o visual | Lista de chequeo por categoría; resultado y observación por prueba; "No probado" explícito; conclusión y recomendación; reabrir mientras la orden esté en diagnóstico | ✅ |
+| S4-02 | Como recepcionista, quiero que no se cotice sin diagnóstico | La orden no pasa a COTIZACIÓN sin diagnóstico cerrado | ✅ |
+| S4-03 | Como técnico, quiero diagnosticar un computador con el agente | Código de un solo uso; autorización del cliente; agente portable para Windows, solo lectura; SMART con permisos de administrador; resultados automáticos evaluados por el servidor | ✅ |
+| S4-04 | Como cliente, quiero un informe del diagnóstico | PDF con resultados (automáticos marcados), conclusión y recomendación | ✅ |
+| S4-05 | Como equipo, quiero distribuir el agente | Construcción en GitHub Actions (Windows) y publicación en GitHub Releases con SHA256 | ✅ |
+
+**Fuera de este sprint:** revisión del equipo con IA a partir de fotos (requiere un servicio
+de pago y almacenamiento definitivo; sus resultados serán `AI_SUGGESTION`, nunca comprobados).
+
+## Sprints 5 – 6
 
 Las historias se detallan en la planificación de cada sprint, a partir de los módulos 2 – 11
 del documento de requerimientos y del modelo de [ERMS-ERD.md](ERMS-ERD.md). Se agregan
@@ -68,8 +81,8 @@ estos requerimientos detectados en el análisis:
 | R-01 | Consentimiento de tratamiento de datos (Ley 1581 de 2012) | 2 ✅ |
 | R-02 | Estado `COTIZACION_RECHAZADA` y devolución sin reparar | 3 |
 | R-03 | Numeración de documentos sin colisiones (`document_sequences`) | 3 ✅ |
-| R-04 | Consentimiento antes de ejecutar el agente en el equipo del cliente | 4 |
-| R-05 | Token de agente de un solo uso, limitado a una sesión | 4 |
+| R-04 | Consentimiento antes de ejecutar el agente en el equipo del cliente | 4 ✅ |
+| R-05 | Token de agente de un solo uso, limitado a una sesión | 4 ✅ |
 | R-06 | IVA por ítem de cotización (19 % o 0 %) | 5 |
 | R-07 | Existencias por sede (`stock_levels`) | 5 |
 | R-08 | Compras a proveedores (`purchase_orders`) | 5 |

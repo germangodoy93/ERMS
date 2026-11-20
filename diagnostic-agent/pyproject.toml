@@ -1,0 +1,42 @@
+[project]
+name = "erms-agent"
+version = "0.1.0"
+description = "ERMS – agente portable de diagnóstico para Windows (solo lectura)"
+requires-python = ">=3.13"
+# No runtime dependencies: only the Python standard library and Windows' own tools
+# (PowerShell CIM cmdlets and powercfg). Smaller attack surface and a smaller executable.
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.1",
+    "pyinstaller==6.22.3",
+    "pytest>=9.2.0",
+    "ruff>=0.17.6",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+allowed-confusables = ["–"]
+select = ["E", "F", "W", "I", "N", "UP", "B", "S", "A", "C4", "SIM", "RUF", "PT"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["erms_agent"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+filterwarnings = ["error"]

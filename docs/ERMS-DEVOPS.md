@@ -35,6 +35,7 @@ verificadas el 2026-11-19:
 | Mailpit (imagen) | v1.33.1 | Correo de desarrollo; no se usa la v1.34.0 por ser de hace 2 días |
 | reportlab | 5.1.0 | Sprint 3, acta en PDF. Licencia BSD. Sin tipos: `mypy` lo ignora (`pyproject.toml`) |
 | Pillow | 13.0.0 | Dependencia de reportlab; también valida y limpia las fotos (licencia MIT-CMU) |
+| PyInstaller | 6.22.3 | Sprint 4, solo para construir el agente (licencia GPL con excepción que permite distribuir el ejecutable) |
 | python-multipart | **0.0.33** (fijada) | Subida de fotos en FastAPI. No se usa la 0.0.34 por ser de hace 4 días |
 
 ### Decisiones de compatibilidad
@@ -87,6 +88,8 @@ verificadas el 2026-11-19:
 | `SMTP_HOST` · `SMTP_PORT` · `SMTP_USERNAME` · `SMTP_PASSWORD` · `SMTP_STARTTLS` · `SMTP_FROM` | Para recuperar contraseñas | Sin `SMTP_HOST` no se envían correos: se registra el intento sin el enlace. |
 | `ATTACHMENTS_DIR` | No | Carpeta del almacenamiento local de fotos (por defecto `var/attachments`). En Railway es efímera: **modo demostración**. |
 | `ATTACHMENT_MAX_BYTES` · `ATTACHMENT_MAX_PER_ORDER` | No | 10 MB · 20 |
+| `AGENT_DOWNLOAD_URL` | No | Descarga del agente (por defecto, el último release de GitHub) |
+| `AGENT_PAIRING_MINUTES` · `AGENT_TOKEN_MINUTES` | No | 30 · 15 |
 | `ERMS_ADMIN_PASSWORD` | Solo `bootstrap` | Contraseña temporal del primer administrador |
 | `ERMS_TEST_DATABASE_URL` | Solo pruebas | Base **desechable** para las pruebas de integración |
 
@@ -95,9 +98,23 @@ Servidor web de producción: `API_UPSTREAM` y `PORT`.
 
 ## 4. CI (GitHub Actions)
 
+`agent-release.yml` construye el agente en Windows cuando cambia `diagnostic-agent/` y lo
+publica en el release `agent-v<versión>` con su SHA256. La descarga estable es
+`https://github.com/germangodoy93/ERMS/releases/latest/download/erms-agente.exe`. Para publicar
+una versión nueva, se cambia `VERSION` en `diagnostic-agent/erms_agent/__init__.py`.
+
+Construcción local (Windows):
+
+```powershell
+cd diagnostic-agent; python -m uv sync
+python -m uv run pyinstaller --onefile --console --name erms-agente --distpath build/dist --workpath build/work --specpath build erms_agent/__main__.py
+.\build\dist\erms-agente.exe --server http://localhost:5173   # contra el entorno local
+```
+
 | Job | Pasos |
 |---|---|
 | `backend` | ruff, mypy, pytest (unitarias + integración contra PostgreSQL), verificación de que `docs/api/openapi.json` está actualizado |
+| `agent` | ruff, mypy, pytest del agente (Linux; las consultas se prueban con salidas de ejemplo) |
 | `frontend` | eslint, prettier, tsc, vitest, build |
 | `docker` | `docker compose up --wait` + `scripts/smoke-test.sh` + `scripts/smoke-auth.sh` (bootstrap → login por el proxy web → correo de recuperación en Mailpit); build de las imágenes `prod` |
 

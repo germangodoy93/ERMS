@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { saveBlob } from "@/lib/download";
 import { formatDateTime, formatPhone } from "@/lib/format";
 import { PERMS, useCan } from "@/modules/auth/permissions";
+import { DiagnosticPanel } from "@/modules/diagnostics/components/DiagnosticPanel";
 import { ImeiCheckButton } from "@/modules/devices/components/ImeiCheckButton";
 import { errorMessage } from "@/services/errors";
 import type { WorkOrder, WorkOrderStatus } from "@/types/api";
@@ -190,6 +191,15 @@ function OrderDetail({ order }: { order: WorkOrder }) {
             <Field label="Accesorios">{accessoriesText(order.accessories)}</Field>
             <Field label="Observaciones">{order.notes ?? "—"}</Field>
           </dl>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Diagnóstico</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DiagnosticPanel order={order} />
         </CardContent>
       </Card>
 

@@ -7,6 +7,8 @@ import {
   CONSENT_CHANNELS,
   CONSENT_PURPOSES,
   CUSTOMER_KINDS,
+  DIAGNOSTIC_RESULTS,
+  DIAGNOSTIC_SOURCES,
   ID_TYPES,
   OVERALL_STATUSES,
   PAYMENT_METHODS,
@@ -487,6 +489,72 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
     required: ["created_at", "file_name", "id", "size_bytes"],
   },
   PhotoList: { all: ["demo", "items", "max_photos"], required: ["demo", "items", "max_photos"] },
+  DiagnosticRead: {
+    all: [
+      "agent_available",
+      "agent_download_url",
+      "agent_elevated",
+      "agent_reported_at",
+      "agent_unavailable_reason",
+      "agent_version",
+      "closed_at",
+      "closed_by",
+      "conclusion",
+      "editable",
+      "recommendation",
+      "results",
+      "session_id",
+      "state",
+    ],
+    required: [
+      "agent_available",
+      "agent_download_url",
+      "agent_elevated",
+      "agent_reported_at",
+      "agent_unavailable_reason",
+      "agent_version",
+      "closed_at",
+      "closed_by",
+      "conclusion",
+      "editable",
+      "recommendation",
+      "results",
+      "session_id",
+      "state",
+    ],
+  },
+  TestResultRead: {
+    all: [
+      "automated",
+      "component",
+      "evidence",
+      "name",
+      "observation",
+      "recorded_at",
+      "recorded_by",
+      "result",
+      "source",
+      "test_code",
+    ],
+    required: [
+      "automated",
+      "component",
+      "evidence",
+      "name",
+      "observation",
+      "recorded_at",
+      "recorded_by",
+      "result",
+      "source",
+      "test_code",
+    ],
+  },
+  ResultInput: { all: ["observation", "result", "test_code"], required: ["result", "test_code"] },
+  CloseRequest: { all: ["conclusion", "recommendation"], required: ["conclusion"] },
+  PairingCreated: {
+    all: ["code", "download_url", "expires_at"],
+    required: ["code", "download_url", "expires_at"],
+  },
 };
 
 describe("API contract (docs/api/openapi.json)", () => {
@@ -535,6 +603,12 @@ describe("API contract (docs/api/openapi.json)", () => {
         "/api/v1/work-orders/{order_id}/reception-act.pdf",
         "/api/v1/work-orders/{order_id}/photos",
         "/api/v1/work-orders/{order_id}/photos/{attachment_id}",
+        "/api/v1/work-orders/{order_id}/diagnostic",
+        "/api/v1/work-orders/{order_id}/diagnostic/results",
+        "/api/v1/work-orders/{order_id}/diagnostic/close",
+        "/api/v1/work-orders/{order_id}/diagnostic/reopen",
+        "/api/v1/work-orders/{order_id}/diagnostic/agent-pairing",
+        "/api/v1/work-orders/{order_id}/diagnostic-report.pdf",
       ]),
     );
   });
@@ -551,6 +625,8 @@ describe("API contract (docs/api/openapi.json)", () => {
     expect(schema("UnlockMethod").enum).toEqual([...UNLOCK_METHODS]);
     expect(schema("Accessory").enum).toEqual([...ACCESSORIES]);
     expect(schema("PaymentMethod").enum).toEqual([...PAYMENT_METHODS]);
+    expect(schema("Result").enum).toEqual([...DIAGNOSTIC_RESULTS]);
+    expect(schema("Source").enum).toEqual([...DIAGNOSTIC_SOURCES]);
   });
 
   it.each(Object.entries(FIELDS))("keeps %s fields in sync", (name, fields) => {

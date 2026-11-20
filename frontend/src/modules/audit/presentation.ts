@@ -33,6 +33,12 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   "work_order.status_changed": "Cambio de estado de orden",
   "work_order.photo_added": "Foto agregada",
   "work_order.photo_deleted": "Foto eliminada",
+  "diagnostic.results_saved": "Resultados de diagnóstico guardados",
+  "diagnostic.closed": "Diagnóstico cerrado",
+  "diagnostic.reopened": "Diagnóstico reabierto",
+  "diagnostic.agent_pairing_created": "Código de agente generado",
+  "diagnostic.agent_paired": "Agente vinculado",
+  "diagnostic.agent_reported": "Agente envió resultados",
 };
 
 export function auditActionLabel(action: string): string {

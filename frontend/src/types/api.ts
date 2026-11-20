@@ -522,3 +522,53 @@ export interface PhotoList {
   max_photos: number;
   items: Photo[];
 }
+
+// --- Diagnostics (Sprint 4) -----------------------------------------------------------
+
+export const DIAGNOSTIC_RESULTS = ["OK", "WARNING", "FAIL", "NOT_TESTED", "NOT_SUPPORTED"] as const;
+export type DiagnosticResultCode = (typeof DIAGNOSTIC_RESULTS)[number];
+
+export const DIAGNOSTIC_SOURCES = ["MANUAL", "AGENT", "AI_SUGGESTION"] as const;
+export type DiagnosticSource = (typeof DIAGNOSTIC_SOURCES)[number];
+
+export interface DiagnosticTestResult {
+  test_code: string;
+  name: string;
+  component: string;
+  automated: boolean;
+  result: DiagnosticResultCode | null;
+  observation: string | null;
+  evidence: Record<string, unknown> | null;
+  source: DiagnosticSource | null;
+  recorded_by: PersonRef | null;
+  recorded_at: string | null;
+}
+
+export interface Diagnostic {
+  session_id: string | null;
+  state: "NOT_STARTED" | "OPEN" | "CLOSED";
+  editable: boolean;
+  agent_available: boolean;
+  agent_unavailable_reason: string | null;
+  agent_download_url: string;
+  conclusion: string | null;
+  recommendation: string | null;
+  closed_at: string | null;
+  closed_by: PersonRef | null;
+  agent_version: string | null;
+  agent_elevated: boolean | null;
+  agent_reported_at: string | null;
+  results: DiagnosticTestResult[];
+}
+
+export interface DiagnosticResultInput {
+  test_code: string;
+  result: DiagnosticResultCode;
+  observation?: string | null;
+}
+
+export interface AgentPairing {
+  code: string;
+  expires_at: string;
+  download_url: string;
+}

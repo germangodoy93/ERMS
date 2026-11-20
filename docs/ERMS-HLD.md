@@ -94,7 +94,8 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
   `customer_consents`). Las autorizaciones de fotos y del agente son separadas. La supresión
   se atiende anonimizando, y la auditoría nunca guarda los valores de los datos personales.
 - El agente nunca ejecuta formateos, borrados ni cambios de firmware: esas operaciones no
-  existen en su interfaz.
+  existen en su código. Solo lee información técnica del hardware, con código de un solo uso
+  y token limitado a un reporte de una orden; no lee archivos, cuentas ni programas.
 
 ## 5. Decisiones de arquitectura (ADR)
 
@@ -127,6 +128,10 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 | 025 | Las órdenes no guardan contraseñas de desbloqueo; se registra el método | Campo cifrado | Regla del proyecto: no recolectar contraseñas. El cliente desbloquea o se la da en persona al técnico. |
 | 026 | Las fotos se re-codifican (JPEG, máx. 2048 px, sin EXIF) | Guardar el original | Elimina la ubicación GPS y otros metadatos personales, valida que sea una imagen real y controla el tamaño. |
 | 027 | Consulta de IMEI reportados: botón que copia el IMEI y abre la consulta pública oficial (imeicolombia.com.co) | Automatizar el formulario o pagar GSMA Device Check | La consulta oficial no tiene API y exige verificación humana; automatizarla sería no oficial y frágil. GSMA tiene costo. |
+| 028 | Agente: Python solo con biblioteca estándar, consultas CIM por PowerShell y `powercfg`, empaquetado con PyInstaller | pywin32/WMI o un agente en .NET | Sin dependencias externas, auditable y probado en Windows real. Las consultas son fijas y de solo lectura; una prueba lo verifica. |
+| 029 | Ejecutable sin firma digital, publicado en GitHub Releases con SHA256 | Certificado de firma (~USD 200/año) | Decisión de costo. Windows SmartScreen advierte; la pantalla de ERMS explica cómo continuar. |
+| 030 | Catálogo de pruebas en código; umbrales evaluados en el servidor | Tablas editables; evaluar en el agente | Igual en todos los entornos y versionado con el código. Cambiar un umbral no exige publicar un nuevo agente. |
+| 031 | Agente sin permisos de administrador por defecto; SMART solo si se ejecuta elevado | Exigir administrador | Mínimo privilegio. Lo no leído queda `NOT_SUPPORTED`. |
 
 ## 6. Riesgos
 

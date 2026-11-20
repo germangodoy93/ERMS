@@ -1,0 +1,61 @@
+name: Agent release
+
+# Builds the portable Windows agent and publishes it as the latest GitHub release asset:
+# https://github.com/<owner>/ERMS/releases/latest/download/erms-agente.exe
+# The executable is NOT code-signed (decision recorded in docs/ERMS-HLD.md, ADR-029).
+
+on:
+  push:
+    branches: [main]
+    paths: ["diagnostic-agent/**", ".github/workflows/agent-release.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: agent-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-2025
+    defaults:
+      run:
+        working-directory: diagnostic-agent
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.9"
+      - run: uv python install 3.13
+      - run: uv sync --frozen
+      - name: Tests
+        run: uv run pytest
+      - name: Build executable
+        run: >-
+          uv run pyinstaller --onefile --console --name erms-agente --clean --noconfirm
+          --distpath build/dist --workpath build/work --specpath build erms_agent/__main__.py
+      - name: Smoke test (no server needed)
+        run: |
+          ./build/dist/erms-agente.exe --help
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+      - name: Checksum
+        run: |
+          $hash = (Get-FileHash build/dist/erms-agente.exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  erms-agente.exe" | Out-File -Encoding ascii build/dist/erms-agente.exe.sha256
+          "SHA256: $hash"
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = (uv run python -c "import erms_agent; print(erms_agent.VERSION)").Trim()
+          $tag = "agent-v$version"
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --target $env:GITHUB_SHA --latest `
+              --title "Agente de diagnóstico $version" `
+              --notes "Agente portable de diagnóstico ERMS para Windows (solo lectura, sin firma digital). Verifique el SHA256 adjunto."
+          }
+          gh release upload $tag build/dist/erms-agente.exe build/dist/erms-agente.exe.sha256 --clobber

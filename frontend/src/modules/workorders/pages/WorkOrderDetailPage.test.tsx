@@ -9,6 +9,24 @@ import type { WorkOrder } from "@/types/api";
 import { changeStatus, getWorkOrder, listPhotos } from "../api";
 import { WorkOrderDetailPage } from "./WorkOrderDetailPage";
 
+vi.mock("@/modules/diagnostics/api", () => ({
+  getDiagnostic: vi.fn().mockResolvedValue({
+    session_id: null,
+    state: "NOT_STARTED",
+    editable: false,
+    agent_available: false,
+    agent_unavailable_reason: null,
+    agent_download_url: "https://example.com/agente.exe",
+    conclusion: null,
+    recommendation: null,
+    closed_at: null,
+    closed_by: null,
+    agent_version: null,
+    agent_elevated: null,
+    agent_reported_at: null,
+    results: [],
+  }),
+}));
 vi.mock("../api", () => ({
   getWorkOrder: vi.fn(),
   changeStatus: vi.fn(),
