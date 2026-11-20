@@ -36,7 +36,9 @@ from app.modules.customers.service import CustomerService
 from app.modules.devices.models import Device, DeviceModel
 from app.modules.diagnostics.models import DiagnosticSession
 from app.modules.organizations.models import Branch
+from app.modules.payments.service import PaymentService
 from app.modules.privacy.catalog import ConsentPurpose
+from app.modules.repairs.models import QualityCheck
 from app.modules.roles.catalog import Perm
 from app.modules.roles.models import Permission, Role, role_permissions, user_roles
 from app.modules.users.models import User
@@ -65,12 +67,17 @@ from app.modules.workorders.schemas import (
     WorkOrderRead,
     WorkOrderUpdate,
 )
-from app.shared.context import BOGOTA, RequestContext, utcnow
+from app.shared.context import RequestContext, utcnow
 from app.shared.identifiers import search_key
 from app.shared.pagination import PageParams
+from app.shared.sequences import default_branch, next_document_number
 
 DOC_TYPE = "WORK_ORDER"
 PHOTO_ENTITY = "work_order"
+# States driven by the quotation (send / customer response), not by the status endpoint.
+QUOTE_DRIVEN = frozenset(
+    {Status.PENDIENTE_AUTORIZACION, Status.APROBADO, Status.COTIZACION_RECHAZADA}
+)
 NUMBER_PREFIX = "ER"
 NO_TERMS_MESSAGE = (
     "El taller aún no ha publicado las condiciones del acta de recepción. Un administrador "
@@ -138,25 +145,12 @@ class ReceptionTermsService:
         return terms
 
 
-def next_number(session: Session, organization_id: uuid.UUID, year: int) -> str:
-    value = session.execute(
-        text(
-            "INSERT INTO document_sequences (organization_id, doc_type, year, last_value) "
-            "VALUES (:org, :doc, :year, 1) "
-            "ON CONFLICT (organization_id, doc_type, year) "
-            "DO UPDATE SET last_value = document_sequences.last_value + 1 "
-            "RETURNING last_value"
-        ),
-        {"org": organization_id, "doc": DOC_TYPE, "year": year},
-    ).scalar_one()
-    return f"{NUMBER_PREFIX}-{year}-{value:06d}"
-
-
 class WorkOrderService:
     def __init__(self, session: Session, settings: Settings, storage: Storage) -> None:
         self._session = session
         self._settings = settings
         self._attachments = AttachmentService(session, storage)
+        self._payments = PaymentService(session)
         self._customers = CustomerService(session)
         self._terms = ReceptionTermsService(session)
         self._audit = AuditService(session)
@@ -269,12 +263,7 @@ class WorkOrderService:
         if open_order is not None:
             raise ConflictError(f"El equipo ya tiene una orden abierta: {open_order}.")
         terms = self._terms.require_current(actor.organization_id)
-        branch = self._session.scalar(
-            select(Branch)
-            .where(Branch.organization_id == actor.organization_id, Branch.is_active.is_(True))
-            .order_by(Branch.created_at)
-            .limit(1)
-        )
+        branch = default_branch(self._session, actor.organization_id)
         if branch is None:
             raise BusinessRuleError("El taller no tiene una sede activa.")
         technician_id = None
@@ -286,7 +275,9 @@ class WorkOrderService:
         order = WorkOrder(
             organization_id=actor.organization_id,
             branch_id=branch.id,
-            number=next_number(self._session, actor.organization_id, now.astimezone(BOGOTA).year),
+            number=next_document_number(
+                self._session, actor.organization_id, DOC_TYPE, NUMBER_PREFIX
+            ),
             customer_id=customer.id,
             device_id=device.id,
             assigned_technician_id=technician_id,
@@ -307,6 +298,17 @@ class WorkOrderService:
         )
         self._session.add(order)
         self._session.flush()
+        if data.advance_amount > 0 and data.advance_method is not None:
+            self._payments.register(
+                actor,
+                order,
+                amount=data.advance_amount,
+                method=data.advance_method,
+                reference=None,
+                notes="Anticipo registrado en la recepción",
+                kind="ADVANCE",
+                context=context,
+            )
         self._add_history(order, None, Status.RECIBIDO, actor, None, now)
         self._record(
             actor,
@@ -381,7 +383,24 @@ class WorkOrderService:
     ) -> WorkOrderRead:
         if target is Status.ENTREGADO:
             raise BusinessRuleError("Use la entrega del equipo para registrar quién lo retira.")
+        if target in QUOTE_DRIVEN:
+            raise BusinessRuleError(
+                "Este cambio se registra desde la cotización: enviarla, o registrar que el "
+                "cliente la aceptó o la rechazó."
+            )
         order = self.get(actor, order_id, for_update=True)
+        self.transition(actor, order, target, reason, context)
+        return self._to_read(actor, order)
+
+    def transition(
+        self,
+        actor: User,
+        order: WorkOrder,
+        target: Status,
+        reason: str | None,
+        context: RequestContext,
+    ) -> None:
+        """Validated state change, also used by quotations. The order must be locked."""
         source = self._check_transition(actor, order, target)
         if reason_required(source, target) and not reason:
             raise BusinessRuleError("Indique el motivo de este cambio de estado.")
@@ -389,15 +408,44 @@ class WorkOrderService:
             raise BusinessRuleError(
                 "Cierre el diagnóstico con su conclusión antes de pasar a cotización."
             )
+        if (
+            source is Status.CONTROL_CALIDAD
+            and target is Status.LISTO_ENTREGA
+            and not self._quality_passed(order)
+        ):
+            raise BusinessRuleError(
+                "Registre un control de calidad aprobado antes de marcar el equipo listo."
+            )
         self._claim_if_technician(actor, order)
         self._move(actor, order, source, target, reason, context)
-        return self._to_read(actor, order)
 
     def deliver(
         self, actor: User, order_id: uuid.UUID, data: DeliveryRequest, context: RequestContext
     ) -> WorkOrderRead:
         order = self.get(actor, order_id, for_update=True)
         source = self._check_transition(actor, order, Status.ENTREGADO)
+        billing = self._payments.billing(order)
+        note = data.notes
+        if billing.balance > 0:
+            if Perm.WORK_ORDERS_DELIVER_WITH_BALANCE not in actor.permission_codes:
+                raise BusinessRuleError(
+                    f"El cliente tiene un saldo pendiente de {billing.balance}. Registre el pago "
+                    "o pida a un supervisor que autorice la entrega."
+                )
+            if not data.balance_reason:
+                raise BusinessRuleError("Indique por qué se entrega con saldo pendiente.")
+            parts = [
+                f"Entregado con saldo pendiente de {billing.balance}: {data.balance_reason}",
+                data.notes,
+            ]
+            note = " · ".join(p for p in parts if p)
+            self._record(
+                actor,
+                context,
+                "work_order.delivered_with_balance",
+                order,
+                {"balance": str(billing.balance)},
+            )
         if data.picked_up_by_customer:
             customer = self._session.get(Customer, order.customer_id)
             assert customer is not None  # noqa: S101 - FK guarantees it
@@ -410,7 +458,7 @@ class WorkOrderService:
             order.delivered_to_document = data.document
         now = utcnow()
         order.delivered_at = now
-        self._move(actor, order, source, Status.ENTREGADO, data.notes, context, now=now)
+        self._move(actor, order, source, Status.ENTREGADO, note, context, now=now)
         return self._to_read(actor, order)
 
     # --- Photos (demo storage) -----------------------------------------------------------
@@ -557,6 +605,15 @@ class WorkOrderService:
             )
         )
         self._session.flush()
+
+    def _quality_passed(self, order: WorkOrder) -> bool:
+        passed = self._session.scalar(
+            select(QualityCheck.passed)
+            .where(QualityCheck.work_order_id == order.id)
+            .order_by(QualityCheck.checked_at.desc(), QualityCheck.id.desc())
+            .limit(1)
+        )
+        return bool(passed)
 
     def _diagnostic_closed(self, order: WorkOrder) -> bool:
         closed_at = self._session.scalar(

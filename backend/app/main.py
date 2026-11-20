@@ -13,8 +13,12 @@ from app.modules.devices.router import catalog_router, devices_router
 from app.modules.diagnostics.router import agent_router as diagnostic_agent_router
 from app.modules.diagnostics.router import router as diagnostics_router
 from app.modules.health.router import router as health_router
+from app.modules.inventory.router import router as inventory_router
 from app.modules.organizations.router import router as organization_router
+from app.modules.payments.router import router as payments_router
 from app.modules.privacy.router import router as privacy_router
+from app.modules.quotes.router import router as quotes_router
+from app.modules.repairs.router import router as repairs_router
 from app.modules.roles.router import router as roles_router
 from app.modules.users.router import router as users_router
 from app.modules.workorders.router import router as work_orders_router
@@ -62,6 +66,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         work_orders_router,
         diagnostics_router,
         diagnostic_agent_router,
+        inventory_router,
+        quotes_router,
+        repairs_router,
+        payments_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)
     return app

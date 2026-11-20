@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.modules.audit.models import AuditLog
 from app.modules.auth.models import RefreshToken
-from app.modules.roles.catalog import RoleCode
+from app.modules.roles.catalog import SYSTEM_ROLES, RoleCode
 from app.shared.context import utcnow
 
 from .conftest import PASSWORD, CapturingMailer, Tenant, login, make_user
@@ -41,20 +41,7 @@ def test_me_returns_roles_and_effective_permissions(client: TestClient, tenant: 
     headers = login(client, tenant.users[RoleCode.SUPERVISOR].email)
     me = client.get("/api/v1/auth/me", headers=headers).json()
     assert [r["code"] for r in me["roles"]] == ["SUPERVISOR"]
-    assert me["permissions"] == [
-        "audit:read",
-        "catalog:manage",
-        "customers:manage",
-        "customers:read",
-        "devices:manage",
-        "users:manage",
-        "users:read",
-        "work_orders:assign",
-        "work_orders:create",
-        "work_orders:deliver",
-        "work_orders:progress",
-        "work_orders:read",
-    ]
+    assert me["permissions"] == sorted(SYSTEM_ROLES[RoleCode.SUPERVISOR][1])
     assert me["organization"]["name"] == tenant.organization.name
 
 

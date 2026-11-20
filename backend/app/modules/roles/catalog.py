@@ -31,6 +31,13 @@ class Perm(StrEnum):
     WORK_ORDERS_ASSIGN = "work_orders:assign"
     WORK_ORDERS_PROGRESS = "work_orders:progress"
     WORK_ORDERS_DELIVER = "work_orders:deliver"
+    WORK_ORDERS_DELIVER_WITH_BALANCE = "work_orders:deliver_with_balance"
+    INVENTORY_READ = "inventory:read"
+    INVENTORY_MANAGE = "inventory:manage"
+    QUOTES_MANAGE = "quotes:manage"
+    QUOTES_DISCOUNT = "quotes:discount"
+    REPAIRS_MANAGE = "repairs:manage"
+    PAYMENTS_MANAGE = "payments:manage"
 
 
 PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
@@ -49,6 +56,13 @@ PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
     Perm.WORK_ORDERS_ASSIGN: "Asignar técnicos a las órdenes",
     Perm.WORK_ORDERS_PROGRESS: "Avanzar las etapas técnicas de las órdenes",
     Perm.WORK_ORDERS_DELIVER: "Registrar decisiones del cliente, cancelar y entregar equipos",
+    Perm.WORK_ORDERS_DELIVER_WITH_BALANCE: "Autorizar la entrega de equipos con saldo pendiente",
+    Perm.INVENTORY_READ: "Consultar repuestos y existencias",
+    Perm.INVENTORY_MANAGE: "Administrar repuestos, proveedores, entradas y ajustes de inventario",
+    Perm.QUOTES_MANAGE: "Elaborar y enviar cotizaciones",
+    Perm.QUOTES_DISCOUNT: "Autorizar descuentos mayores al 10 %",
+    Perm.REPAIRS_MANAGE: "Registrar reparaciones, consumir repuestos y hacer control de calidad",
+    Perm.PAYMENTS_MANAGE: "Registrar pagos y emitir comprobantes",
 }
 
 SYSTEM_ROLES: dict[RoleCode, tuple[str, frozenset[Perm]]] = {
@@ -69,6 +83,13 @@ SYSTEM_ROLES: dict[RoleCode, tuple[str, frozenset[Perm]]] = {
                 Perm.WORK_ORDERS_ASSIGN,
                 Perm.WORK_ORDERS_PROGRESS,
                 Perm.WORK_ORDERS_DELIVER,
+                Perm.WORK_ORDERS_DELIVER_WITH_BALANCE,
+                Perm.INVENTORY_READ,
+                Perm.INVENTORY_MANAGE,
+                Perm.QUOTES_MANAGE,
+                Perm.QUOTES_DISCOUNT,
+                Perm.REPAIRS_MANAGE,
+                Perm.PAYMENTS_MANAGE,
             }
         ),
     ),
@@ -80,6 +101,9 @@ SYSTEM_ROLES: dict[RoleCode, tuple[str, frozenset[Perm]]] = {
                 Perm.DEVICES_MANAGE,
                 Perm.WORK_ORDERS_READ,
                 Perm.WORK_ORDERS_PROGRESS,
+                Perm.INVENTORY_READ,
+                Perm.QUOTES_MANAGE,
+                Perm.REPAIRS_MANAGE,
             }
         ),
     ),
@@ -94,6 +118,9 @@ SYSTEM_ROLES: dict[RoleCode, tuple[str, frozenset[Perm]]] = {
                 Perm.WORK_ORDERS_CREATE,
                 Perm.WORK_ORDERS_ASSIGN,
                 Perm.WORK_ORDERS_DELIVER,
+                Perm.INVENTORY_READ,
+                Perm.QUOTES_MANAGE,
+                Perm.PAYMENTS_MANAGE,
             }
         ),
     ),

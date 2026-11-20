@@ -115,9 +115,14 @@ class DeliveryRequest(BaseModel):
     name: str | None = Field(default=None, max_length=200)
     document: str | None = Field(default=None, max_length=40)
     notes: str | None = Field(default=None, max_length=2000)
+    balance_reason: str | None = Field(
+        default=None,
+        max_length=500,
+        description="Obligatorio con saldo pendiente (requiere work_orders:deliver_with_balance)",
+    )
 
     _texts = field_validator("name", "document")(clean_text)
-    _notes = field_validator("notes")(clean_multiline)
+    _notes = field_validator("notes", "balance_reason")(clean_multiline)
 
     @model_validator(mode="after")
     def _third_party(self) -> Self:

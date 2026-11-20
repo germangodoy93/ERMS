@@ -3503,6 +3503,1396 @@
           }
         ]
       }
+    },
+    "/api/v1/inventory/parts": {
+      "get": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Repuestos con existencia",
+        "operationId": "list_parts_api_v1_inventory_parts_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Código o nombre",
+              "title": "Q"
+            },
+            "description": "Código o nombre"
+          },
+          {
+            "name": "low_stock",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Low Stock"
+            }
+          },
+          {
+            "name": "include_inactive",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Inactive"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartRead"
+                  },
+                  "title": "Response List Parts Api V1 Inventory Parts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Nuevo repuesto",
+        "operationId": "create_part_api_v1_inventory_parts_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartWrite"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/parts/{part_id}": {
+      "get": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Detalle del repuesto",
+        "operationId": "get_part_api_v1_inventory_parts__part_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "part_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Part Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Editar repuesto",
+        "operationId": "update_part_api_v1_inventory_parts__part_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "part_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Part Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartWrite"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/parts/{part_id}/movements": {
+      "get": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Movimientos",
+        "operationId": "part_movements_api_v1_inventory_parts__part_id__movements_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "part_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Part Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MovementRead"
+                  },
+                  "title": "Response Part Movements Api V1 Inventory Parts  Part Id  Movements Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/parts/{part_id}/adjustments": {
+      "post": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Ajuste por conteo físico",
+        "operationId": "adjust_api_v1_inventory_parts__part_id__adjustments_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "part_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Part Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdjustmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/entries": {
+      "post": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Entrada de inventario (compra)",
+        "operationId": "receive_api_v1_inventory_entries_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockEntryCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockEntryRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/inventory/suppliers": {
+      "get": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Proveedores",
+        "operationId": "list_suppliers_api_v1_inventory_suppliers_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_inactive",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Inactive"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SupplierRead"
+                  },
+                  "title": "Response List Suppliers Api V1 Inventory Suppliers Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Nuevo proveedor",
+        "operationId": "create_supplier_api_v1_inventory_suppliers_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierWrite"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/suppliers/{supplier_id}": {
+      "put": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Editar proveedor",
+        "operationId": "update_supplier_api_v1_inventory_suppliers__supplier_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "supplier_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Supplier Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierWrite"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/quotes": {
+      "get": {
+        "tags": [
+          "quotes"
+        ],
+        "summary": "Cotizaciones de la orden",
+        "operationId": "list_quotes_api_v1_work_orders__order_id__quotes_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteOverview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "quotes"
+        ],
+        "summary": "Crear borrador (copia la versión anterior)",
+        "operationId": "create_quote_api_v1_work_orders__order_id__quotes_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/quotes/{quote_id}": {
+      "put": {
+        "tags": [
+          "quotes"
+        ],
+        "summary": "Guardar ítems del borrador",
+        "operationId": "save_quote_api_v1_work_orders__order_id__quotes__quote_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "quote_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quote Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteSave"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "quotes"
+        ],
+        "summary": "Descartar borrador",
+        "operationId": "discard_quote_api_v1_work_orders__order_id__quotes__quote_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "quote_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quote Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/quotes/{quote_id}/send": {
+      "post": {
+        "tags": [
+          "quotes"
+        ],
+        "summary": "Enviar al cliente",
+        "operationId": "send_quote_api_v1_work_orders__order_id__quotes__quote_id__send_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "quote_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quote Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/quotes/{quote_id}/response": {
+      "post": {
+        "tags": [
+          "quotes"
+        ],
+        "summary": "Registrar respuesta del cliente",
+        "operationId": "respond_quote_api_v1_work_orders__order_id__quotes__quote_id__response_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "quote_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quote Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespondRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/quotes/{quote_id}/pdf": {
+      "get": {
+        "tags": [
+          "quotes"
+        ],
+        "summary": "Cotización en PDF",
+        "operationId": "quote_pdf_api_v1_work_orders__order_id__quotes__quote_id__pdf_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "quote_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quote Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/repair": {
+      "get": {
+        "tags": [
+          "repairs"
+        ],
+        "summary": "Reparación y control de calidad",
+        "operationId": "get_repair_api_v1_work_orders__order_id__repair_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RepairOverview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/repair/tasks": {
+      "post": {
+        "tags": [
+          "repairs"
+        ],
+        "summary": "Nueva tarea",
+        "operationId": "add_task_api_v1_work_orders__order_id__repair_tasks_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/repair/tasks/{task_id}/parts": {
+      "post": {
+        "tags": [
+          "repairs"
+        ],
+        "summary": "Consumir repuesto del inventario",
+        "operationId": "consume_part_api_v1_work_orders__order_id__repair_tasks__task_id__parts_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsumeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/repair/tasks/{task_id}/parts/{repair_part_id}/return": {
+      "post": {
+        "tags": [
+          "repairs"
+        ],
+        "summary": "Devolver repuesto al inventario",
+        "operationId": "return_part_api_v1_work_orders__order_id__repair_tasks__task_id__parts__repair_part_id__return_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Task Id"
+            }
+          },
+          {
+            "name": "repair_part_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Repair Part Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/repair/quality-checks": {
+      "post": {
+        "tags": [
+          "repairs"
+        ],
+        "summary": "Registrar control de calidad",
+        "operationId": "quality_check_api_v1_work_orders__order_id__repair_quality_checks_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QcCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QcRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/billing": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "summary": "Saldo y pagos de la orden",
+        "operationId": "get_billing_api_v1_work_orders__order_id__billing_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/payments": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "summary": "Registrar un pago",
+        "operationId": "register_payment_api_v1_work_orders__order_id__payments_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/payments/{payment_id}/receipt.pdf": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "summary": "Comprobante de pago (no es factura electrónica)",
+        "operationId": "receipt_api_v1_work_orders__order_id__payments__payment_id__receipt_pdf_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "payment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Payment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3545,6 +4935,29 @@
           "code"
         ],
         "title": "AccessoryItem"
+      },
+      "AdjustmentCreate": {
+        "properties": {
+          "counted_quantity": {
+            "type": "integer",
+            "maximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Counted Quantity"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "counted_quantity",
+          "reason"
+        ],
+        "title": "AdjustmentCreate",
+        "description": "Physical count: the new quantity on the shelf, with the reason of the difference."
       },
       "AgentReport": {
         "properties": {
@@ -3874,6 +5287,61 @@
         ],
         "title": "BatteryInfo"
       },
+      "BillingRead": {
+        "properties": {
+          "diagnostic_fee": {
+            "type": "string",
+            "title": "Diagnostic Fee"
+          },
+          "accepted_quote_total": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted Quote Total"
+          },
+          "amount_due": {
+            "type": "string",
+            "title": "Amount Due",
+            "description": "Total de la cotización aceptada (incluye el diagnóstico) o el diagnóstico"
+          },
+          "paid": {
+            "type": "string",
+            "title": "Paid"
+          },
+          "balance": {
+            "type": "string",
+            "title": "Balance",
+            "description": "Positivo: debe el cliente; negativo: saldo a favor"
+          },
+          "payments": {
+            "items": {
+              "$ref": "#/components/schemas/PaymentRead"
+            },
+            "type": "array",
+            "title": "Payments"
+          },
+          "can_register": {
+            "type": "boolean",
+            "title": "Can Register"
+          }
+        },
+        "type": "object",
+        "required": [
+          "diagnostic_fee",
+          "accepted_quote_total",
+          "amount_due",
+          "paid",
+          "balance",
+          "payments",
+          "can_register"
+        ],
+        "title": "BillingRead"
+      },
       "Body_upload_photo_api_v1_work_orders__order_id__photos_post": {
         "properties": {
           "file": {
@@ -4153,6 +5621,27 @@
         ],
         "title": "ConsentStatus",
         "description": "Current state of one purpose (most recent record)."
+      },
+      "ConsumeRequest": {
+        "properties": {
+          "part_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Part Id"
+          },
+          "quantity": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Quantity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "part_id",
+          "quantity"
+        ],
+        "title": "ConsumeRequest"
       },
       "CpuInfo": {
         "properties": {
@@ -4813,6 +6302,19 @@
               }
             ],
             "title": "Notes"
+          },
+          "balance_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Balance Reason",
+            "description": "Obligatorio con saldo pendiente (requiere work_orders:deliver_with_balance)"
           }
         },
         "type": "object",
@@ -5983,6 +7485,119 @@
         "type": "object",
         "title": "MemoryModule"
       },
+      "MovementRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "ADJUSTMENT",
+              "RETURN"
+            ],
+            "title": "Kind"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "stock_after": {
+            "type": "integer",
+            "title": "Stock After"
+          },
+          "unit_cost": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Cost"
+          },
+          "reference_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Type"
+          },
+          "reference_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Id"
+          },
+          "reference_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Label"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "quantity",
+          "stock_after",
+          "unit_cost",
+          "reference_type",
+          "reference_id",
+          "reference_label",
+          "reason",
+          "created_by",
+          "created_at"
+        ],
+        "title": "MovementRead"
+      },
       "OrganizationRead": {
         "properties": {
           "id": {
@@ -6437,6 +8052,240 @@
         ],
         "title": "PairingCreated"
       },
+      "PartRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "PART",
+              "COMPONENT",
+              "ACCESSORY",
+              "CONSUMABLE"
+            ],
+            "title": "Kind"
+          },
+          "unit_cost": {
+            "type": "string",
+            "title": "Unit Cost"
+          },
+          "sale_price": {
+            "type": "string",
+            "title": "Sale Price"
+          },
+          "tax_rate": {
+            "type": "integer",
+            "title": "Tax Rate"
+          },
+          "price_includes_tax": {
+            "type": "boolean",
+            "title": "Price Includes Tax"
+          },
+          "min_stock": {
+            "type": "integer",
+            "title": "Min Stock"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "stock": {
+            "type": "integer",
+            "title": "Stock"
+          },
+          "low_stock": {
+            "type": "boolean",
+            "title": "Low Stock"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "sku",
+          "name",
+          "kind",
+          "unit_cost",
+          "sale_price",
+          "tax_rate",
+          "price_includes_tax",
+          "min_stock",
+          "notes",
+          "is_active",
+          "stock",
+          "low_stock"
+        ],
+        "title": "PartRead"
+      },
+      "PartWrite": {
+        "properties": {
+          "sku": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 2,
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "PART",
+              "COMPONENT",
+              "ACCESSORY",
+              "CONSUMABLE"
+            ],
+            "title": "Kind",
+            "default": "PART"
+          },
+          "unit_cost": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Unit Cost",
+            "default": "0"
+          },
+          "sale_price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Sale Price",
+            "default": "0"
+          },
+          "tax_rate": {
+            "type": "integer",
+            "enum": [
+              0,
+              19
+            ],
+            "title": "Tax Rate",
+            "default": 0
+          },
+          "price_includes_tax": {
+            "type": "boolean",
+            "title": "Price Includes Tax",
+            "default": false
+          },
+          "min_stock": {
+            "type": "integer",
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Min Stock",
+            "default": 0
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "sku",
+          "name"
+        ],
+        "title": "PartWrite"
+      },
+      "PaymentCreate": {
+        "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Amount"
+          },
+          "method": {
+            "$ref": "#/components/schemas/PaymentMethod"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference",
+            "description": "Nº de transacción"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount",
+          "method"
+        ],
+        "title": "PaymentCreate"
+      },
       "PaymentMethod": {
         "type": "string",
         "enum": [
@@ -6447,6 +8296,91 @@
           "DAVIPLATA"
         ],
         "title": "PaymentMethod"
+      },
+      "PaymentRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "receipt_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Receipt Number"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "ADVANCE",
+              "PAYMENT"
+            ],
+            "title": "Kind"
+          },
+          "amount": {
+            "type": "string",
+            "title": "Amount"
+          },
+          "method": {
+            "$ref": "#/components/schemas/PaymentMethod"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "received_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "paid_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Paid At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "receipt_number",
+          "kind",
+          "amount",
+          "method",
+          "reference",
+          "notes",
+          "received_by",
+          "paid_at"
+        ],
+        "title": "PaymentRead"
       },
       "PermissionRead": {
         "properties": {
@@ -6643,6 +8577,578 @@
         ],
         "title": "PrivacyPolicyVersion"
       },
+      "QcCreate": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ResultInput"
+            },
+            "type": "array",
+            "maxItems": 60,
+            "minItems": 1,
+            "title": "Results"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "title": "QcCreate"
+      },
+      "QcRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/QcResultRead"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "checked_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checked_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Checked At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "passed",
+          "results",
+          "notes",
+          "checked_by",
+          "checked_at"
+        ],
+        "title": "QcRead"
+      },
+      "QcResultRead": {
+        "properties": {
+          "test_code": {
+            "type": "string",
+            "title": "Test Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "result": {
+            "$ref": "#/components/schemas/Result"
+          },
+          "observation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "test_code",
+          "name",
+          "result",
+          "observation"
+        ],
+        "title": "QcResultRead"
+      },
+      "QcTest": {
+        "properties": {
+          "test_code": {
+            "type": "string",
+            "title": "Test Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "test_code",
+          "name"
+        ],
+        "title": "QcTest"
+      },
+      "QuoteItemInput": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "LABOR",
+              "PART"
+            ],
+            "title": "Kind"
+          },
+          "part_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Part Id",
+            "description": "Repuesto del inventario; vacío = repuesto por pedir"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 9999.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "unit_price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Unit Price"
+          },
+          "discount_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Discount Percent",
+            "default": "0"
+          },
+          "apply_tax": {
+            "type": "boolean",
+            "title": "Apply Tax",
+            "description": "Aplica IVA del 19 %",
+            "default": false
+          },
+          "price_includes_tax": {
+            "type": "boolean",
+            "title": "Price Includes Tax",
+            "description": "El precio escrito ya incluye el IVA",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "quantity",
+          "unit_price"
+        ],
+        "title": "QuoteItemInput"
+      },
+      "QuoteItemRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "LABOR",
+              "PART"
+            ],
+            "title": "Kind"
+          },
+          "part_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Part Id"
+          },
+          "sku": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sku"
+          },
+          "in_stock": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "In Stock"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "quantity": {
+            "type": "string",
+            "title": "Quantity"
+          },
+          "unit_price": {
+            "type": "string",
+            "title": "Unit Price"
+          },
+          "discount_percent": {
+            "type": "string",
+            "title": "Discount Percent"
+          },
+          "tax_rate": {
+            "type": "integer",
+            "title": "Tax Rate"
+          },
+          "price_includes_tax": {
+            "type": "boolean",
+            "title": "Price Includes Tax"
+          },
+          "discount_amount": {
+            "type": "string",
+            "title": "Discount Amount"
+          },
+          "base_amount": {
+            "type": "string",
+            "title": "Base Amount"
+          },
+          "tax_amount": {
+            "type": "string",
+            "title": "Tax Amount"
+          },
+          "total_amount": {
+            "type": "string",
+            "title": "Total Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "position",
+          "kind",
+          "part_id",
+          "sku",
+          "in_stock",
+          "description",
+          "quantity",
+          "unit_price",
+          "discount_percent",
+          "tax_rate",
+          "price_includes_tax",
+          "discount_amount",
+          "base_amount",
+          "tax_amount",
+          "total_amount"
+        ],
+        "title": "QuoteItemRead"
+      },
+      "QuoteOverview": {
+        "properties": {
+          "diagnostic_fee": {
+            "type": "string",
+            "title": "Diagnostic Fee"
+          },
+          "quotes": {
+            "items": {
+              "$ref": "#/components/schemas/QuoteRead"
+            },
+            "type": "array",
+            "title": "Quotes",
+            "description": "De la versión más reciente a la más antigua"
+          },
+          "can_edit": {
+            "type": "boolean",
+            "title": "Can Edit"
+          },
+          "can_send": {
+            "type": "boolean",
+            "title": "Can Send"
+          },
+          "can_respond": {
+            "type": "boolean",
+            "title": "Can Respond"
+          },
+          "max_discount_percent": {
+            "type": "integer",
+            "title": "Max Discount Percent",
+            "description": "Descuento máximo por ítem para este usuario"
+          }
+        },
+        "type": "object",
+        "required": [
+          "diagnostic_fee",
+          "quotes",
+          "can_edit",
+          "can_send",
+          "can_respond",
+          "max_discount_percent"
+        ],
+        "title": "QuoteOverview"
+      },
+      "QuoteRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "SENT",
+              "ACCEPTED",
+              "REJECTED",
+              "SUPERSEDED",
+              "EXPIRED"
+            ],
+            "title": "Status",
+            "description": "EXPIRED se calcula: enviada y vencida"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid Until"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "subtotal": {
+            "type": "string",
+            "title": "Subtotal"
+          },
+          "discount_total": {
+            "type": "string",
+            "title": "Discount Total"
+          },
+          "tax_total": {
+            "type": "string",
+            "title": "Tax Total"
+          },
+          "total": {
+            "type": "string",
+            "title": "Total"
+          },
+          "discount_authorized_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "sent_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sent At"
+          },
+          "responded_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responded At"
+          },
+          "response_channel": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsentChannel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/QuoteItemRead"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "status",
+          "valid_until",
+          "notes",
+          "subtotal",
+          "discount_total",
+          "tax_total",
+          "total",
+          "discount_authorized_by",
+          "created_by",
+          "created_at",
+          "sent_at",
+          "responded_at",
+          "response_channel",
+          "items"
+        ],
+        "title": "QuoteRead"
+      },
+      "QuoteSave": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/QuoteItemInput"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Items"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "QuoteSave"
+      },
       "ReadinessResponse": {
         "properties": {
           "status": {
@@ -6724,6 +9230,97 @@
         ],
         "title": "ReceptionTermsRead"
       },
+      "RepairOverview": {
+        "properties": {
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/TaskRead"
+            },
+            "type": "array",
+            "title": "Tasks"
+          },
+          "quality_checks": {
+            "items": {
+              "$ref": "#/components/schemas/QcRead"
+            },
+            "type": "array",
+            "title": "Quality Checks",
+            "description": "Del más reciente al más antiguo"
+          },
+          "qc_tests": {
+            "items": {
+              "$ref": "#/components/schemas/QcTest"
+            },
+            "type": "array",
+            "title": "Qc Tests",
+            "description": "Pruebas que exige el control de calidad"
+          },
+          "can_repair": {
+            "type": "boolean",
+            "title": "Can Repair",
+            "description": "Orden en reparación y usuario habilitado"
+          },
+          "can_check": {
+            "type": "boolean",
+            "title": "Can Check",
+            "description": "Orden en control de calidad y usuario habilitado"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tasks",
+          "quality_checks",
+          "qc_tests",
+          "can_repair",
+          "can_check"
+        ],
+        "title": "RepairOverview"
+      },
+      "RepairPartRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "part_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Part Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "unit_cost": {
+            "type": "string",
+            "title": "Unit Cost"
+          },
+          "returned": {
+            "type": "boolean",
+            "title": "Returned"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "part_id",
+          "sku",
+          "name",
+          "quantity",
+          "unit_cost",
+          "returned"
+        ],
+        "title": "RepairPartRead"
+      },
       "ReportAccepted": {
         "properties": {
           "results": {
@@ -6758,6 +9355,35 @@
           "new_password"
         ],
         "title": "ResetPasswordRequest"
+      },
+      "RespondRequest": {
+        "properties": {
+          "accepted": {
+            "type": "boolean",
+            "title": "Accepted"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/ConsentChannel"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "accepted",
+          "channel"
+        ],
+        "title": "RespondRequest"
       },
       "Result": {
         "type": "string",
@@ -7108,6 +9734,294 @@
         ],
         "title": "StatusHistoryItem"
       },
+      "StockEntryCreate": {
+        "properties": {
+          "supplier_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Id"
+          },
+          "invoice_number": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invoice Number"
+          },
+          "received_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Received On"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/StockEntryLine"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "minItems": 1,
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "received_on",
+          "lines"
+        ],
+        "title": "StockEntryCreate"
+      },
+      "StockEntryLine": {
+        "properties": {
+          "part_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Part Id"
+          },
+          "quantity": {
+            "type": "integer",
+            "maximum": 100000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Quantity"
+          },
+          "unit_cost": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Unit Cost"
+          }
+        },
+        "type": "object",
+        "required": [
+          "part_id",
+          "quantity",
+          "unit_cost"
+        ],
+        "title": "StockEntryLine"
+      },
+      "StockEntryRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "supplier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier"
+          },
+          "invoice_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invoice Number"
+          },
+          "received_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Received On"
+          },
+          "lines": {
+            "type": "integer",
+            "title": "Lines"
+          },
+          "total_cost": {
+            "type": "string",
+            "title": "Total Cost"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "supplier",
+          "invoice_number",
+          "received_on",
+          "lines",
+          "total_cost"
+        ],
+        "title": "StockEntryRead"
+      },
+      "SupplierRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "tax_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Id"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "tax_id",
+          "contact_name",
+          "phone",
+          "email",
+          "is_active"
+        ],
+        "title": "SupplierRead"
+      },
+      "SupplierWrite": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "tax_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Id"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 30
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SupplierWrite"
+      },
       "SystemInfo": {
         "properties": {
           "os_caption": {
@@ -7221,6 +10135,90 @@
         },
         "type": "object",
         "title": "SystemInfo"
+      },
+      "TaskCreate": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 3,
+            "title": "Description"
+          },
+          "labor_minutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Labor Minutes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "description"
+        ],
+        "title": "TaskCreate"
+      },
+      "TaskRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "labor_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Labor Minutes"
+          },
+          "technician": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "parts": {
+            "items": {
+              "$ref": "#/components/schemas/RepairPartRead"
+            },
+            "type": "array",
+            "title": "Parts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "description",
+          "labor_minutes",
+          "technician",
+          "created_at",
+          "parts"
+        ],
+        "title": "TaskRead"
       },
       "TemporaryPasswordSet": {
         "properties": {
@@ -8149,7 +11147,7 @@
     "securitySchemes": {
       "HTTPBearer": {
         "type": "http",
-        "description": "Token entregado por /pair",
+        "description": "Access token obtenido en /auth/login",
         "scheme": "bearer"
       }
     }

@@ -244,8 +244,23 @@ def test_full_lifecycle_with_roles(client: TestClient, setup: Setup, tenant: Ten
     order = _move(client, setup.technician, oid, "DIAGNOSTICO")
     _close_diagnostic(client, setup.technician, oid, "PHONE")
     order = _move(client, setup.technician, oid, "COTIZACION")
-    order = _move(client, setup.reception, oid, "PENDIENTE_AUTORIZACION")
-    order = _move(client, setup.reception, oid, "APROBADO")
+    quote = client.post(f"{ORDERS}/{oid}/quotes", headers=setup.technician).json()
+    item = {
+        "kind": "LABOR",
+        "description": "Cambio de pantalla",
+        "quantity": 1,
+        "unit_price": "100000",
+    }
+    client.put(
+        f"{ORDERS}/{oid}/quotes/{quote['id']}", headers=setup.technician, json={"items": [item]}
+    )
+    client.post(f"{ORDERS}/{oid}/quotes/{quote['id']}/send", headers=setup.reception)
+    accepted = client.post(
+        f"{ORDERS}/{oid}/quotes/{quote['id']}/response",
+        headers=setup.reception,
+        json={"accepted": True, "channel": "VERBAL"},
+    )
+    assert accepted.status_code == 200, accepted.text
     order = _move(client, setup.technician, oid, "EN_REPARACION")
     order = _move(client, setup.technician, oid, "CONTROL_CALIDAD")
     no_reason = client.post(
@@ -254,7 +269,18 @@ def test_full_lifecycle_with_roles(client: TestClient, setup: Setup, tenant: Ten
     assert no_reason.status_code == 422
     order = _move(client, setup.technician, oid, "EN_REPARACION", "El micrófono no funciona.")
     order = _move(client, setup.technician, oid, "CONTROL_CALIDAD")
+    qc = [{"test_code": t.code, "result": "OK"} for t in catalog.manual_tests_for("PHONE")]
+    qc_response = client.post(
+        f"{ORDERS}/{oid}/repair/quality-checks", headers=setup.technician, json={"results": qc}
+    )
+    assert qc_response.status_code == 201, qc_response.text
     order = _move(client, setup.technician, oid, "LISTO_ENTREGA")
+    paid = client.post(
+        f"{ORDERS}/{oid}/payments",
+        headers=setup.reception,
+        json={"amount": "80000", "method": "CASH"},
+    )
+    assert paid.status_code == 201, paid.text
 
     via_status = client.post(
         f"{ORDERS}/{oid}/status", headers=setup.reception, json={"status": "ENTREGADO"}
@@ -297,8 +323,14 @@ def test_invalid_transitions_and_reasons(client: TestClient, setup: Setup) -> No
     order = _move(client, setup.reception, oid, "CANCELADO", "El cliente desistió.")
     assert order["allowed_transitions"] == ["LISTO_ENTREGA"]
     order = _move(client, setup.reception, oid, "LISTO_ENTREGA")
-    delivered = client.post(
+    with_balance = client.post(
         f"{ORDERS}/{oid}/delivery", headers=setup.reception, json={"picked_up_by_customer": True}
+    )
+    assert with_balance.status_code == 422  # diagnostic 50000 - advance 20000 still due
+    delivered = client.post(
+        f"{ORDERS}/{oid}/delivery",
+        headers=setup.admin,
+        json={"picked_up_by_customer": True, "balance_reason": "Se condona el diagnóstico"},
     ).json()
     assert delivered["delivered_to_name"] == "Cliente Ficticio Pérez"
     assert delivered["delivered_to_document"] == "CC 1000000001"

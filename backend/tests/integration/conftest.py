@@ -35,6 +35,17 @@ TEST_DB_URL = os.environ.get("ERMS_TEST_DATABASE_URL")
 PASSWORD = "Contraseña-de-prueba-123"
 
 BUSINESS_TABLES = (
+    "payments",
+    "quality_checks",
+    "repair_parts",
+    "repair_tasks",
+    "quotation_items",
+    "quotations",
+    "inventory_movements",
+    "stock_entries",
+    "stock_levels",
+    "parts",
+    "suppliers",
     "agent_pairings",
     "diagnostic_results",
     "diagnostic_sessions",
