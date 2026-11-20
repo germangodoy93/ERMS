@@ -17,6 +17,7 @@ class OrganizationRead(BaseModel):
     city: str | None
     phone: str | None
     email: str | None
+    warranty_days: int
 
 
 class OrganizationUpdate(BaseModel):
@@ -29,6 +30,7 @@ class OrganizationUpdate(BaseModel):
     city: str | None = Field(default=None, max_length=80)
     phone: str | None = Field(default=None, max_length=30)
     email: EmailStr | None = None
+    warranty_days: int | None = Field(default=None, ge=1, le=3650)
 
     _text = field_validator("name", "legal_name", "address", "city")(clean_text)
     _nit = field_validator("tax_id")(optional_nit)

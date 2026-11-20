@@ -14,7 +14,7 @@ Rules:
 
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from sqlalchemy import func, or_, select, text
@@ -35,14 +35,16 @@ from app.modules.customers.models import Customer
 from app.modules.customers.service import CustomerService
 from app.modules.devices.models import Device, DeviceModel
 from app.modules.diagnostics.models import DiagnosticSession
-from app.modules.organizations.models import Branch
+from app.modules.organizations.models import Branch, Organization
 from app.modules.payments.service import PaymentService
 from app.modules.privacy.catalog import ConsentPurpose
-from app.modules.repairs.models import QualityCheck
+from app.modules.quotes.models import Quotation
+from app.modules.repairs.models import QualityCheck, RepairTask
 from app.modules.roles.catalog import Perm
 from app.modules.roles.models import Permission, Role, role_permissions, user_roles
 from app.modules.users.models import User
 from app.modules.users.repository import escape_like
+from app.modules.warranties.models import Warranty
 from app.modules.workorders.catalog import (
     CLOSED,
     REQUIRED_PERMISSIONS,
@@ -67,7 +69,7 @@ from app.modules.workorders.schemas import (
     WorkOrderRead,
     WorkOrderUpdate,
 )
-from app.shared.context import RequestContext, utcnow
+from app.shared.context import BOGOTA, RequestContext, utcnow
 from app.shared.identifiers import search_key
 from app.shared.pagination import PageParams
 from app.shared.sequences import default_branch, next_document_number
@@ -459,6 +461,7 @@ class WorkOrderService:
         now = utcnow()
         order.delivered_at = now
         self._move(actor, order, source, Status.ENTREGADO, note, context, now=now)
+        self._create_warranty(actor, order, data.warranty_days, context)
         return self._to_read(actor, order)
 
     # --- Photos (demo storage) -----------------------------------------------------------
@@ -605,6 +608,45 @@ class WorkOrderService:
             )
         )
         self._session.flush()
+
+    def _create_warranty(
+        self, actor: User, order: WorkOrder, days: int | None, context: RequestContext
+    ) -> None:
+        """Repaired orders get a warranty from the delivery date. Warranty claims do not:
+        they are covered by the original warranty (no endless extension)."""
+        if order.warranty_of_id is not None:
+            return
+        repaired = self._session.scalar(
+            select(Quotation.id).where(
+                Quotation.work_order_id == order.id, Quotation.status == "ACCEPTED"
+            )
+        ) or self._session.scalar(select(RepairTask.id).where(RepairTask.work_order_id == order.id))
+        if not repaired:
+            return
+        organization = self._session.get(Organization, order.organization_id)
+        assert organization is not None  # noqa: S101 - FK guarantees it
+        length = days or organization.warranty_days
+        starts = utcnow().astimezone(BOGOTA).date()
+        warranty = Warranty(
+            organization_id=order.organization_id,
+            work_order_id=order.id,
+            days=length,
+            starts_on=starts,
+            ends_on=starts + timedelta(days=length),
+            created_by_id=actor.id,
+        )
+        self._session.add(warranty)
+        self._session.flush()
+        self._record(
+            actor,
+            context,
+            "warranty.created",
+            order,
+            {
+                "days": length,
+                "ends_on": warranty.ends_on.isoformat(),
+            },
+        )
 
     def _quality_passed(self, order: WorkOrder) -> bool:
         passed = self._session.scalar(

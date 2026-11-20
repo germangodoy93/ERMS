@@ -63,6 +63,10 @@ class Settings(BaseSettings):
     )
     login_max_attempts: int = Field(default=5, ge=1)
     login_lockout_minutes: int = Field(default=15, ge=1)
+    login_ip_max_failures: int = Field(
+        default=20, ge=1, description="Fallos de login por IP (todas las cuentas) por ventana"
+    )
+    login_ip_window_minutes: int = Field(default=15, ge=1)
     password_reset_ttl_minutes: int = Field(default=30, ge=5, le=24 * 60)
     password_min_length: int = Field(default=12, ge=8)
     refresh_cookie_secure: bool | None = Field(

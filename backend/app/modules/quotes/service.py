@@ -237,7 +237,8 @@ class QuoteService:
         quote = self.get(actor, order.id, quote_id)
         if quote.status != "DRAFT":
             raise BusinessRuleError("Solo se envía una cotización en borrador.")
-        if not quote.items or quote.total <= 0:
+        # A warranty claim may be quoted at $0 (covered by the warranty).
+        if not quote.items or (quote.total <= 0 and order.warranty_of_id is None):
             raise BusinessRuleError("La cotización no tiene ítems con valor.")
         for previous in self._session.scalars(
             select(Quotation).where(Quotation.work_order_id == order.id, Quotation.status == "SENT")

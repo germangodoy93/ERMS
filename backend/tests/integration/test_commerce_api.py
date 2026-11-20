@@ -1,8 +1,6 @@
-from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Any
 
-import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import update
 from sqlalchemy.orm import Session
@@ -12,38 +10,15 @@ from app.modules.quotes.models import Quotation
 from app.modules.roles.catalog import RoleCode
 
 from .conftest import (
-    Tenant,
+    Shop,
     login,
     make_tenant,
     make_user,
     new_customer,
-    publish_policy,
-    publish_terms,
 )
 
 ORDERS = "/api/v1/work-orders"
 INV = "/api/v1/inventory"
-
-
-@dataclass
-class Shop:
-    admin: dict[str, str]
-    supervisor: dict[str, str]
-    reception: dict[str, str]
-    tech: dict[str, str]
-
-
-@pytest.fixture
-def shop(client: TestClient, tenant: Tenant) -> Shop:
-    admin = login(client, tenant.users[RoleCode.ADMIN].email)
-    publish_policy(client, admin)
-    publish_terms(client, admin)
-    return Shop(
-        admin=admin,
-        supervisor=login(client, tenant.users[RoleCode.SUPERVISOR].email),
-        reception=login(client, tenant.users[RoleCode.RECEPTIONIST].email),
-        tech=login(client, tenant.users[RoleCode.TECHNICIAN].email),
-    )
 
 
 def _ok(response: Any, code: int = 200) -> Any:  # JSON of a successful response
@@ -83,16 +58,34 @@ def _part(client: TestClient, s: Shop, sku: str = "pant-a10", stock: int = 0, **
 
 
 def _order(client: TestClient, s: Shop, *, advance: str = "0", fee: str = "50000") -> Any:
-    customer = _ok(client.post("/api/v1/customers", headers=s.reception, json=new_customer()), 201)
-    manufacturers = _ok(client.get("/api/v1/catalog/manufacturers", headers=s.reception))
-    samsung = next(m["id"] for m in manufacturers if m["name"] == "Samsung")
-    model = _ok(
+    customer = _ok(
         client.post(
-            "/api/v1/catalog/models",
+            "/api/v1/customers",
             headers=s.reception,
-            json={"manufacturer_id": samsung, "category_code": "PHONE", "name": "Galaxy Comercio"},
+            json=new_customer(id_type=None, id_number=None),
         ),
         201,
+    )
+    manufacturers = _ok(client.get("/api/v1/catalog/manufacturers", headers=s.reception))
+    samsung = next(m["id"] for m in manufacturers if m["name"] == "Samsung")
+    existing = _ok(
+        client.get("/api/v1/catalog/models", headers=s.reception, params={"q": "Galaxy Comercio"})
+    )
+    model = (
+        existing[0]
+        if existing
+        else _ok(
+            client.post(
+                "/api/v1/catalog/models",
+                headers=s.reception,
+                json={
+                    "manufacturer_id": samsung,
+                    "category_code": "PHONE",
+                    "name": "Galaxy Comercio",
+                },
+            ),
+            201,
+        )
     )
     device = _ok(
         client.post(

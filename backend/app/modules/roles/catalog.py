@@ -38,6 +38,8 @@ class Perm(StrEnum):
     QUOTES_DISCOUNT = "quotes:discount"
     REPAIRS_MANAGE = "repairs:manage"
     PAYMENTS_MANAGE = "payments:manage"
+    REPORTS_READ = "reports:read"
+    WARRANTIES_MANAGE = "warranties:manage"
 
 
 PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
@@ -63,6 +65,8 @@ PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
     Perm.QUOTES_DISCOUNT: "Autorizar descuentos mayores al 10 %",
     Perm.REPAIRS_MANAGE: "Registrar reparaciones, consumir repuestos y hacer control de calidad",
     Perm.PAYMENTS_MANAGE: "Registrar pagos y emitir comprobantes",
+    Perm.REPORTS_READ: "Consultar el tablero del taller y los reportes",
+    Perm.WARRANTIES_MANAGE: "Abrir y resolver reclamos de garantía",
 }
 
 SYSTEM_ROLES: dict[RoleCode, tuple[str, frozenset[Perm]]] = {
@@ -90,6 +94,8 @@ SYSTEM_ROLES: dict[RoleCode, tuple[str, frozenset[Perm]]] = {
                 Perm.QUOTES_DISCOUNT,
                 Perm.REPAIRS_MANAGE,
                 Perm.PAYMENTS_MANAGE,
+                Perm.REPORTS_READ,
+                Perm.WARRANTIES_MANAGE,
             }
         ),
     ),
@@ -121,6 +127,8 @@ SYSTEM_ROLES: dict[RoleCode, tuple[str, frozenset[Perm]]] = {
                 Perm.INVENTORY_READ,
                 Perm.QUOTES_MANAGE,
                 Perm.PAYMENTS_MANAGE,
+                Perm.REPORTS_READ,
+                Perm.WARRANTIES_MANAGE,
             }
         ),
     ),

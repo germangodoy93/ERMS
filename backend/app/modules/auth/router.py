@@ -4,6 +4,8 @@ from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, Response, statu
 
 from app.core.config import Settings, get_settings
 from app.core.email import Mailer, get_mailer
+from app.core.exceptions import InvalidCredentialsError, RateLimitedError
+from app.core.rate_limit import FailureLimiter
 from app.modules.auth.dependencies import CurrentPrincipal, get_auth_service
 from app.modules.auth.schemas import (
     ChangePasswordRequest,
@@ -48,6 +50,18 @@ def _token_response(result: AuthResult) -> TokenResponse:
     )
 
 
+_login_limiter: FailureLimiter | None = None
+
+
+def get_login_limiter(settings: Settings) -> FailureLimiter:
+    global _login_limiter
+    if _login_limiter is None:
+        _login_limiter = FailureLimiter(
+            settings.login_ip_max_failures, settings.login_ip_window_minutes * 60
+        )
+    return _login_limiter
+
+
 @router.post("/login", response_model=TokenResponse, summary="Iniciar sesión")
 def login(
     body: LoginRequest,
@@ -56,7 +70,19 @@ def login(
     context: Context,
     settings: AppSettings,
 ) -> TokenResponse:
-    result = service.login(body.email, body.password, context)
+    limiter = get_login_limiter(settings)
+    key = context.ip_address or "unknown"
+    wait = limiter.retry_after(key)
+    if wait:
+        raise RateLimitedError(
+            "Demasiados intentos fallidos desde esta red. Intente de nuevo más tarde.",
+            retry_after=wait,
+        )
+    try:
+        result = service.login(body.email, body.password, context)
+    except InvalidCredentialsError:
+        limiter.record_failure(key)
+        raise
     _set_refresh_cookie(response, settings, result)
     return _token_response(result)
 

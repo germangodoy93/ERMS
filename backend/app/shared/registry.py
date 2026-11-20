@@ -17,6 +17,7 @@ from app.modules.quotes import models as quotes_models
 from app.modules.repairs import models as repairs_models
 from app.modules.roles import models as roles_models
 from app.modules.users import models as users_models
+from app.modules.warranties import models as warranties_models
 from app.modules.workorders import models as workorders_models
 from app.shared.models import Base
 
@@ -36,5 +37,6 @@ __all__ = [
     "repairs_models",
     "roles_models",
     "users_models",
+    "warranties_models",
     "workorders_models",
 ]

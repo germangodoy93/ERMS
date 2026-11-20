@@ -19,8 +19,10 @@ from app.modules.payments.router import router as payments_router
 from app.modules.privacy.router import router as privacy_router
 from app.modules.quotes.router import router as quotes_router
 from app.modules.repairs.router import router as repairs_router
+from app.modules.reports.router import router as reports_router
 from app.modules.roles.router import router as roles_router
 from app.modules.users.router import router as users_router
+from app.modules.warranties.router import router as warranties_router
 from app.modules.workorders.router import router as work_orders_router
 from app.modules.workorders.router import terms_router as reception_terms_router
 
@@ -70,6 +72,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         quotes_router,
         repairs_router,
         payments_router,
+        warranties_router,
+        reports_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)
     return app

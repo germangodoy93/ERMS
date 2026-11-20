@@ -4893,6 +4893,296 @@
           }
         }
       }
+    },
+    "/api/v1/work-orders/{order_id}/warranty": {
+      "get": {
+        "tags": [
+          "warranties"
+        ],
+        "summary": "Garantía y reclamos",
+        "operationId": "get_warranty_api_v1_work_orders__order_id__warranty_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarrantyOverview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/warranty/claims": {
+      "post": {
+        "tags": [
+          "warranties"
+        ],
+        "summary": "Abrir reclamo (crea una orden vinculada, sin diagnóstico)",
+        "operationId": "open_claim_api_v1_work_orders__order_id__warranty_claims_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/warranty/claims/{claim_id}/decision": {
+      "post": {
+        "tags": [
+          "warranties"
+        ],
+        "summary": "Resolver reclamo",
+        "operationId": "decide_claim_api_v1_work_orders__order_id__warranty_claims__claim_id__decision_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "claim_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Claim Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Indicadores del taller",
+        "operationId": "dashboard_api_v1_dashboard_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/reports/{kind}": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Reporte por periodo (json, csv o pdf)",
+        "operationId": "report_api_v1_reports__kind__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "income",
+                "orders",
+                "inventory",
+                "technicians"
+              ],
+              "type": "string",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "To"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "json",
+                "csv",
+                "pdf"
+              ],
+              "type": "string",
+              "default": "json",
+              "title": "Format"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Report"
+                }
+              },
+              "text/csv": {},
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5395,6 +5685,142 @@
           "new_password"
         ],
         "title": "ChangePasswordRequest"
+      },
+      "ClaimCreate": {
+        "properties": {
+          "reported_issue": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 5,
+            "title": "Reported Issue"
+          },
+          "physical_condition": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 3,
+            "title": "Physical Condition"
+          },
+          "accessories": {
+            "items": {
+              "$ref": "#/components/schemas/AccessoryItem"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Accessories"
+          },
+          "unlock_method": {
+            "$ref": "#/components/schemas/UnlockMethod"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reported_issue",
+          "physical_condition",
+          "unlock_method"
+        ],
+        "title": "ClaimCreate"
+      },
+      "ClaimDecision": {
+        "properties": {
+          "accepted": {
+            "type": "boolean",
+            "title": "Accepted"
+          },
+          "resolution": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 5,
+            "title": "Resolution"
+          }
+        },
+        "type": "object",
+        "required": [
+          "accepted",
+          "resolution"
+        ],
+        "title": "ClaimDecision"
+      },
+      "ClaimRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "claim_order_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Claim Order Id"
+          },
+          "claim_order_number": {
+            "type": "string",
+            "title": "Claim Order Number"
+          },
+          "reported_issue": {
+            "type": "string",
+            "title": "Reported Issue"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "ACCEPTED",
+              "REJECTED"
+            ],
+            "title": "Status"
+          },
+          "resolution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "claim_order_id",
+          "claim_order_number",
+          "reported_issue",
+          "status",
+          "resolution",
+          "decided_by",
+          "decided_at",
+          "created_at"
+        ],
+        "title": "ClaimRead"
       },
       "CloseRequest": {
         "properties": {
@@ -6261,6 +6687,167 @@
         "title": "CustomerUpdate",
         "description": "Only the fields present in the request are changed."
       },
+      "Dashboard": {
+        "properties": {
+          "scope": {
+            "type": "string",
+            "enum": [
+              "WORKSHOP",
+              "MINE"
+            ],
+            "title": "Scope",
+            "description": "WORKSHOP con reports:read; MINE para técnicos (solo sus órdenes)"
+          },
+          "open_by_status": {
+            "items": {
+              "$ref": "#/components/schemas/StatusCount"
+            },
+            "type": "array",
+            "title": "Open By Status"
+          },
+          "received_today": {
+            "type": "integer",
+            "title": "Received Today"
+          },
+          "received_week": {
+            "type": "integer",
+            "title": "Received Week"
+          },
+          "overdue": {
+            "type": "integer",
+            "title": "Overdue",
+            "description": "Abiertas con fecha estimada de entrega vencida"
+          },
+          "awaiting_customer": {
+            "type": "integer",
+            "title": "Awaiting Customer"
+          },
+          "expired_quotes": {
+            "type": "integer",
+            "title": "Expired Quotes"
+          },
+          "ready_for_delivery": {
+            "type": "integer",
+            "title": "Ready For Delivery"
+          },
+          "ready_balance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ready Balance"
+          },
+          "income_month": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MethodTotal"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Income Month"
+          },
+          "income_month_total": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Income Month Total"
+          },
+          "avg_turnaround_days": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Turnaround Days",
+            "description": "Últimos 90 días, recepción → entrega"
+          },
+          "technician_load": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TechnicianLoad"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Technician Load"
+          },
+          "low_stock": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Low Stock"
+          },
+          "warranties_expiring": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warranties Expiring",
+            "description": "Vencen en los próximos 15 días"
+          },
+          "open_claims": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Open Claims"
+          }
+        },
+        "type": "object",
+        "required": [
+          "scope",
+          "open_by_status",
+          "received_today",
+          "received_week",
+          "overdue",
+          "awaiting_customer",
+          "expired_quotes",
+          "ready_for_delivery",
+          "ready_balance",
+          "income_month",
+          "income_month_total",
+          "avg_turnaround_days",
+          "technician_load",
+          "low_stock",
+          "warranties_expiring",
+          "open_claims"
+        ],
+        "title": "Dashboard"
+      },
       "DeliveryRequest": {
         "properties": {
           "picked_up_by_customer": {
@@ -6315,6 +6902,20 @@
             ],
             "title": "Balance Reason",
             "description": "Obligatorio con saldo pendiente (requiere work_orders:deliver_with_balance)"
+          },
+          "warranty_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 3650.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warranty Days",
+            "description": "Días de garantía; por defecto, los del taller"
           }
         },
         "type": "object",
@@ -7485,6 +8086,23 @@
         "type": "object",
         "title": "MemoryModule"
       },
+      "MethodTotal": {
+        "properties": {
+          "method": {
+            "$ref": "#/components/schemas/PaymentMethod"
+          },
+          "amount": {
+            "type": "string",
+            "title": "Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "method",
+          "amount"
+        ],
+        "title": "MethodTotal"
+      },
       "MovementRead": {
         "properties": {
           "id": {
@@ -7678,6 +8296,10 @@
               }
             ],
             "title": "Email"
+          },
+          "warranty_days": {
+            "type": "integer",
+            "title": "Warranty Days"
           }
         },
         "type": "object",
@@ -7690,7 +8312,8 @@
           "address",
           "city",
           "phone",
-          "email"
+          "email",
+          "warranty_days"
         ],
         "title": "OrganizationRead"
       },
@@ -7800,6 +8423,19 @@
               }
             ],
             "title": "Email"
+          },
+          "warranty_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 3650.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warranty Days"
           }
         },
         "type": "object",
@@ -9321,6 +9957,84 @@
         ],
         "title": "RepairPartRead"
       },
+      "Report": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "income",
+              "orders",
+              "inventory",
+              "technicians"
+            ],
+            "title": "Kind"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "date_from": {
+            "type": "string",
+            "title": "Date From"
+          },
+          "date_to": {
+            "type": "string",
+            "title": "Date To"
+          },
+          "columns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Columns"
+          },
+          "rows": {
+            "items": {
+              "items": {},
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Rows"
+          },
+          "summary": {
+            "items": {
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2
+            },
+            "type": "array",
+            "title": "Summary"
+          },
+          "money_columns": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Money Columns",
+            "description": "Índices de columnas con valores en pesos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "title",
+          "date_from",
+          "date_to",
+          "columns",
+          "rows",
+          "summary"
+        ],
+        "title": "Report",
+        "description": "Generic tabular report: the same data feeds JSON, CSV and PDF."
+      },
       "ReportAccepted": {
         "properties": {
           "results": {
@@ -9681,6 +10395,23 @@
           "status"
         ],
         "title": "StatusChange"
+      },
+      "StatusCount": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "count"
+        ],
+        "title": "StatusCount"
       },
       "StatusHistoryItem": {
         "properties": {
@@ -10220,6 +10951,31 @@
         ],
         "title": "TaskRead"
       },
+      "TechnicianLoad": {
+        "properties": {
+          "technician": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null = sin asignar"
+          },
+          "open_orders": {
+            "type": "integer",
+            "title": "Open Orders"
+          }
+        },
+        "type": "object",
+        "required": [
+          "technician",
+          "open_orders"
+        ],
+        "title": "TechnicianLoad"
+      },
       "TemporaryPasswordSet": {
         "properties": {
           "temporary_password": {
@@ -10682,6 +11438,96 @@
         },
         "type": "object",
         "title": "VolumeInfo"
+      },
+      "WarrantyOverview": {
+        "properties": {
+          "warranty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WarrantyRead"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Garantía de esta orden, o la original si esta orden es un reclamo"
+          },
+          "claims": {
+            "items": {
+              "$ref": "#/components/schemas/ClaimRead"
+            },
+            "type": "array",
+            "title": "Claims"
+          },
+          "is_claim_order": {
+            "type": "boolean",
+            "title": "Is Claim Order"
+          },
+          "can_claim": {
+            "type": "boolean",
+            "title": "Can Claim"
+          },
+          "can_decide": {
+            "type": "boolean",
+            "title": "Can Decide"
+          }
+        },
+        "type": "object",
+        "required": [
+          "warranty",
+          "claims",
+          "is_claim_order",
+          "can_claim",
+          "can_decide"
+        ],
+        "title": "WarrantyOverview"
+      },
+      "WarrantyRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "work_order_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Work Order Id"
+          },
+          "work_order_number": {
+            "type": "string",
+            "title": "Work Order Number"
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Ends On"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "work_order_id",
+          "work_order_number",
+          "days",
+          "starts_on",
+          "ends_on",
+          "active"
+        ],
+        "title": "WarrantyRead"
       },
       "WorkOrderCreate": {
         "properties": {

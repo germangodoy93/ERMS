@@ -2,7 +2,7 @@
 
 import uuid
 
-from sqlalchemy import Boolean, ForeignKey, String, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.shared.models import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -22,6 +22,9 @@ class Organization(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     city: Mapped[str | None] = mapped_column(String(80), nullable=True)
     phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
     email: Mapped[str | None] = mapped_column(String(254), nullable=True)
+    warranty_days: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=90, server_default="90"
+    )
     timezone: Mapped[str] = mapped_column(
         String(64), nullable=False, default="America/Bogota", server_default="America/Bogota"
     )

@@ -113,6 +113,11 @@ class WorkOrder(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     delivered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     delivered_to_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
     delivered_to_document: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    warranty_of_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("work_orders.id", ondelete="RESTRICT"),
+        nullable=True,
+        comment="Orden original cuando esta orden atiende un reclamo de garantía",
+    )
 
     device: Mapped[Device] = relationship(lazy="joined")
 

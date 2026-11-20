@@ -43,8 +43,10 @@ class OrganizationService:
         changes: dict[str, Any] = {}
         for field in data.model_fields_set:
             value = getattr(data, field)
-            if field == "name" and value is None:
-                raise BusinessRuleError("El nombre del taller es obligatorio.")
+            if field in ("name", "warranty_days") and value is None:
+                raise BusinessRuleError(
+                    "El nombre del taller y los días de garantía son obligatorios."
+                )
             if getattr(organization, field) != value:
                 changes[field] = [getattr(organization, field), value]
                 setattr(organization, field, value)

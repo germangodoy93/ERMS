@@ -67,6 +67,16 @@ class PasswordChangeRequiredError(AppError):
     title = "Debe cambiar su contraseña"
 
 
+class RateLimitedError(AppError):
+    status_code = HTTPStatus.TOO_MANY_REQUESTS
+    code = "rate_limited"
+    title = "Demasiados intentos"
+
+    def __init__(self, detail: str, *, retry_after: int) -> None:
+        super().__init__(detail)
+        self.retry_after = retry_after
+
+
 class BusinessRuleError(AppError):
     status_code = HTTPStatus.UNPROCESSABLE_ENTITY
     code = "business_rule_violation"
@@ -107,6 +117,8 @@ async def _app_error_handler(request: Request, exc: Exception) -> JSONResponse:
     )
     if isinstance(exc, AuthenticationError):
         response.headers["WWW-Authenticate"] = "Bearer"
+    if isinstance(exc, RateLimitedError):
+        response.headers["Retry-After"] = str(exc.retry_after)
     return response
 
 

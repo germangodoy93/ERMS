@@ -23,6 +23,7 @@ from app.core.email import OutgoingEmail, get_mailer
 from app.core.security import hash_password
 from app.core.storage import LocalStorage, get_storage
 from app.main import create_app
+from app.modules.auth import router as auth_router
 from app.modules.devices.catalog import seed_manufacturers
 from app.modules.health.checks import BACKEND_ROOT
 from app.modules.organizations.models import Branch, Organization
@@ -35,6 +36,8 @@ TEST_DB_URL = os.environ.get("ERMS_TEST_DATABASE_URL")
 PASSWORD = "Contraseña-de-prueba-123"
 
 BUSINESS_TABLES = (
+    "warranty_claims",
+    "warranties",
     "payments",
     "quality_checks",
     "repair_parts",
@@ -143,6 +146,7 @@ def storage(tmp_path: Path) -> LocalStorage:
 def client(db: Session, mailer: CapturingMailer, storage: LocalStorage) -> Iterator[TestClient]:
     app = create_app()
     app.dependency_overrides[get_mailer] = lambda: mailer
+    auth_router._login_limiter = None  # fresh per-IP counter for each test
     app.dependency_overrides[get_storage] = lambda: storage
     with TestClient(app) as test_client:
         yield test_client
@@ -249,3 +253,25 @@ def publish_terms(client: TestClient, admin_headers: dict[str, str]) -> dict[str
     assert response.status_code == 201, response.text
     body: dict[str, object] = response.json()
     return body
+
+
+@dataclass
+class Shop:
+    admin: dict[str, str]
+    supervisor: dict[str, str]
+    reception: dict[str, str]
+    tech: dict[str, str]
+
+
+@pytest.fixture
+def shop(client: TestClient, tenant: Tenant) -> Shop:
+    """Workshop ready for commerce tests: policy and terms published, one login per role."""
+    admin = login(client, tenant.users[RoleCode.ADMIN].email)
+    publish_policy(client, admin)
+    publish_terms(client, admin)
+    return Shop(
+        admin=admin,
+        supervisor=login(client, tenant.users[RoleCode.SUPERVISOR].email),
+        reception=login(client, tenant.users[RoleCode.RECEPTIONIST].email),
+        tech=login(client, tenant.users[RoleCode.TECHNICIAN].email),
+    )

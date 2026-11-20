@@ -120,6 +120,9 @@ class DeliveryRequest(BaseModel):
         max_length=500,
         description="Obligatorio con saldo pendiente (requiere work_orders:deliver_with_balance)",
     )
+    warranty_days: int | None = Field(
+        default=None, ge=1, le=3650, description="Días de garantía; por defecto, los del taller"
+    )
 
     _texts = field_validator("name", "document")(clean_text)
     _notes = field_validator("notes", "balance_reason")(clean_multiline)
