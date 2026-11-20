@@ -89,6 +89,14 @@ class Settings(BaseSettings):
     attachment_max_bytes: int = Field(default=10 * 1024 * 1024, ge=1024)
     attachment_max_per_order: int = Field(default=20, ge=1, le=100)
 
+    # --- Diagnostic agent (Sprint 4) -------------------------------------------------
+    agent_download_url: str = Field(
+        default="https://github.com/germangodoy93/ERMS/releases/latest/download/erms-agente.exe",
+        description="Where technicians download the portable Windows agent.",
+    )
+    agent_pairing_minutes: int = Field(default=30, ge=5, le=240)
+    agent_token_minutes: int = Field(default=15, ge=5, le=120)
+
     @field_validator("jwt_secret")
     @classmethod
     def _strong_jwt_secret(cls, value: SecretStr) -> SecretStr:

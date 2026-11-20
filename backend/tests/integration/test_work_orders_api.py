@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.core.storage import LocalStorage
 from app.modules.audit.models import AuditLog
+from app.modules.diagnostics import catalog
 from app.modules.roles.catalog import RoleCode
 from app.modules.users.models import User
 
@@ -118,6 +119,18 @@ def _move(
     assert response.status_code == 200, response.text
     body: dict[str, Any] = response.json()
     return body
+
+
+def _close_diagnostic(
+    client: TestClient, headers: dict[str, str], order_id: object, category: str
+) -> None:
+    url = f"{ORDERS}/{order_id}/diagnostic"
+    results = [{"test_code": t.code, "result": "OK"} for t in catalog.manual_tests_for(category)]
+    assert (
+        client.put(f"{url}/results", headers=headers, json={"results": results}).status_code == 200
+    )
+    closed = client.post(f"{url}/close", headers=headers, json={"conclusion": "Diagnóstico ok."})
+    assert closed.status_code == 200, closed.text
 
 
 # --- Reception terms and creation --------------------------------------------------------
@@ -228,8 +241,9 @@ def test_full_lifecycle_with_roles(client: TestClient, setup: Setup, tenant: Ten
 
     order = _move(client, setup.technician, oid, "INSPECCION")
     assert order["assigned_technician"]["id"] == str(technician.id)  # claimed
-    for status in ("DIAGNOSTICO", "COTIZACION"):
-        order = _move(client, setup.technician, oid, status)
+    order = _move(client, setup.technician, oid, "DIAGNOSTICO")
+    _close_diagnostic(client, setup.technician, oid, "PHONE")
+    order = _move(client, setup.technician, oid, "COTIZACION")
     order = _move(client, setup.reception, oid, "PENDIENTE_AUTORIZACION")
     order = _move(client, setup.reception, oid, "APROBADO")
     order = _move(client, setup.technician, oid, "EN_REPARACION")

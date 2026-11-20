@@ -8,6 +8,7 @@ from app.modules.audit import models as audit_models
 from app.modules.auth import models as auth_models
 from app.modules.customers import models as customers_models
 from app.modules.devices import models as devices_models
+from app.modules.diagnostics import models as diagnostics_models
 from app.modules.organizations import models as organizations_models
 from app.modules.privacy import models as privacy_models
 from app.modules.roles import models as roles_models
@@ -22,6 +23,7 @@ __all__ = [
     "auth_models",
     "customers_models",
     "devices_models",
+    "diagnostics_models",
     "organizations_models",
     "privacy_models",
     "roles_models",

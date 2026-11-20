@@ -3112,6 +3112,397 @@
           }
         }
       }
+    },
+    "/api/v1/work-orders/{order_id}/diagnostic": {
+      "get": {
+        "tags": [
+          "diagnostics"
+        ],
+        "summary": "Diagnóstico de la orden",
+        "operationId": "get_diagnostic_api_v1_work_orders__order_id__diagnostic_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/diagnostic/results": {
+      "put": {
+        "tags": [
+          "diagnostics"
+        ],
+        "summary": "Registrar resultados manuales",
+        "operationId": "save_results_api_v1_work_orders__order_id__diagnostic_results_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResultsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/diagnostic/close": {
+      "post": {
+        "tags": [
+          "diagnostics"
+        ],
+        "summary": "Cerrar el diagnóstico",
+        "operationId": "close_diagnostic_api_v1_work_orders__order_id__diagnostic_close_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/diagnostic/reopen": {
+      "post": {
+        "tags": [
+          "diagnostics"
+        ],
+        "summary": "Reabrir el diagnóstico",
+        "operationId": "reopen_diagnostic_api_v1_work_orders__order_id__diagnostic_reopen_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/diagnostic/agent-pairing": {
+      "post": {
+        "tags": [
+          "diagnostics"
+        ],
+        "summary": "Generar código de un solo uso para el agente",
+        "operationId": "create_pairing_api_v1_work_orders__order_id__diagnostic_agent_pairing_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairingCreated"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/diagnostic-report.pdf": {
+      "get": {
+        "tags": [
+          "diagnostics"
+        ],
+        "summary": "Informe de diagnóstico en PDF",
+        "operationId": "diagnostic_report_api_v1_work_orders__order_id__diagnostic_report_pdf_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostics/agent/pair": {
+      "post": {
+        "tags": [
+          "diagnostic-agent"
+        ],
+        "summary": "Canjear el código del técnico",
+        "operationId": "agent_pair_api_v1_diagnostics_agent_pair_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PairRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostics/agent/report": {
+      "post": {
+        "tags": [
+          "diagnostic-agent"
+        ],
+        "summary": "Enviar los datos recolectados (una vez)",
+        "operationId": "agent_report_api_v1_diagnostics_agent_report_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentReport"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -3154,6 +3545,149 @@
           "code"
         ],
         "title": "AccessoryItem"
+      },
+      "AgentReport": {
+        "properties": {
+          "agent_version": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Agent Version"
+          },
+          "elevated": {
+            "type": "boolean",
+            "title": "Elevated",
+            "description": "True si el agente se ejecutó como administrador"
+          },
+          "system": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SystemInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cpus": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CpuInfo"
+                },
+                "type": "array",
+                "maxItems": 16
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cpus"
+          },
+          "memory": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemoryInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "gpus": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GpuInfo"
+                },
+                "type": "array",
+                "maxItems": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gpus"
+          },
+          "disks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DiskInfo"
+                },
+                "type": "array",
+                "maxItems": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disks"
+          },
+          "volumes": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/VolumeInfo"
+                },
+                "type": "array",
+                "maxItems": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Volumes"
+          },
+          "smart": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SmartInfo"
+                },
+                "type": "array",
+                "maxItems": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Smart"
+          },
+          "battery": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BatteryInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stability": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StabilityInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "errors": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "maxProperties": 20,
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "agent_version",
+          "elevated"
+        ],
+        "title": "AgentReport"
       },
       "AnonymizeRequest": {
         "properties": {
@@ -3291,6 +3825,55 @@
         ],
         "title": "AuditLogRead"
       },
+      "BatteryInfo": {
+        "properties": {
+          "present": {
+            "type": "boolean",
+            "title": "Present"
+          },
+          "design_capacity_mwh": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Design Capacity Mwh"
+          },
+          "full_charge_capacity_mwh": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Charge Capacity Mwh"
+          },
+          "cycle_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cycle Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "present"
+        ],
+        "title": "BatteryInfo"
+      },
       "Body_upload_photo_api_v1_work_orders__order_id__photos_post": {
         "properties": {
           "file": {
@@ -3344,6 +3927,33 @@
           "new_password"
         ],
         "title": "ChangePasswordRequest"
+      },
+      "CloseRequest": {
+        "properties": {
+          "conclusion": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 5,
+            "title": "Conclusion"
+          },
+          "recommendation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommendation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conclusion"
+        ],
+        "title": "CloseRequest"
       },
       "ComponentHealth": {
         "properties": {
@@ -3543,6 +4153,63 @@
         ],
         "title": "ConsentStatus",
         "description": "Current state of one purpose (most recent record)."
+      },
+      "CpuInfo": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "cores": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 4096.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cores"
+          },
+          "logical_processors": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 8192.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logical Processors"
+          },
+          "max_clock_mhz": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Clock Mhz"
+          }
+        },
+        "type": "object",
+        "title": "CpuInfo"
       },
       "CurrentPrivacyPolicy": {
         "properties": {
@@ -4767,6 +5434,237 @@
         "title": "DeviceUpdate",
         "description": "Only the fields present in the request are changed. The owner cannot be changed."
       },
+      "DiagnosticRead": {
+        "properties": {
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "NOT_STARTED",
+              "OPEN",
+              "CLOSED"
+            ],
+            "title": "State"
+          },
+          "editable": {
+            "type": "boolean",
+            "title": "Editable",
+            "description": "El usuario puede registrar resultados ahora"
+          },
+          "agent_available": {
+            "type": "boolean",
+            "title": "Agent Available",
+            "description": "Computador, orden en diagnóstico y autorización DIAGNOSTIC_AGENT vigente"
+          },
+          "agent_unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Unavailable Reason"
+          },
+          "agent_download_url": {
+            "type": "string",
+            "title": "Agent Download Url"
+          },
+          "conclusion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conclusion"
+          },
+          "recommendation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommendation"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "closed_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "agent_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Version"
+          },
+          "agent_elevated": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Elevated"
+          },
+          "agent_reported_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Reported At"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/TestResultRead"
+            },
+            "type": "array",
+            "title": "Results"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "state",
+          "editable",
+          "agent_available",
+          "agent_unavailable_reason",
+          "agent_download_url",
+          "conclusion",
+          "recommendation",
+          "closed_at",
+          "closed_by",
+          "agent_version",
+          "agent_elevated",
+          "agent_reported_at",
+          "results"
+        ],
+        "title": "DiagnosticRead"
+      },
+      "DiskInfo": {
+        "properties": {
+          "friendly_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Friendly Name"
+          },
+          "media_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Type"
+          },
+          "bus_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bus Type"
+          },
+          "size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size Bytes"
+          },
+          "health_status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Health Status"
+          },
+          "operational_status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operational Status"
+          }
+        },
+        "type": "object",
+        "title": "DiskInfo"
+      },
       "ForgotPasswordRequest": {
         "properties": {
           "email": {
@@ -4780,6 +5678,48 @@
           "email"
         ],
         "title": "ForgotPasswordRequest"
+      },
+      "GpuInfo": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "driver_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Driver Version"
+          },
+          "adapter_ram_bytes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adapter Ram Bytes"
+          }
+        },
+        "type": "object",
+        "title": "GpuInfo"
       },
       "HTTPValidationError": {
         "properties": {
@@ -4961,6 +5901,87 @@
           "must_change_password"
         ],
         "title": "MeResponse"
+      },
+      "MemoryInfo": {
+        "properties": {
+          "total_bytes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Bytes"
+          },
+          "modules": {
+            "items": {
+              "$ref": "#/components/schemas/MemoryModule"
+            },
+            "type": "array",
+            "maxItems": 32,
+            "title": "Modules"
+          }
+        },
+        "type": "object",
+        "title": "MemoryInfo"
+      },
+      "MemoryModule": {
+        "properties": {
+          "capacity_bytes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity Bytes"
+          },
+          "speed_mhz": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speed Mhz"
+          },
+          "manufacturer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manufacturer"
+          },
+          "part_number": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Part Number"
+          }
+        },
+        "type": "object",
+        "title": "MemoryModule"
       },
       "OrganizationRead": {
         "properties": {
@@ -5348,6 +6369,74 @@
         ],
         "title": "Page[WorkOrderListItem]"
       },
+      "PairRequest": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 6,
+            "title": "Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "title": "PairRequest"
+      },
+      "PairResponse": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
+          },
+          "work_order_number": {
+            "type": "string",
+            "title": "Work Order Number"
+          },
+          "device": {
+            "type": "string",
+            "title": "Device"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "expires_at",
+          "work_order_number",
+          "device"
+        ],
+        "title": "PairResponse"
+      },
+      "PairingCreated": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "Código de un solo uso que se escribe en el agente"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          },
+          "download_url": {
+            "type": "string",
+            "title": "Download Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "expires_at",
+          "download_url"
+        ],
+        "title": "PairingCreated"
+      },
       "PaymentMethod": {
         "type": "string",
         "enum": [
@@ -5635,6 +6724,19 @@
         ],
         "title": "ReceptionTermsRead"
       },
+      "ReportAccepted": {
+        "properties": {
+          "results": {
+            "type": "integer",
+            "title": "Results"
+          }
+        },
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "title": "ReportAccepted"
+      },
       "ResetPasswordRequest": {
         "properties": {
           "token": {
@@ -5656,6 +6758,73 @@
           "new_password"
         ],
         "title": "ResetPasswordRequest"
+      },
+      "Result": {
+        "type": "string",
+        "enum": [
+          "OK",
+          "WARNING",
+          "FAIL",
+          "NOT_TESTED",
+          "NOT_SUPPORTED"
+        ],
+        "title": "Result"
+      },
+      "ResultInput": {
+        "properties": {
+          "test_code": {
+            "type": "string",
+            "maxLength": 40,
+            "title": "Test Code"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "OK",
+              "WARNING",
+              "FAIL",
+              "NOT_TESTED",
+              "NOT_SUPPORTED"
+            ],
+            "title": "Result"
+          },
+          "observation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "test_code",
+          "result"
+        ],
+        "title": "ResultInput"
+      },
+      "ResultsUpdate": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ResultInput"
+            },
+            "type": "array",
+            "maxItems": 60,
+            "minItems": 1,
+            "title": "Results"
+          }
+        },
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "title": "ResultsUpdate"
       },
       "RolePermissionsUpdate": {
         "properties": {
@@ -5734,6 +6903,115 @@
           "name"
         ],
         "title": "RoleRef"
+      },
+      "SmartInfo": {
+        "properties": {
+          "disk": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disk"
+          },
+          "temperature_c": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 200.0,
+                "minimum": -50.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature C"
+          },
+          "wear_percent": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 255.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wear Percent"
+          },
+          "read_errors": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Read Errors"
+          },
+          "write_errors": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Write Errors"
+          },
+          "power_on_hours": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Power On Hours"
+          }
+        },
+        "type": "object",
+        "title": "SmartInfo"
+      },
+      "Source": {
+        "type": "string",
+        "enum": [
+          "MANUAL",
+          "AGENT",
+          "AI_SUGGESTION"
+        ],
+        "title": "Source"
+      },
+      "StabilityInfo": {
+        "properties": {
+          "unexpected_shutdowns_30d": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Unexpected Shutdowns 30D"
+          },
+          "bugchecks_30d": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Bugchecks 30D"
+          }
+        },
+        "type": "object",
+        "required": [
+          "unexpected_shutdowns_30d",
+          "bugchecks_30d"
+        ],
+        "title": "StabilityInfo"
       },
       "Status": {
         "type": "string",
@@ -5830,6 +7108,120 @@
         ],
         "title": "StatusHistoryItem"
       },
+      "SystemInfo": {
+        "properties": {
+          "os_caption": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Os Caption"
+          },
+          "os_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Os Version"
+          },
+          "os_build": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Os Build"
+          },
+          "architecture": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Architecture"
+          },
+          "manufacturer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manufacturer"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "bios_serial": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bios Serial"
+          },
+          "bios_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bios Version"
+          },
+          "last_boot": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Boot"
+          }
+        },
+        "type": "object",
+        "title": "SystemInfo"
+      },
       "TemporaryPasswordSet": {
         "properties": {
           "temporary_password": {
@@ -5844,6 +7236,106 @@
           "temporary_password"
         ],
         "title": "TemporaryPasswordSet"
+      },
+      "TestResultRead": {
+        "properties": {
+          "test_code": {
+            "type": "string",
+            "title": "Test Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "component": {
+            "type": "string",
+            "title": "Component"
+          },
+          "automated": {
+            "type": "boolean",
+            "title": "Automated"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Result"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null mientras no se ha registrado"
+          },
+          "observation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observation"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Source"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recorded_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recorded_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recorded At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "test_code",
+          "name",
+          "component",
+          "automated",
+          "result",
+          "observation",
+          "evidence",
+          "source",
+          "recorded_by",
+          "recorded_at"
+        ],
+        "title": "TestResultRead"
       },
       "TokenResponse": {
         "properties": {
@@ -6138,6 +7630,60 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VolumeInfo": {
+        "properties": {
+          "drive_letter": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drive Letter"
+          },
+          "size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size Bytes"
+          },
+          "free_bytes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Free Bytes"
+          },
+          "file_system": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File System"
+          }
+        },
+        "type": "object",
+        "title": "VolumeInfo"
       },
       "WorkOrderCreate": {
         "properties": {
@@ -6603,7 +8149,7 @@
     "securitySchemes": {
       "HTTPBearer": {
         "type": "http",
-        "description": "Access token obtenido en /auth/login",
+        "description": "Token entregado por /pair",
         "scheme": "bearer"
       }
     }

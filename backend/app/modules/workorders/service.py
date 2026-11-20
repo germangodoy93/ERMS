@@ -34,6 +34,7 @@ from app.modules.audit.service import AuditService
 from app.modules.customers.models import Customer
 from app.modules.customers.service import CustomerService
 from app.modules.devices.models import Device, DeviceModel
+from app.modules.diagnostics.models import DiagnosticSession
 from app.modules.organizations.models import Branch
 from app.modules.privacy.catalog import ConsentPurpose
 from app.modules.roles.catalog import Perm
@@ -384,6 +385,10 @@ class WorkOrderService:
         source = self._check_transition(actor, order, target)
         if reason_required(source, target) and not reason:
             raise BusinessRuleError("Indique el motivo de este cambio de estado.")
+        if target is Status.COTIZACION and not self._diagnostic_closed(order):
+            raise BusinessRuleError(
+                "Cierre el diagnóstico con su conclusión antes de pasar a cotización."
+            )
         self._claim_if_technician(actor, order)
         self._move(actor, order, source, target, reason, context)
         return self._to_read(actor, order)
@@ -479,7 +484,7 @@ class WorkOrderService:
 
     def allowed_transitions(self, actor: User, order: WorkOrder) -> list[Status]:
         source = Status(order.status)
-        if not self._may_work_on(actor, order):
+        if not may_work_on(actor, order):
             return []
         return [
             target
@@ -493,17 +498,9 @@ class WorkOrderService:
             raise BusinessRuleError(f"No se puede pasar de {source.value} a {target.value}.")
         if not REQUIRED_PERMISSIONS[target] & actor.permission_codes:
             raise PermissionDeniedError("No tiene permisos para llevar la orden a ese estado.")
-        if not self._may_work_on(actor, order):
+        if not may_work_on(actor, order):
             raise PermissionDeniedError("La orden está asignada a otro técnico.")
         return source
-
-    @staticmethod
-    def _may_work_on(actor: User, order: WorkOrder) -> bool:
-        """Technicians only move their own (or unassigned) orders; coordinators move any."""
-        perms = actor.permission_codes
-        if Perm.WORK_ORDERS_ASSIGN in perms or Perm.WORK_ORDERS_DELIVER in perms:
-            return True
-        return order.assigned_technician_id in (None, actor.id)
 
     @staticmethod
     def _claim_if_technician(actor: User, order: WorkOrder) -> None:
@@ -560,6 +557,12 @@ class WorkOrderService:
             )
         )
         self._session.flush()
+
+    def _diagnostic_closed(self, order: WorkOrder) -> bool:
+        closed_at = self._session.scalar(
+            select(DiagnosticSession.closed_at).where(DiagnosticSession.work_order_id == order.id)
+        )
+        return closed_at is not None
 
     def _valid_technician(self, actor: User, technician_id: uuid.UUID) -> User:
         technician = next((t for t in self.technicians(actor) if t.id == technician_id), None)
@@ -658,6 +661,14 @@ class WorkOrderService:
             ),
             updated_at=order.updated_at,
         )
+
+
+def may_work_on(actor: User, order: WorkOrder) -> bool:
+    """Technicians only work on their own (or unassigned) orders; coordinators on any."""
+    perms = actor.permission_codes
+    if Perm.WORK_ORDERS_ASSIGN in perms or Perm.WORK_ORDERS_DELIVER in perms:
+        return True
+    return order.assigned_technician_id in (None, actor.id)
 
 
 def _lookup(users: dict[uuid.UUID, User], user_id: uuid.UUID | None) -> User | None:

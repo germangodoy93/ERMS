@@ -10,6 +10,8 @@ from app.modules.audit.router import router as audit_router
 from app.modules.auth.router import router as auth_router
 from app.modules.customers.router import router as customers_router
 from app.modules.devices.router import catalog_router, devices_router
+from app.modules.diagnostics.router import agent_router as diagnostic_agent_router
+from app.modules.diagnostics.router import router as diagnostics_router
 from app.modules.health.router import router as health_router
 from app.modules.organizations.router import router as organization_router
 from app.modules.privacy.router import router as privacy_router
@@ -58,6 +60,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         devices_router,
         reception_terms_router,
         work_orders_router,
+        diagnostics_router,
+        diagnostic_agent_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)
     return app
