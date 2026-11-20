@@ -4,8 +4,8 @@ Plataforma para gestionar un centro de diagnóstico, mantenimiento y reparación
 computadores, celulares, tablets y consolas: desde la recepción del equipo hasta su entrega y
 garantía.
 
-**Estado:** Sprint 5 terminado (inventario, cotizaciones con IVA, reparación, calidad y
-pagos). Ver [roadmap](docs/ERMS-ROADMAP.md).
+**Estado:** MVP terminado (Sprint 6: garantías, dashboard, reportes, prueba de punta a punta en
+el navegador). Ver [roadmap](docs/ERMS-ROADMAP.md).
 
 | Capa | Tecnología |
 |---|---|
@@ -97,6 +97,7 @@ npm run dev                    # http://localhost:5173 (proxy /api → :8000)
 | `cd backend; uv run ruff check .; uv run mypy app tests` | Lint y tipos |
 | `cd frontend; npm test` | Vitest |
 | `cd frontend; npm run lint; npm run typecheck` | ESLint y TypeScript |
+| `cd e2e; npx playwright test` | Prueba de punta a punta en el navegador (requiere la aplicación corriendo; ver ERMS-DEVOPS) |
 | `pre-commit install` | Activa los ganchos locales (requiere `pip install pre-commit`) |
 
 Cuando cambien los esquemas de la API, regenera el contrato:

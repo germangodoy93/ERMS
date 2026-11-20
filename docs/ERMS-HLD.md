@@ -73,7 +73,8 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 ## 4. Seguridad (resumen)
 
 - Argon2id (`pwdlib`) para contraseñas; JWT con PyJWT. Política: mínimo 12 caracteres y no
-  puede contener el usuario del correo. Bloqueo de 15 min tras 5 intentos fallidos.
+  puede contener el usuario del correo. Bloqueo de 15 min tras 5 intentos fallidos por cuenta y, desde el Sprint 6, máximo 20 intentos
+  fallidos por IP cada 15 min (429 con `Retry-After`).
 - Access token de 15 minutos guardado solo en memoria del cliente. El refresh token va en
   cookie `httpOnly`, `Secure`, `SameSite=Strict`, limitada a `/api/v1/auth`, con rotación y
   revocación en BD. La sesión dura máx. 12 h y se cierra tras 2 h sin actividad.
@@ -137,6 +138,12 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 | 034 | Entradas de inventario simples (sin órdenes de compra) | Flujo de compras completo | Decisión del negocio para el MVP. |
 | 035 | Saldo = cotización aprobada (incluye el diagnóstico) o diagnóstico − pagos; entrega con saldo solo con permiso y motivo | Bloqueo total | Decisión del negocio; queda trazado en el historial y la auditoría. |
 | 036 | Comprobante de pago interno con numeración `RC-<año>-<consecutivo>` | Factura electrónica | La facturación DIAN está fuera del MVP; el comprobante lo aclara. |
+| 037 | Garantía automática al entregar un equipo reparado; el reclamo abre una orden nueva enlazada (`warranty_of_id`) | Reabrir la orden original | La orden original queda cerrada e intacta; el reclamo tiene su propio diagnóstico, historial y documentos. |
+| 038 | Reportes con un solo modelo tabular que alimenta JSON, CSV y PDF; CSV con BOM, `;` y neutralización de fórmulas | Librería de Excel (xlsx) | Sin dependencias nuevas; Excel en español lo abre directamente; evita inyección de fórmulas (CSV injection). |
+| 039 | Límite de intentos fallidos por IP en memoria del proceso | Redis | Hay una sola instancia del backend; Redis costaría más sin beneficio. Si se escala a varias instancias, se mueve a Redis. |
+| 040 | Pantallas cargadas bajo demanda (`React.lazy`) y librerías en fragmentos separados | Un solo archivo | El código propio inicial pasa de 525 kB a 32 kB; las librerías cambian poco y quedan en la caché del navegador. |
+| 041 | Backups con la función nativa de Railway (plan Pro) | `pg_dump` programado propio | Sin código ni almacenamiento adicional; el simulacro de restauración se hace en un entorno duplicado. |
+| 042 | E2E con Playwright contra el stack de Docker Compose en CI; los datos maestros se crean por la API y el flujo de la orden por la interfaz | Todo por la interfaz | Prueba lo que el usuario hace sin volver la prueba lenta y frágil. |
 
 ## 6. Riesgos
 
@@ -145,5 +152,5 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 | Docker no instalado en el equipo de desarrollo | Bloquea el cierre del Sprint 0 | Instalar Docker Desktop + WSL2. CI ejecuta el smoke test con Compose. |
 | Festividades de diciembre (Sprints 2 y 3) | Menor capacidad | Priorizar el backlog y aceptar alcance reducido del Sprint 3. |
 | Restricciones de Apple y consolas | Diagnóstico automatizado limitado | Checklists manuales marcados como tales; nunca simular pruebas. |
-| Plan gratuito de Railway con límites de recursos | Rendimiento | Medir en el Sprint 6; el diseño no depende de Railway. |
+| Recursos de Railway | Rendimiento | Plan Pro. Pantallas bajo demanda y librerías en caché; el diseño no depende de Railway. |
 | Datos personales de clientes | Legal (Habeas Data) | Consentimiento registrado, cifrado en tránsito, mínimos privilegios. |

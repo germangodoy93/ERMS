@@ -9,7 +9,7 @@
 | Unitarias frontend | Vitest + Testing Library | Presentación, páginas con API simulada | Local y CI |
 | Contrato | Vitest + `docs/api/openapi.json`; CI verifica que el JSON coincide con el código | Tipos del frontend frente a esquemas del backend | Local y CI |
 | Humo E2E | `scripts/smoke-test.sh` | Web → proxy → API → PostgreSQL | CI con Docker Compose y local |
-| E2E de UI | Playwright (a evaluar en el Sprint 6) | Flujos críticos: recepción → entrega | CI |
+| E2E de UI | Playwright 1.65.0 (`e2e/`) | Recepción → diagnóstico → cotización → reparación → calidad → pago → entrega → reclamo de garantía | CI (job `docker`) |
 
 ## 2. Reglas
 
@@ -136,6 +136,36 @@ existente.
 | Contrato | `frontend/src/types/api.contract.test.ts` | 16 esquemas y 20 rutas nuevas |
 | Cotización (UI) | `frontend/src/modules/workshop/quotePayload.test.ts` | Conversión de valores escritos ("50.000", "1,5"), validaciones, saldo |
 | Entrega (UI) | `frontend/src/modules/workorders/components/DeliveryDialog.test.tsx` | Recepción bloqueada con saldo; supervisor con motivo; sin saldo sin preguntas |
+
+## 9. Pruebas del Sprint 6
+
+Resultado local del 2026-11-20: **179 pruebas de backend** (95 % de cobertura), **145 de
+frontend** y **1 E2E en navegador** (unos 20 s), todas en verde. El E2E se ejecutó contra una
+organización nueva con contraseña temporal, igual que en CI. Recorrido por el proxy web:
+entrega con garantía de 60 días → reclamo (orden nueva, diagnóstico $0) → cotización en $0 →
+reclamo aceptado → dashboard → cuatro reportes en JSON, CSV (con BOM) y PDF → rango invertido
+422 → 21 intentos fallidos de inicio de sesión: 429 con `Retry-After`.
+
+La prueba E2E encontró tres errores de interfaz que las pruebas unitarias no veían, ya
+corregidos y cubiertos por pruebas nuevas:
+
+1. Al cambiar el estado de la orden, los paneles (diagnóstico, cotización, reparación, pagos,
+   garantía) no se actualizaban hasta recargar la página.
+2. Al guardar resultados del diagnóstico se borraba la conclusión ya escrita.
+3. El valor sugerido del pago seguía siendo el saldo de cuando se abrió la página (solo el
+   diagnóstico) aunque luego se aprobara la cotización.
+
+| Prueba | Archivo | Verifica |
+|---|---|---|
+| Garantías | `backend/tests/integration/test_warranties_reports_api.py` | Garantía al entregar con días del taller o de la entrega; sin garantía si no se reparó; reclamo vigente; orden nueva sin diagnóstico; cotización $0; decisión; permisos |
+| Dashboard | `test_warranties_reports_api.py` | Alcance del taller con dinero; técnico solo sus órdenes y sin dinero |
+| Reportes | `test_warranties_reports_api.py` | Cuatro reportes; columnas de dinero; CSV con BOM y `;`; PDF; rango invertido y mayor a un año; permisos |
+| CSV seguro | `test_warranties_reports_api.py` | Fórmulas neutralizadas, números intactos |
+| Límite por IP | `test_warranties_reports_api.py` | 20 fallos → 429 con `Retry-After` |
+| Contrato | `frontend/src/types/api.contract.test.ts` | Esquemas y 5 rutas nuevas |
+| Dashboard, reportes y garantía (UI) | `frontend/src/modules/reports/**/*.test.tsx` | Indicadores por alcance; moneda en reportes; abrir reclamo |
+| Regresiones (UI) | `workorders/hooks.test.tsx`, `DiagnosticPanel.test.tsx`, `BillingPanel.test.tsx` | Los tres errores anteriores |
+| E2E | `e2e/tests/repair-flow.spec.ts` | Flujo completo en Chromium, incluida la descarga del acta y el cambio de contraseña temporal |
 
 **Windows:** si la terminal abre la carpeta como `c:\...` (minúscula), Vitest carga dos copias de
 sí mismo y las pruebas de interfaz fallan con `Invalid Chai property: toBeInTheDocument`.

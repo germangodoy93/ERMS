@@ -45,6 +45,7 @@ Todas las respuestas de error usan `Content-Type: application/problem+json`:
 | `password_change_required` | 403 | El usuario tiene contraseña temporal; solo puede usar `/auth/me`, `/auth/password/change` y `/auth/logout` |
 | `permission_denied` | 403 | RBAC |
 | `not_found` | 404 | Recurso inexistente o de otra organización |
+| `rate_limited` | 429 | Demasiados intentos fallidos de inicio de sesión desde la misma IP (20 en 15 min). Incluye `Retry-After` en segundos. |
 | `conflict` | 409 | Unicidad (correo, documento del cliente, IMEI, serial, fabricante o modelo ya registrado) |
 | `internal_error` | 500 | Error inesperado; no expone detalles internos |
 
@@ -341,6 +342,31 @@ cotización (`/status` responde 422). Si se aprueba, el diagnóstico queda inclu
 Valor del servicio = total de la cotización aprobada (incluye el diagnóstico) o, sin cotización
 aprobada, el valor del diagnóstico. El anticipo de la recepción es el primer pago. Entregar con
 saldo > 0 exige `work_orders:deliver_with_balance` y `balance_reason` en `/delivery`.
+
+### Garantías (`/work-orders/{id}/warranty`)
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET …/warranty` | `work_orders:read` | 200 `{warranty, claims[], is_claim_order, can_claim, can_decide}`. En una orden de reclamo, `warranty` es la de la orden original. |
+| `POST …/warranty/claims` | `warranties:manage` | 201 `WorkOrderRead`: `{reported_issue, physical_condition, unlock_method, accessories?}`. Abre una orden nueva para el mismo equipo, sin valor de diagnóstico y con `warranty_of_id`. Solo con garantía vigente y sin otro reclamo abierto. |
+| `POST …/warranty/claims/{c}/decision` | `warranties:manage` | 200: `{accepted, resolution}` |
+
+La garantía se crea al entregar un equipo reparado (cotización aprobada o trabajos
+registrados), con los días de `DeliveryRequest.warranty_days` o, si no se indican, los de
+`organizations.warranty_days`. Las órdenes de reclamo no generan una garantía nueva y su
+cotización puede ser de $0.
+
+### Dashboard y reportes
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET /dashboard` | `work_orders:read` | 200 `Dashboard`. Con `reports:read`, alcance `WORKSHOP` (todo el taller, con dinero); sin él, `MINE` (solo las órdenes asignadas y los campos de dinero en `null`). |
+| `GET /reports/{kind}?from=&to=&format=` | `reports:read` | `kind`: `income`, `orders`, `inventory`, `technicians`. `format`: `json` (200 `Report`), `csv` o `pdf`. Rango máximo 366 días; `from > to` responde 422. |
+
+`Report` = `{kind, title, date_from, date_to, columns[], rows[][], summary[[etiqueta, valor]], money_columns[]}`.
+El CSV usa UTF-8 con BOM y `;` para que Excel en español lo abra directamente; las columnas de
+`money_columns` van como número sin formato. Las celdas de texto que empiezan por `=`, `+`, `-`,
+`@`, tabulador o retorno de carro se anteponen con `'` para evitar inyección de fórmulas.
 
 ### Salud
 

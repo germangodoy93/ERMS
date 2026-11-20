@@ -36,6 +36,7 @@ verificadas el 2026-11-19:
 | reportlab | 5.1.0 | Sprint 3, acta en PDF. Licencia BSD. Sin tipos: `mypy` lo ignora (`pyproject.toml`) |
 | Pillow | 13.0.0 | Dependencia de reportlab; también valida y limpia las fotos (licencia MIT-CMU) |
 | PyInstaller | 6.22.3 | Sprint 4, solo para construir el agente (licencia GPL con excepción que permite distribuir el ejecutable) |
+| Playwright (`@playwright/test`) | **1.65.0** (fijada) | Sprint 6, E2E en `e2e/`. No se usa la 1.65.1 por ser muy reciente. Licencia Apache 2.0 |
 | python-multipart | **0.0.33** (fijada) | Subida de fotos en FastAPI. No se usa la 0.0.34 por ser de hace 4 días |
 
 ### Decisiones de compatibilidad
@@ -81,7 +82,8 @@ verificadas el 2026-11-19:
 | `PORT` | No | Puerto HTTP; Railway lo inyecta |
 | `JWT_SECRET` | **Sí** | Clave de firma de los access tokens, mínimo 32 caracteres (`openssl rand -hex 32`). Cambiarla cierra todas las sesiones. |
 | `ACCESS_TOKEN_TTL_MINUTES` · `SESSION_MAX_HOURS` · `SESSION_IDLE_MINUTES` | No | 15 · 12 · 120 |
-| `LOGIN_MAX_ATTEMPTS` · `LOGIN_LOCKOUT_MINUTES` | No | 5 · 15 |
+| `LOGIN_MAX_ATTEMPTS` · `LOGIN_LOCKOUT_MINUTES` | No | 5 · 15 (por cuenta) |
+| `LOGIN_IP_MAX_FAILURES` · `LOGIN_IP_WINDOW_MINUTES` | No | 20 · 15 (por IP, en memoria del proceso) |
 | `PASSWORD_MIN_LENGTH` · `PASSWORD_RESET_TTL_MINUTES` | No | 12 · 30 |
 | `REFRESH_COOKIE_SECURE` | No | Por defecto `true` solo en producción |
 | `FRONTEND_URL` | Sí en producción | Base de los enlaces enviados por correo (p. ej. el dominio de `web` en Railway) |
@@ -116,7 +118,21 @@ python -m uv run pyinstaller --onefile --console --name erms-agente --distpath b
 | `backend` | ruff, mypy, pytest (unitarias + integración contra PostgreSQL), verificación de que `docs/api/openapi.json` está actualizado |
 | `agent` | ruff, mypy, pytest del agente (Linux; las consultas se prueban con salidas de ejemplo) |
 | `frontend` | eslint, prettier, tsc, vitest, build |
-| `docker` | `docker compose up --wait` + `scripts/smoke-test.sh` + `scripts/smoke-auth.sh` (bootstrap → login por el proxy web → correo de recuperación en Mailpit); build de las imágenes `prod` |
+| `docker` | `docker compose up --wait` + `scripts/smoke-test.sh` + `scripts/smoke-auth.sh` (bootstrap → login por el proxy web → correo de recuperación en Mailpit) + E2E con Playwright (Chromium) sobre el mismo stack; build de las imágenes `prod`. Si el E2E falla, el reporte y la traza quedan como artefacto `playwright-report` (7 días). |
+
+### Prueba E2E en local
+
+Con el backend y Vite corriendo (`http://localhost:5173`):
+
+```powershell
+cd e2e; npm ci; npx playwright install chromium
+$env:E2E_EMAIL = "admin@example.com"; $env:E2E_PASSWORD = "<contraseña>"
+npx playwright test          # agrega --headed para ver el navegador
+```
+
+Crea datos ficticios (repuesto, modelo, cliente, órdenes) en la organización del usuario: úsela
+solo en entornos desechables, **nunca contra producción**. Si el usuario tiene contraseña
+temporal, la prueba la cambia por `E2E_NEW_PASSWORD`.
 
 ### Pruebas de integración en Windows sin Docker
 
@@ -144,7 +160,22 @@ Code" (vigente solo hasta el 2026-12-01).
 
 ### Servicio `Postgres`
 
-*New → Database → PostgreSQL*. Backups programados en el Sprint 6 (R-09).
+*New → Database → PostgreSQL*.
+
+**Backups (R-09, plan Pro):** en el servicio `Postgres`, pestaña *Backups*, activar los
+programas diario y semanal (Railway conserva cada copia según el programa). Antes de una
+migración riesgosa, crear un backup manual desde la misma pestaña.
+
+Simulacro de restauración (una vez al mes y antes de salir en vivo):
+
+1. En el proyecto, duplicar el entorno `production` como `restore-drill` (*Environments → New →
+   Duplicate*), para no tocar los datos reales.
+2. En `restore-drill`, servicio `Postgres` → *Backups*, restaurar el backup más reciente.
+3. Abrir la web de `restore-drill`, iniciar sesión y revisar que estén las últimas órdenes y
+   pagos. Anotar la fecha y el resultado.
+4. Eliminar el entorno `restore-drill`.
+
+Restaurar en `production` reemplaza los datos actuales: solo ante una pérdida real.
 
 ### Servicio `backend` (nombre exacto: `backend`, se usa en la red privada)
 

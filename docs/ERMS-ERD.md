@@ -45,7 +45,7 @@ erDiagram
 
 | Tabla | Sprint | Columnas clave | Restricciones |
 |---|---|---|---|
-| `organizations` | ✅ 0 · 2 | name, slug, tax_id (NIT), timezone, is_active; desde el Sprint 2: legal_name, address, city, phone, email (responsable del tratamiento) | `uq(slug)` |
+| `organizations` | ✅ 0 · 2 | name, slug, tax_id (NIT), timezone, is_active; desde el Sprint 2: legal_name, address, city, phone, email (responsable del tratamiento); desde el Sprint 6: warranty_days (90 por defecto) | `uq(slug)` |
 | `branches` | ✅ 1 | name, city, address, phone, is_active | `uq(organization_id, name)` |
 | `users` | ✅ 1 | email, full_name, phone, password_hash, must_change_password, is_active, failed_login_count, locked_until, last_login_at, password_changed_at | `uq(email)` **global**; `ck(email = lower(email))` |
 | `roles` | ✅ 1 | code (ADMIN, SUPERVISOR, TECHNICIAN, RECEPTIONIST), name, is_system | `uq(organization_id, code)` |
@@ -73,7 +73,7 @@ erDiagram
 |---|---|---|---|
 | `document_sequences` | ✅ 3 | organization_id, doc_type (WORK_ORDER, …), year, last_value | PK (organization_id, doc_type, year); se incrementa con `INSERT … ON CONFLICT DO UPDATE … RETURNING` (atómico) |
 | `reception_terms` | ✅ 3 | version, content, published_at, published_by_id | `uq(organization_id, version)`; versiones inmutables |
-| `work_orders` | ✅ 3 | number (`ER-2026-000001`), branch_id, customer_id, device_id, assigned_technician_id, status, priority, received_at, received_by_id, reported_issue, physical_condition, accessories JSONB `[{code, detail}]`, unlock_method, estimated_delivery_date, diagnostic_fee, advance_amount, advance_method, notes, terms_id, delivered_at, delivered_to_name, delivered_to_document | `uq(organization_id, number)`; índices (organization_id, status), (organization_id, received_at); dinero `NUMERIC(14,2) ≥ 0`; anticipo > 0 exige medio de pago. **No guarda contraseñas de desbloqueo.** |
+| `work_orders` | ✅ 3 | number (`ER-2026-000001`), branch_id, customer_id, device_id, assigned_technician_id, status, priority, received_at, received_by_id, reported_issue, physical_condition, accessories JSONB `[{code, detail}]`, unlock_method, estimated_delivery_date, diagnostic_fee, advance_amount, advance_method, notes, terms_id, delivered_at, delivered_to_name, delivered_to_document; desde el Sprint 6: warranty_of_id (orden original cuando la orden atiende un reclamo de garantía) | `uq(organization_id, number)`; índices (organization_id, status), (organization_id, received_at); dinero `NUMERIC(14,2) ≥ 0`; anticipo > 0 exige medio de pago. **No guarda contraseñas de desbloqueo.** |
 | `work_order_status_history` | ✅ 3 | work_order_id, from_status, to_status, changed_by_id, reason, changed_at | solo inserción |
 | `attachments` | ✅ 3 | organization_id, entity_type, entity_id, kind (PHOTO), storage_key, file_name, content_type, size_bytes, sha256, uploaded_by_id | índice (entity_type, entity_id); `uq(storage_key)` |
 
@@ -128,8 +128,8 @@ asignar (al moverla se le asigna).
 | `repair_parts` | ✅ 5 | task_id, part_id, quantity, unit_cost, movement_id, returned_movement_id | FK a los movimientos de salida y devolución |
 | `quality_checks` | ✅ 5 | work_order_id, passed, results JSONB, notes, checked_by_id, checked_at | Lista manual de la categoría; LISTO_ENTREGA exige el último aprobado |
 | `payments` | ✅ 5 | work_order_id, receipt_number (`RC-2026-000001`), kind (ADVANCE, PAYMENT), amount, method (CASH, TRANSFER, CARD, NEQUI, DAVIPLATA), reference, notes, received_by_id, paid_at | `ck(amount > 0)`; `uq(organization_id, receipt_number)` |
-| `warranties` | 📐 6 | work_order_id, starts_at, ends_at, conditions | — |
-| `warranty_claims` | 📐 6 | warranty_id, reported_issue, diagnosis, resolution, new_work_order_id | — |
+| `warranties` | ✅ 6 | work_order_id, days, starts_on, ends_on, created_by_id, created_at | `uq(work_order_id)`, `ck(days > 0)`, índice en ends_on. Se crea al entregar un equipo reparado (cotización aprobada o trabajos registrados) |
+| `warranty_claims` | ✅ 6 | warranty_id, claim_order_id, reported_issue, status (OPEN, ACCEPTED, REJECTED), resolution, decided_by_id, decided_at, created_by_id | `uq(claim_order_id)`; el reclamo abre una orden nueva |
 
 **Transacción de consumo de repuestos (Sprint 5):** en una sola transacción se ejecuta
 `SELECT … FOR UPDATE` sobre `stock_levels`, se valida la cantidad, se inserta el registro en

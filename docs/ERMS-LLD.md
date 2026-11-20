@@ -23,6 +23,7 @@ ERMS/
 │       ├── hooks/ stores/    hooks globales, stores Zustand (desde el Sprint 1)
 │       └── types/            contratos de API
 ├── diagnostic-agent/         Sprint 4: paquete Python `erms_agent` (src layout)
+├── e2e/                      Sprint 6: prueba de punta a punta con Playwright (npm propio)
 ├── infrastructure/           init de PostgreSQL; backups y despliegue
 ├── docs/                     documentación y docs/api/openapi.json
 ├── scripts/                  smoke-test.sh, dev-db-setup.sql

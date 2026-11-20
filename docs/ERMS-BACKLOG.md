@@ -82,7 +82,20 @@ de pago y almacenamiento definitivo; sus resultados serán `AI_SUGGESTION`, nunc
 | S5-06 | Como recepcionista, quiero cobrar | Saldo según cotización aprobada (incluye diagnóstico) o diagnóstico; pagos con comprobante RC; el anticipo es el primer pago | ✅ |
 | S5-07 | Como supervisor, quiero autorizar entregas con saldo | Solo con permiso y motivo registrado en el historial | ✅ |
 
-## Sprint 6
+## Sprint 6 – Cierre del MVP
+
+| ID | Historia | Criterios de aceptación | Estado |
+|---|---|---|---|
+| S6-01 | Como recepcionista, quiero que cada reparación entregada tenga garantía | Días por defecto del taller (90), ajustables en la entrega; solo si se reparó; vigencia visible en la orden | ✅ |
+| S6-02 | Como recepcionista, quiero atender reclamos de garantía | Orden nueva enlazada a la original, sin cobro de diagnóstico, cotización en $0 permitida; el supervisor acepta o rechaza con resolución | ✅ |
+| S6-03 | Como dueño, quiero ver el estado del taller al entrar | Órdenes abiertas por estado, recibidas hoy y en la semana, vencidas, esperando al cliente, listas para entrega con saldo, ingresos del mes por medio, tiempo promedio, carga por técnico, stock bajo, garantías por vencer y reclamos abiertos. El técnico solo ve sus órdenes y sin dinero | ✅ |
+| S6-04 | Como dueño, quiero reportes por fechas | Ingresos, órdenes, inventario y técnicos; en pantalla, Excel (CSV) y PDF | ✅ |
+| S6-05 | Como equipo, quiero una prueba de punta a punta en el navegador | Playwright recorre recepción → diagnóstico → cotización → reparación → calidad → pago → entrega → reclamo de garantía, en CI | ✅ |
+| S6-06 | Como usuario, quiero que la aplicación cargue rápido | Pantallas cargadas bajo demanda y librerías en archivos separados que el navegador conserva entre despliegues | ✅ |
+| S6-07 | Como dueño, quiero proteger el inicio de sesión | Límite de 20 intentos fallidos por IP cada 15 min (429), además del bloqueo por cuenta | ✅ |
+| S6-08 | Como dueño, quiero respaldos de la base de datos | Backups nativos de Railway (plan Pro) programados y simulacro de restauración documentado | ✅ (configuración manual) |
+
+## Requerimientos detectados
 
 Las historias se detallan en la planificación de cada sprint, a partir de los módulos 2 – 11
 del documento de requerimientos y del modelo de [ERMS-ERD.md](ERMS-ERD.md). Se agregan
@@ -98,7 +111,7 @@ estos requerimientos detectados en el análisis:
 | R-06 | IVA por ítem de cotización (19 % o 0 %) | 5 ✅ |
 | R-07 | Existencias por sede (`stock_levels`) | 5 ✅ |
 | R-08 | Compras a proveedores: entrada simple en el Sprint 5; órdenes de compra después del MVP | 5 ✅ (simple) |
-| R-09 | Backups programados de PostgreSQL | 6 |
+| R-09 | Backups programados de PostgreSQL | 6 ✅ (Railway) |
 
 ## Después del MVP
 
