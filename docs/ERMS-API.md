@@ -115,7 +115,9 @@ Acciones registradas: `auth.login`, `auth.login_failed`, `auth.logout`,
 `organization.updated`, `privacy_policy.published`, `customer.created`, `customer.updated`,
 `customer.consent_granted`, `customer.consent_revoked`, `customer.anonymized`,
 `catalog.manufacturer_created`, `catalog.manufacturer_updated`, `catalog.model_created`,
-`catalog.model_updated`, `device.created`, `device.updated`.
+`catalog.model_updated`, `device.created`, `device.updated`, `reception_terms.published`,
+`work_order.created`, `work_order.updated`, `work_order.assigned`,
+`work_order.status_changed`, `work_order.photo_added`, `work_order.photo_deleted`.
 Las contraseñas y los tokens nunca se registran. De los clientes solo se registran los
 **nombres de los campos** que cambiaron, nunca sus valores (ADR-018).
 
@@ -190,6 +192,58 @@ Reglas:
 Reglas: solo se registran equipos de clientes activos, no anonimizados y con autorización
 de datos vigente (422). El IMEI tiene 15 dígitos con dígito de control Luhn y es único en el
 taller; el serial es único por modelo (409 con el nombre del propietario actual).
+
+### Condiciones del acta (`/reception-terms`)
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET /reception-terms` | autenticado | 200 `{terms: ReceptionTermsRead \| null, template}` |
+| `POST /reception-terms` | `organization:manage` | 201 `ReceptionTermsRead`: `{content}` publica la versión siguiente |
+
+### Órdenes de servicio (`/work-orders`)
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET /work-orders?q=&status=&status=&technician_id=&unassigned=&open=&page=&size=` | `work_orders:read` | 200 `Page[WorkOrderListItem]`, de la más reciente a la más antigua. `q`: número, cliente (sin tildes), IMEI, serial o modelo. |
+| `POST /work-orders` | `work_orders:create` | 201 `WorkOrderRead` |
+| `GET /work-orders/technicians` | `work_orders:assign` | 200 `[{id, full_name}]`: usuarios activos con `work_orders:progress` |
+| `GET /work-orders/{id}` | `work_orders:read` | 200 `WorkOrderRead` (incluye `history[]` y `allowed_transitions[]` para el usuario actual) |
+| `PATCH /work-orders/{id}` | `work_orders:create` | 200: corrige falla, estado físico, prioridad, fecha estimada y notas (no los valores) |
+| `PUT /work-orders/{id}/assignment` | `work_orders:assign` | 200: `{technician_id \| null}` |
+| `POST /work-orders/{id}/status` | `progress` o `deliver` según el estado | 200: `{status, reason?}` |
+| `POST /work-orders/{id}/delivery` | `work_orders:deliver` | 200: `{picked_up_by_customer, name?, document?, notes?}` |
+| `GET /work-orders/{id}/reception-act.pdf` | `work_orders:read` | 200 `application/pdf` (descarga) |
+| `GET /work-orders/{id}/photos` | `work_orders:read` | 200 `{demo, max_photos, items[]}` |
+| `POST /work-orders/{id}/photos` | `work_orders:create` o `progress` | 201: `multipart/form-data` con `file` (JPG, PNG o WEBP; máx. 10 MB) |
+| `GET /work-orders/{id}/photos/{photo_id}` | `work_orders:read` | 200 `image/jpeg` |
+| `DELETE /work-orders/{id}/photos/{photo_id}` | `work_orders:create` o `progress` | 204 |
+
+```json
+// POST /work-orders
+{ "customer_id": "…", "device_id": "…", "reported_issue": "No enciende.",
+  "physical_condition": "Pantalla rayada.", "unlock_method": "CUSTOMER_IN_PERSON",
+  "accessories": [{ "code": "CHARGER" }, { "code": "OTHER", "detail": "Lápiz óptico" }],
+  "priority": "NORMAL", "estimated_delivery_date": "2026-11-27",
+  "diagnostic_fee": "50000", "advance_amount": "20000", "advance_method": "NEQUI",
+  "assigned_technician_id": null, "notes": null }
+```
+
+Reglas:
+
+- Requiere condiciones publicadas, cliente con autorización de datos vigente y un equipo activo
+  del mismo cliente sin otra orden abierta (409).
+- Número `ER-<año>-<6 dígitos>`, consecutivo por taller y año (hora de Bogotá).
+- `unlock_method`: `NOT_REQUIRED`, `CUSTOMER_IN_PERSON` o `CUSTOMER_UNLOCKS`. **Nunca se envían
+  ni guardan contraseñas o patrones.**
+- Accesorios: `CHARGER`, `CABLE`, `CASE`, `BATTERY`, `SIM`, `SD_CARD`, `CONTROLLER`, `BOX`,
+  `OTHER` (exige `detail`). Medios de pago: `CASH`, `TRANSFER`, `CARD`, `NEQUI`, `DAVIPLATA`.
+- Dinero como texto decimal con dos posiciones en las respuestas (`"50000.00"`).
+- Transiciones y permisos: ver la tabla en [ERMS-ERD.md](ERMS-ERD.md). Transición inválida o sin
+  motivo requerido: 422; sin permiso u orden de otro técnico: 403. `ENTREGADO` solo por
+  `/delivery`. Una orden entregada no se modifica.
+- Fotos: exigen la autorización `PHOTOS` vigente del cliente; se re-codifican a JPEG de máx.
+  2048 px **sin metadatos EXIF (incluido el GPS)**; máx. 20 por orden. Con `demo: true` se
+  guardan en el disco del servidor y pueden perderse al redesplegar.
 
 ### Salud
 

@@ -4,7 +4,7 @@ Plataforma para gestionar un centro de diagnóstico, mantenimiento y reparación
 computadores, celulares, tablets y consolas: desde la recepción del equipo hasta su entrega y
 garantía.
 
-**Estado:** Sprint 2 terminado (clientes, autorizaciones de datos y equipos). Ver
+**Estado:** Sprint 3 terminado (recepción, órdenes de servicio y acta en PDF). Ver
 [roadmap](docs/ERMS-ROADMAP.md).
 
 | Capa | Tecnología |

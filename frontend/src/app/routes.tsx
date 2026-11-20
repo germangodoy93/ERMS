@@ -14,6 +14,9 @@ import { CatalogPage } from "@/modules/devices/pages/CatalogPage";
 import { DevicesPage } from "@/modules/devices/pages/DevicesPage";
 import { OrganizationPage } from "@/modules/organization/pages/OrganizationPage";
 import { RolesPage } from "@/modules/roles/pages/RolesPage";
+import { NewWorkOrderPage } from "@/modules/workorders/pages/NewWorkOrderPage";
+import { WorkOrderDetailPage } from "@/modules/workorders/pages/WorkOrderDetailPage";
+import { WorkOrdersPage } from "@/modules/workorders/pages/WorkOrdersPage";
 import { SystemStatusPage } from "@/modules/system/pages/SystemStatusPage";
 import { UsersPage } from "@/modules/users/pages/UsersPage";
 
@@ -32,6 +35,30 @@ export const routes: RouteObject[] = [
         element: <AppLayout />,
         children: [
           { index: true, element: <SystemStatusPage /> },
+          {
+            path: "ordenes",
+            element: (
+              <RequirePermission permission={PERMS.WORK_ORDERS_READ}>
+                <WorkOrdersPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "ordenes/nueva",
+            element: (
+              <RequirePermission permission={PERMS.WORK_ORDERS_CREATE}>
+                <NewWorkOrderPage />
+              </RequirePermission>
+            ),
+          },
+          {
+            path: "ordenes/:orderId",
+            element: (
+              <RequirePermission permission={PERMS.WORK_ORDERS_READ}>
+                <WorkOrderDetailPage />
+              </RequirePermission>
+            ),
+          },
           {
             path: "clientes",
             element: (

@@ -2,12 +2,17 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import {
+  ACCESSORIES,
   COMPONENT_STATUSES,
   CONSENT_CHANNELS,
   CONSENT_PURPOSES,
   CUSTOMER_KINDS,
   ID_TYPES,
   OVERALL_STATUSES,
+  PAYMENT_METHODS,
+  PRIORITIES,
+  UNLOCK_METHODS,
+  WORK_ORDER_STATUSES,
 } from "./api";
 
 interface SchemaObject {
@@ -348,6 +353,140 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
     ],
     required: [],
   },
+  WorkOrderListItem: {
+    all: [
+      "assigned_technician",
+      "customer",
+      "device",
+      "estimated_delivery_date",
+      "id",
+      "number",
+      "priority",
+      "received_at",
+      "status",
+    ],
+    required: [
+      "assigned_technician",
+      "customer",
+      "device",
+      "estimated_delivery_date",
+      "id",
+      "number",
+      "priority",
+      "received_at",
+      "status",
+    ],
+  },
+  WorkOrderRead: {
+    all: [
+      "accessories",
+      "advance_amount",
+      "advance_method",
+      "allowed_transitions",
+      "assigned_technician",
+      "branch",
+      "customer",
+      "customer_allows_photos",
+      "delivered_at",
+      "delivered_to_document",
+      "delivered_to_name",
+      "device",
+      "diagnostic_fee",
+      "estimated_delivery_date",
+      "history",
+      "id",
+      "notes",
+      "number",
+      "physical_condition",
+      "priority",
+      "received_at",
+      "received_by",
+      "reported_issue",
+      "status",
+      "terms_version",
+      "unlock_method",
+      "updated_at",
+    ],
+    required: [
+      "accessories",
+      "advance_amount",
+      "advance_method",
+      "allowed_transitions",
+      "assigned_technician",
+      "branch",
+      "customer",
+      "customer_allows_photos",
+      "delivered_at",
+      "delivered_to_document",
+      "delivered_to_name",
+      "device",
+      "diagnostic_fee",
+      "estimated_delivery_date",
+      "history",
+      "id",
+      "notes",
+      "number",
+      "physical_condition",
+      "priority",
+      "received_at",
+      "received_by",
+      "reported_issue",
+      "status",
+      "terms_version",
+      "unlock_method",
+      "updated_at",
+    ],
+  },
+  WorkOrderCreate: {
+    all: [
+      "accessories",
+      "advance_amount",
+      "advance_method",
+      "assigned_technician_id",
+      "customer_id",
+      "device_id",
+      "diagnostic_fee",
+      "estimated_delivery_date",
+      "notes",
+      "physical_condition",
+      "priority",
+      "reported_issue",
+      "unlock_method",
+    ],
+    required: ["customer_id", "device_id", "physical_condition", "reported_issue", "unlock_method"],
+  },
+  WorkOrderUpdate: {
+    all: ["estimated_delivery_date", "notes", "physical_condition", "priority", "reported_issue"],
+    required: [],
+  },
+  StatusHistoryItem: {
+    all: ["changed_at", "changed_by", "from_status", "reason", "to_status"],
+    required: ["changed_at", "changed_by", "from_status", "reason", "to_status"],
+  },
+  AccessoryItem: { all: ["code", "detail"], required: ["code"] },
+  PersonRef: { all: ["full_name", "id"], required: ["full_name", "id"] },
+  CustomerSummary: {
+    all: ["full_name", "id", "id_number", "id_type", "phone"],
+    required: ["full_name", "id", "id_number", "id_type", "phone"],
+  },
+  DeviceSummary: {
+    all: ["category", "id", "imei", "manufacturer", "model", "serial_number"],
+    required: ["category", "id", "imei", "manufacturer", "model", "serial_number"],
+  },
+  DeliveryRequest: {
+    all: ["document", "name", "notes", "picked_up_by_customer"],
+    required: ["picked_up_by_customer"],
+  },
+  CurrentReceptionTerms: { all: ["template", "terms"], required: ["template", "terms"] },
+  ReceptionTermsRead: {
+    all: ["content", "id", "published_at", "version"],
+    required: ["content", "id", "published_at", "version"],
+  },
+  PhotoRead: {
+    all: ["created_at", "file_name", "id", "size_bytes"],
+    required: ["created_at", "file_name", "id", "size_bytes"],
+  },
+  PhotoList: { all: ["demo", "items", "max_photos"], required: ["demo", "items", "max_photos"] },
 };
 
 describe("API contract (docs/api/openapi.json)", () => {
@@ -386,6 +525,16 @@ describe("API contract (docs/api/openapi.json)", () => {
         "/api/v1/catalog/manufacturers/{manufacturer_id}",
         "/api/v1/catalog/models",
         "/api/v1/catalog/models/{model_id}",
+        "/api/v1/reception-terms",
+        "/api/v1/work-orders",
+        "/api/v1/work-orders/technicians",
+        "/api/v1/work-orders/{order_id}",
+        "/api/v1/work-orders/{order_id}/assignment",
+        "/api/v1/work-orders/{order_id}/status",
+        "/api/v1/work-orders/{order_id}/delivery",
+        "/api/v1/work-orders/{order_id}/reception-act.pdf",
+        "/api/v1/work-orders/{order_id}/photos",
+        "/api/v1/work-orders/{order_id}/photos/{attachment_id}",
       ]),
     );
   });
@@ -397,6 +546,11 @@ describe("API contract (docs/api/openapi.json)", () => {
     expect(schema("ConsentChannel").enum).toEqual([...CONSENT_CHANNELS]);
     expect(schema("IdType").enum).toEqual([...ID_TYPES]);
     expect(schema("CustomerKind").enum).toEqual([...CUSTOMER_KINDS]);
+    expect(schema("Status").enum).toEqual([...WORK_ORDER_STATUSES]);
+    expect(schema("Priority").enum).toEqual([...PRIORITIES]);
+    expect(schema("UnlockMethod").enum).toEqual([...UNLOCK_METHODS]);
+    expect(schema("Accessory").enum).toEqual([...ACCESSORIES]);
+    expect(schema("PaymentMethod").enum).toEqual([...PAYMENT_METHODS]);
   });
 
   it.each(Object.entries(FIELDS))("keeps %s fields in sync", (name, fields) => {

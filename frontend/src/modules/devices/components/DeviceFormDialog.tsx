@@ -42,11 +42,13 @@ export function DeviceFormDialog({
   onOpenChange,
   customerId,
   device,
+  onCreated,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   customerId: string;
   device?: Device;
+  onCreated?: (device: Device) => void;
 }) {
   const categories = useCategories();
   const manufacturers = useManufacturers();
@@ -110,8 +112,12 @@ export function DeviceFormDialog({
         await updateDevice.mutateAsync({ id: device.id, changes });
         toast.success("Equipo actualizado.");
       } else {
-        await createDevice.mutateAsync({ customerId, payload: fields satisfies DeviceCreate });
+        const created = await createDevice.mutateAsync({
+          customerId,
+          payload: fields satisfies DeviceCreate,
+        });
         toast.success("Equipo registrado.");
+        onCreated?.(created);
       }
       onOpenChange(false);
     } catch (error) {

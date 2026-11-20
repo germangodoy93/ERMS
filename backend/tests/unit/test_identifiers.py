@@ -130,3 +130,15 @@ def test_authorization_texts_reference_policy_version() -> None:
     assert set(texts) == set(ConsentPurpose)
     assert "(versión 3)" in texts[ConsentPurpose.DATA_PROCESSING]
     assert "formateos" in texts[ConsentPurpose.DIAGNOSTIC_AGENT]
+
+
+def test_pdf_formats_money_and_phones() -> None:
+    from decimal import Decimal
+
+    from app.modules.workorders.pdf import money, phone
+
+    assert money(Decimal("45000")) == "$ 45.000"
+    assert money(Decimal("1250000.5")) == "$ 1.250.000,50"
+    assert phone("+573000000077") == "300 000 0077"
+    assert phone("+14155550100") == "+14155550100"
+    assert phone(None) is None

@@ -61,7 +61,7 @@ erDiagram
 |---|---|---|---|
 | `privacy_policies` | ✅ 2 | version, content, published_at, published_by_id | `uq(organization_id, version)`; versiones inmutables |
 | `customers` | ✅ 2 | kind (PERSON/COMPANY), full_name, search_name (sin tildes), id_type (CC, CE, NIT, PAS, TI, PPT), id_number, phone (E.164), email, address, notes, is_active, anonymized_at, created_by_id | `uq(organization_id, id_type, id_number)` (documento opcional); `ck` tipo y número juntos; índice GIN trigram (`pg_trgm`) por `search_name` |
-| `customer_consents` | ✅ 2 | customer_id, purpose (DATA_PROCESSING, PHOTOS, DIAGNOSTIC_AGENT), granted, channel (SCREEN, PAPER, VERBAL), policy_id, recorded_by_id, recorded_at | Ley 1581 de 2012; **solo inserción**: el estado vigente es el último registro por finalidad. La evidencia en archivo llega con `attachments` (Sprint 3). |
+| `customer_consents` | ✅ 2 | customer_id, purpose (DATA_PROCESSING, PHOTOS, DIAGNOSTIC_AGENT), granted, channel (SCREEN, PAPER, VERBAL), policy_id, recorded_by_id, recorded_at | Ley 1581 de 2012; **solo inserción**: el estado vigente es el último registro por finalidad. La evidencia en archivo podrá adjuntarse con `attachments` cuando se defina el almacenamiento. |
 | `device_categories` | ✅ 2 | code (PK), name, sort_order | **Catálogo global** fijo: LAPTOP, DESKTOP, PHONE, TABLET, CONSOLE, OTHER |
 | `manufacturers` | ✅ 2 | name, is_active | `uq(organization_id, name)`; 13 precargados por taller |
 | `device_models` | ✅ 2 | manufacturer_id, category_code, name, release_year, is_active | `uq(manufacturer_id, name)` |
@@ -71,18 +71,36 @@ erDiagram
 
 | Tabla | Sprint | Columnas clave | Restricciones |
 |---|---|---|---|
-| `document_sequences` | 📐 3 | doc_type (WORK_ORDER, QUOTATION, …), year, last_value | `uq(organization_id, doc_type, year)`; `SELECT … FOR UPDATE` |
-| `work_orders` | 📐 3 | number (`ER-2026-000001`), branch_id, customer_id, device_id, assigned_technician_id, status, received_at, reported_issue, physical_condition, accessories JSONB, notes | `uq(organization_id, number)`; índice por status |
-| `work_order_status_history` | 📐 3 | work_order_id, from_status, to_status, changed_by, reason | solo inserción |
-| `attachments` | 📐 3 | entity_type, entity_id, storage_key, file_name, content_type, size_bytes, sha256, uploaded_by | índice (entity_type, entity_id) |
+| `document_sequences` | ✅ 3 | organization_id, doc_type (WORK_ORDER, …), year, last_value | PK (organization_id, doc_type, year); se incrementa con `INSERT … ON CONFLICT DO UPDATE … RETURNING` (atómico) |
+| `reception_terms` | ✅ 3 | version, content, published_at, published_by_id | `uq(organization_id, version)`; versiones inmutables |
+| `work_orders` | ✅ 3 | number (`ER-2026-000001`), branch_id, customer_id, device_id, assigned_technician_id, status, priority, received_at, received_by_id, reported_issue, physical_condition, accessories JSONB `[{code, detail}]`, unlock_method, estimated_delivery_date, diagnostic_fee, advance_amount, advance_method, notes, terms_id, delivered_at, delivered_to_name, delivered_to_document | `uq(organization_id, number)`; índices (organization_id, status), (organization_id, received_at); dinero `NUMERIC(14,2) ≥ 0`; anticipo > 0 exige medio de pago. **No guarda contraseñas de desbloqueo.** |
+| `work_order_status_history` | ✅ 3 | work_order_id, from_status, to_status, changed_by_id, reason, changed_at | solo inserción |
+| `attachments` | ✅ 3 | organization_id, entity_type, entity_id, kind (PHOTO), storage_key, file_name, content_type, size_bytes, sha256, uploaded_by_id | índice (entity_type, entity_id); `uq(storage_key)` |
 
 **Estados de la orden:** `RECIBIDO`, `INSPECCION`, `DIAGNOSTICO`, `COTIZACION`,
 `PENDIENTE_AUTORIZACION`, `APROBADO`, `COTIZACION_RECHAZADA` *(agregado)*, `EN_REPARACION`,
 `CONTROL_CALIDAD`, `LISTO_ENTREGA`, `ENTREGADO`, `CANCELADO`, `NO_REPARABLE`.
 
 Los estados `NO_REPARABLE`, `COTIZACION_RECHAZADA` y `CANCELADO` pasan a `LISTO_ENTREGA` y luego
-a `ENTREGADO`, porque el equipo siempre se devuelve. La matriz completa de transiciones se
-define en el Sprint 3.
+a `ENTREGADO`, porque el equipo siempre se devuelve.
+
+**Transiciones (Sprint 3)** — definidas en `backend/app/modules/workorders/catalog.py`:
+
+| Desde | Hacia | Permiso |
+|---|---|---|
+| RECIBIDO | INSPECCION · CANCELADO* | progress · deliver |
+| INSPECCION | DIAGNOSTICO · NO_REPARABLE* · CANCELADO* | progress · progress · deliver |
+| DIAGNOSTICO | COTIZACION · NO_REPARABLE* · CANCELADO* | progress · progress · deliver |
+| COTIZACION | PENDIENTE_AUTORIZACION · CANCELADO* | deliver |
+| PENDIENTE_AUTORIZACION | APROBADO · COTIZACION_RECHAZADA* · CANCELADO* | deliver |
+| APROBADO | EN_REPARACION · CANCELADO* | progress · deliver |
+| EN_REPARACION | CONTROL_CALIDAD · NO_REPARABLE* | progress |
+| CONTROL_CALIDAD | LISTO_ENTREGA · EN_REPARACION* | progress (o deliver para LISTO_ENTREGA) |
+| COTIZACION_RECHAZADA, NO_REPARABLE, CANCELADO | LISTO_ENTREGA | progress o deliver |
+| LISTO_ENTREGA | ENTREGADO (por `/delivery`) | deliver |
+
+\* Exige motivo. Un técnico sin `work_orders:assign` solo mueve órdenes asignadas a él o sin
+asignar (al moverla se le asigna).
 
 ### Diagnóstico
 

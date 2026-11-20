@@ -356,3 +356,169 @@ export interface DeviceUpdate {
   notes?: string | null;
   is_active?: boolean | null;
 }
+
+// --- Work orders (Sprint 3) ----------------------------------------------------------
+
+export const WORK_ORDER_STATUSES = [
+  "RECIBIDO",
+  "INSPECCION",
+  "DIAGNOSTICO",
+  "COTIZACION",
+  "PENDIENTE_AUTORIZACION",
+  "APROBADO",
+  "COTIZACION_RECHAZADA",
+  "EN_REPARACION",
+  "CONTROL_CALIDAD",
+  "LISTO_ENTREGA",
+  "ENTREGADO",
+  "CANCELADO",
+  "NO_REPARABLE",
+] as const;
+export type WorkOrderStatus = (typeof WORK_ORDER_STATUSES)[number];
+
+export const PRIORITIES = ["NORMAL", "HIGH", "URGENT"] as const;
+export type Priority = (typeof PRIORITIES)[number];
+
+export const UNLOCK_METHODS = ["NOT_REQUIRED", "CUSTOMER_IN_PERSON", "CUSTOMER_UNLOCKS"] as const;
+export type UnlockMethod = (typeof UNLOCK_METHODS)[number];
+
+export const ACCESSORIES = [
+  "CHARGER",
+  "CABLE",
+  "CASE",
+  "BATTERY",
+  "SIM",
+  "SD_CARD",
+  "CONTROLLER",
+  "BOX",
+  "OTHER",
+] as const;
+export type AccessoryCode = (typeof ACCESSORIES)[number];
+
+export const PAYMENT_METHODS = ["CASH", "TRANSFER", "CARD", "NEQUI", "DAVIPLATA"] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+export interface AccessoryItem {
+  code: AccessoryCode;
+  detail?: string | null;
+}
+
+export interface PersonRef {
+  id: string;
+  full_name: string;
+}
+
+export interface WorkOrderCustomer {
+  id: string;
+  full_name: string;
+  phone: string | null;
+  id_type: string | null;
+  id_number: string | null;
+}
+
+export interface WorkOrderDevice {
+  id: string;
+  category: string;
+  manufacturer: string;
+  model: string;
+  imei: string | null;
+  serial_number: string | null;
+}
+
+export interface WorkOrderListItem {
+  id: string;
+  number: string;
+  status: WorkOrderStatus;
+  priority: Priority;
+  received_at: string;
+  estimated_delivery_date: string | null;
+  customer: WorkOrderCustomer;
+  device: WorkOrderDevice;
+  assigned_technician: PersonRef | null;
+}
+
+export interface StatusHistoryItem {
+  from_status: WorkOrderStatus | null;
+  to_status: WorkOrderStatus;
+  reason: string | null;
+  changed_by: PersonRef | null;
+  changed_at: string;
+}
+
+export interface WorkOrder extends WorkOrderListItem {
+  branch: string;
+  reported_issue: string;
+  physical_condition: string;
+  accessories: AccessoryItem[];
+  unlock_method: UnlockMethod;
+  /** Decimal string with two places, e.g. "50000.00". */
+  diagnostic_fee: string;
+  advance_amount: string;
+  advance_method: PaymentMethod | null;
+  notes: string | null;
+  terms_version: number;
+  received_by: PersonRef | null;
+  delivered_at: string | null;
+  delivered_to_name: string | null;
+  delivered_to_document: string | null;
+  history: StatusHistoryItem[];
+  allowed_transitions: WorkOrderStatus[];
+  customer_allows_photos: boolean;
+  updated_at: string;
+}
+
+export interface WorkOrderCreate {
+  customer_id: string;
+  device_id: string;
+  reported_issue: string;
+  physical_condition: string;
+  accessories?: AccessoryItem[];
+  unlock_method: UnlockMethod;
+  priority?: Priority;
+  estimated_delivery_date?: string | null;
+  diagnostic_fee?: string;
+  advance_amount?: string;
+  advance_method?: PaymentMethod | null;
+  notes?: string | null;
+  assigned_technician_id?: string | null;
+}
+
+export interface WorkOrderUpdate {
+  reported_issue?: string | null;
+  physical_condition?: string | null;
+  priority?: Priority | null;
+  estimated_delivery_date?: string | null;
+  notes?: string | null;
+}
+
+export interface DeliveryRequest {
+  picked_up_by_customer: boolean;
+  name?: string | null;
+  document?: string | null;
+  notes?: string | null;
+}
+
+export interface ReceptionTerms {
+  id: string;
+  version: number;
+  content: string;
+  published_at: string;
+}
+
+export interface CurrentReceptionTerms {
+  terms: ReceptionTerms | null;
+  template: string;
+}
+
+export interface Photo {
+  id: string;
+  file_name: string;
+  size_bytes: number;
+  created_at: string;
+}
+
+export interface PhotoList {
+  demo: boolean;
+  max_photos: number;
+  items: Photo[];
+}

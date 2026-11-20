@@ -39,7 +39,12 @@ export const NAVIGATION: NavSection[] = [
     items: [
       { label: "Estado del sistema", icon: Activity, to: "/" },
       { label: "Dashboard", icon: LayoutDashboard, plannedSprint: 6 },
-      { label: "Órdenes de servicio", icon: ClipboardList, plannedSprint: 3 },
+      {
+        label: "Órdenes de servicio",
+        icon: ClipboardList,
+        to: "/ordenes",
+        permission: PERMS.WORK_ORDERS_READ,
+      },
       { label: "Clientes", icon: Users, to: "/clientes", permission: PERMS.CUSTOMERS_READ },
       {
         label: "Dispositivos",

@@ -35,7 +35,11 @@ export function useCustomers(filters: CustomerFilters) {
 }
 
 export function useCustomer(id: string) {
-  return useQuery({ queryKey: customerKeys.detail(id), queryFn: () => getCustomer(id) });
+  return useQuery({
+    queryKey: customerKeys.detail(id),
+    queryFn: () => getCustomer(id),
+    enabled: Boolean(id),
+  });
 }
 
 export function useConsentHistory(id: string) {

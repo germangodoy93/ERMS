@@ -54,6 +54,14 @@ def money(value: Decimal) -> str:
     return f"$ {text}" if cents == "00" else f"$ {text},{cents}"
 
 
+def phone(value: str | None) -> str | None:
+    """+573001234567 → 300 123 4567; other numbers unchanged."""
+    if value and value.startswith("+57") and len(value) == 13:
+        digits = value[3:]
+        return f"{digits[:3]} {digits[3:6]} {digits[6:]}"
+    return value
+
+
 def _p(value: str | None, style: ParagraphStyle = BODY) -> Paragraph:
     text = escape(value or "—").replace("\n", "<br/>")
     return Paragraph(text, style)
@@ -102,7 +110,7 @@ def build_reception_act(
         organization.legal_name or organization.name,
         f"NIT {organization.tax_id}" if organization.tax_id else None,
         " · ".join(v for v in (organization.address, organization.city) if v) or None,
-        " · ".join(v for v in (organization.phone, organization.email) if v) or None,
+        " · ".join(v for v in (phone(organization.phone), organization.email) if v) or None,
     ]
     story: list[object] = [
         Paragraph(escape(organization.name), TITLE),
@@ -127,7 +135,7 @@ def build_reception_act(
                     if order.customer.id_number
                     else None,
                 ),
-                ("Teléfono", order.customer.phone),
+                ("Teléfono", phone(order.customer.phone)),
             ],
             (width * 0.3, width * 0.7),
         ),

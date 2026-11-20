@@ -33,6 +33,9 @@ verificadas el 2026-11-19:
 | zustand / react-hook-form / zod | 5.1.0 / 7.92.0 / 4.6.7 | Sprint 1 |
 | @hookform/resolvers / sonner | 7.0.7 / 2.0.8 | Sprint 1 |
 | Mailpit (imagen) | v1.33.1 | Correo de desarrollo; no se usa la v1.34.0 por ser de hace 2 días |
+| reportlab | 5.1.0 | Sprint 3, acta en PDF. Licencia BSD. Sin tipos: `mypy` lo ignora (`pyproject.toml`) |
+| Pillow | 13.0.0 | Dependencia de reportlab; también valida y limpia las fotos (licencia MIT-CMU) |
+| python-multipart | **0.0.33** (fijada) | Subida de fotos en FastAPI. No se usa la 0.0.34 por ser de hace 4 días |
 
 ### Decisiones de compatibilidad
 
@@ -82,6 +85,8 @@ verificadas el 2026-11-19:
 | `REFRESH_COOKIE_SECURE` | No | Por defecto `true` solo en producción |
 | `FRONTEND_URL` | Sí en producción | Base de los enlaces enviados por correo (p. ej. el dominio de `web` en Railway) |
 | `SMTP_HOST` · `SMTP_PORT` · `SMTP_USERNAME` · `SMTP_PASSWORD` · `SMTP_STARTTLS` · `SMTP_FROM` | Para recuperar contraseñas | Sin `SMTP_HOST` no se envían correos: se registra el intento sin el enlace. |
+| `ATTACHMENTS_DIR` | No | Carpeta del almacenamiento local de fotos (por defecto `var/attachments`). En Railway es efímera: **modo demostración**. |
+| `ATTACHMENT_MAX_BYTES` · `ATTACHMENT_MAX_PER_ORDER` | No | 10 MB · 20 |
 | `ERMS_ADMIN_PASSWORD` | Solo `bootstrap` | Contraseña temporal del primer administrador |
 | `ERMS_TEST_DATABASE_URL` | Solo pruebas | Base **desechable** para las pruebas de integración |
 

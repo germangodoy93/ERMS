@@ -41,7 +41,23 @@ Prioridad: **P1** imprescindible para el MVP · **P2** importante · **P3** dese
 | S2-07 | Como supervisor, quiero administrar el catálogo | Fabricantes precargados, renombrar y desactivar; corregir y desactivar modelos | ✅ |
 | S2-08 | Pendientes del Sprint 1 | Nombre del taller en el encabezado; Swagger y OpenAPI ocultos en producción | ✅ |
 
-## Sprints 3 – 6
+## Sprint 3 – Recepción (P1)
+
+| ID | Historia | Criterios de aceptación | Estado |
+|---|---|---|---|
+| S3-01 | Como administrador, quiero publicar las condiciones del acta | Plantilla editable (no es asesoría legal); versiones inmutables; sin condiciones no se reciben equipos | ✅ |
+| S3-02 | Como recepcionista, quiero recibir un equipo | Buscar o crear cliente y equipo en el mismo flujo; falla, estado físico, accesorios (lista + Otro), desbloqueo sin contraseñas, prioridad, fecha estimada, valor del diagnóstico y anticipo con medio de pago; número consecutivo sin colisiones | ✅ |
+| S3-03 | Como recepcionista, quiero imprimir el acta de recepción | PDF con datos del taller, cliente, equipo, recepción, valores, condiciones y firmas; se descarga al crear la orden | ✅ |
+| S3-04 | Como técnico o recepcionista, quiero mover la orden por sus estados | Máquina de estados con permisos por estado, motivos obligatorios, propiedad del técnico, historial de solo inserción | ✅ |
+| S3-05 | Como supervisor o recepcionista, quiero asignar técnicos | Solo usuarios activos con permiso técnico | ✅ |
+| S3-06 | Como recepcionista, quiero registrar la entrega | Quién retira (titular o tercero con documento); la orden queda cerrada | ✅ |
+| S3-07 | Como técnico, quiero fotografiar el equipo | Solo con autorización de fotos; sin metadatos GPS; **modo demostración** hasta elegir proveedor | ✅ (demo) |
+| S3-08 | Como usuario, quiero ver y buscar las órdenes | Vistas: abiertas, mías, sin asignar, esperando al cliente, listas, todas; búsqueda por número, cliente, IMEI, serial o modelo | ✅ |
+
+**Aplazado:** Celery + Redis (sin trabajo en segundo plano que lo justifique todavía; ADR-022) y
+el proveedor de almacenamiento definitivo para las fotos (ADR-023).
+
+## Sprints 4 – 6
 
 Las historias se detallan en la planificación de cada sprint, a partir de los módulos 2 – 11
 del documento de requerimientos y del modelo de [ERMS-ERD.md](ERMS-ERD.md). Se agregan
@@ -51,7 +67,7 @@ estos requerimientos detectados en el análisis:
 |---|---|---|
 | R-01 | Consentimiento de tratamiento de datos (Ley 1581 de 2012) | 2 ✅ |
 | R-02 | Estado `COTIZACION_RECHAZADA` y devolución sin reparar | 3 |
-| R-03 | Numeración de documentos sin colisiones (`document_sequences`) | 3 |
+| R-03 | Numeración de documentos sin colisiones (`document_sequences`) | 3 ✅ |
 | R-04 | Consentimiento antes de ejecutar el agente en el equipo del cliente | 4 |
 | R-05 | Token de agente de un solo uso, limitado a una sesión | 4 |
 | R-06 | IVA por ítem de cotización (19 % o 0 %) | 5 |

@@ -77,6 +77,27 @@ proxy web contra PostgreSQL: política → cliente → equipo → anonimización
 | Presentación | `frontend/src/modules/customers/presentation.test.ts` | Formato de teléfono y documento; estado del cliente; IMEI (igual al backend) |
 | Clientes (UI) | `frontend/src/modules/customers/pages/CustomersPage.test.tsx` | Listado; registro bloqueado sin política; autorización obligatoria y consentimientos enviados; técnico sin botón de registro |
 
+## 6. Pruebas del Sprint 3
+
+Resultado local del 2026-11-20: **142 pruebas de backend** y **99 de frontend**, todas en
+verde; módulos nuevos entre 90 % y 100 % de cobertura. Además se recorrió el flujo completo por
+el proxy web: condiciones → cliente con autorización de fotos → equipo → orden → acta PDF →
+foto → estados → entrega.
+
+| Prueba | Archivo | Verifica |
+|---|---|---|
+| Esquema | `backend/tests/integration/test_database.py` | Migración 0004 en ambos sentidos; modelos = migraciones |
+| Condiciones | `backend/tests/integration/test_work_orders_api.py` | Sin condiciones no hay recepción; plantilla; solo el administrador publica |
+| Recepción | `test_work_orders_api.py` | Numeración consecutiva por taller; dinero con dos decimales; accesorios y "Otro"; anticipo exige medio; equipo de otro cliente; una sola orden abierta por equipo; técnico no crea; cliente sin autorización |
+| Estados | `test_work_orders_api.py` | Flujo completo con roles; motivos obligatorios; transiciones inválidas; entrega a tercero con documento; orden cerrada inmodificable |
+| Asignación | `test_work_orders_api.py` | Solo técnicos activos; el técnico no mueve órdenes de otro; al tomar una orden sin asignar se la asigna |
+| Acta | `test_work_orders_api.py` | PDF descargable; texto con marcado se escapa |
+| Fotos | `test_work_orders_api.py` | Exigen autorización; **GPS eliminado**; redimensionadas; no imágenes y GIF rechazados; nombre de archivo saneado; límites de cantidad y tamaño; borrar |
+| Formatos del PDF | `backend/tests/unit/test_identifiers.py` | Pesos colombianos y teléfonos |
+| Contrato | `frontend/src/types/api.contract.test.ts` | 14 esquemas y 5 enums nuevos |
+| Presentación | `frontend/src/modules/workorders/presentation.test.ts` | Pesos, lectura de montos escritos a mano, motivos iguales al backend |
+| Detalle (UI) | `frontend/src/modules/workorders/pages/WorkOrderDetailPage.test.tsx` | Solo las acciones permitidas por la API; motivo obligatorio al devolver de control de calidad; aviso de modo demostración |
+
 **Windows:** si la terminal abre la carpeta como `c:\...` (minúscula), Vitest carga dos copias de
 sí mismo y las pruebas de interfaz fallan con `Invalid Chai property: toBeInTheDocument`.
 Ejecute las pruebas desde una terminal en `C:\...` (ver ERMS-DEVOPS).

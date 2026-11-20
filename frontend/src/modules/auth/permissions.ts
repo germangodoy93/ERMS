@@ -13,6 +13,11 @@ export const PERMS = {
   CUSTOMERS_ANONYMIZE: "customers:anonymize",
   DEVICES_MANAGE: "devices:manage",
   CATALOG_MANAGE: "catalog:manage",
+  WORK_ORDERS_READ: "work_orders:read",
+  WORK_ORDERS_CREATE: "work_orders:create",
+  WORK_ORDERS_ASSIGN: "work_orders:assign",
+  WORK_ORDERS_PROGRESS: "work_orders:progress",
+  WORK_ORDERS_DELIVER: "work_orders:deliver",
 } as const;
 
 export type PermissionCode = (typeof PERMS)[keyof typeof PERMS];

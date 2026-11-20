@@ -26,6 +26,13 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   "catalog.model_updated": "Modelo actualizado",
   "device.created": "Equipo registrado",
   "device.updated": "Equipo actualizado",
+  "reception_terms.published": "Condiciones del acta publicadas",
+  "work_order.created": "Orden creada",
+  "work_order.updated": "Orden actualizada",
+  "work_order.assigned": "Técnico asignado",
+  "work_order.status_changed": "Cambio de estado de orden",
+  "work_order.photo_added": "Foto agregada",
+  "work_order.photo_deleted": "Foto eliminada",
 };
 
 export function auditActionLabel(action: string): string {

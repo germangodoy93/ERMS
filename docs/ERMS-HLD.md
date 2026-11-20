@@ -121,6 +121,11 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 | 019 | Supresión mediante anonimización | Borrado físico | Se conserva el historial técnico y comercial que exigen las normas contables, sin datos personales. |
 | 020 | Categorías de equipo globales y fijas; fabricantes y modelos por taller | Todo por taller | Las categorías anclan checklists y pruebas de diagnóstico (Sprint 4) que deben ser iguales en todos los entornos. |
 | 021 | Swagger y OpenAPI deshabilitados en producción | Publicarlos | Reducen la superficie expuesta; el contrato está en `docs/api/openapi.json`. |
+| 022 | Acta en PDF generada en la petición con reportlab (BSD); Celery y Redis aplazados | Celery desde el Sprint 3 | Un acta se genera en milisegundos; un Redis más en Railway consume créditos sin necesidad. Se incorporará cuando haya trabajo largo (correos masivos, reportes, respaldos). |
+| 023 | Fotos detrás de una interfaz `Storage`; implementación local en **modo demostración** | Elegir proveedor ya | Decisión del negocio: probar el flujo sin costo. En Railway el disco es efímero; la interfaz y la API lo indican (`demo: true`). Cambiar de proveedor solo toca `app/core/storage.py`. |
+| 024 | Numeración con `INSERT … ON CONFLICT DO UPDATE … RETURNING` | `SELECT … FOR UPDATE` | Una sola sentencia atómica, también para el primer número del año. |
+| 025 | Las órdenes no guardan contraseñas de desbloqueo; se registra el método | Campo cifrado | Regla del proyecto: no recolectar contraseñas. El cliente desbloquea o se la da en persona al técnico. |
+| 026 | Las fotos se re-codifican (JPEG, máx. 2048 px, sin EXIF) | Guardar el original | Elimina la ubicación GPS y otros metadatos personales, valida que sea una imagen real y controla el tamaño. |
 
 ## 6. Riesgos
 
