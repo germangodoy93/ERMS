@@ -26,6 +26,11 @@ class Perm(StrEnum):
     CUSTOMERS_ANONYMIZE = "customers:anonymize"
     DEVICES_MANAGE = "devices:manage"
     CATALOG_MANAGE = "catalog:manage"
+    WORK_ORDERS_READ = "work_orders:read"
+    WORK_ORDERS_CREATE = "work_orders:create"
+    WORK_ORDERS_ASSIGN = "work_orders:assign"
+    WORK_ORDERS_PROGRESS = "work_orders:progress"
+    WORK_ORDERS_DELIVER = "work_orders:deliver"
 
 
 PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
@@ -39,6 +44,11 @@ PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
     Perm.CUSTOMERS_ANONYMIZE: "Anonimizar clientes (derecho de supresión)",
     Perm.DEVICES_MANAGE: "Registrar y editar equipos de clientes",
     Perm.CATALOG_MANAGE: "Administrar fabricantes y modelos",
+    Perm.WORK_ORDERS_READ: "Consultar órdenes de servicio",
+    Perm.WORK_ORDERS_CREATE: "Recibir equipos y crear órdenes de servicio",
+    Perm.WORK_ORDERS_ASSIGN: "Asignar técnicos a las órdenes",
+    Perm.WORK_ORDERS_PROGRESS: "Avanzar las etapas técnicas de las órdenes",
+    Perm.WORK_ORDERS_DELIVER: "Registrar decisiones del cliente, cancelar y entregar equipos",
 }
 
 SYSTEM_ROLES: dict[RoleCode, tuple[str, frozenset[Perm]]] = {
@@ -54,15 +64,37 @@ SYSTEM_ROLES: dict[RoleCode, tuple[str, frozenset[Perm]]] = {
                 Perm.CUSTOMERS_MANAGE,
                 Perm.DEVICES_MANAGE,
                 Perm.CATALOG_MANAGE,
+                Perm.WORK_ORDERS_READ,
+                Perm.WORK_ORDERS_CREATE,
+                Perm.WORK_ORDERS_ASSIGN,
+                Perm.WORK_ORDERS_PROGRESS,
+                Perm.WORK_ORDERS_DELIVER,
             }
         ),
     ),
     RoleCode.TECHNICIAN: (
         "Técnico",
-        frozenset({Perm.CUSTOMERS_READ, Perm.DEVICES_MANAGE}),
+        frozenset(
+            {
+                Perm.CUSTOMERS_READ,
+                Perm.DEVICES_MANAGE,
+                Perm.WORK_ORDERS_READ,
+                Perm.WORK_ORDERS_PROGRESS,
+            }
+        ),
     ),
     RoleCode.RECEPTIONIST: (
         "Recepcionista",
-        frozenset({Perm.CUSTOMERS_READ, Perm.CUSTOMERS_MANAGE, Perm.DEVICES_MANAGE}),
+        frozenset(
+            {
+                Perm.CUSTOMERS_READ,
+                Perm.CUSTOMERS_MANAGE,
+                Perm.DEVICES_MANAGE,
+                Perm.WORK_ORDERS_READ,
+                Perm.WORK_ORDERS_CREATE,
+                Perm.WORK_ORDERS_ASSIGN,
+                Perm.WORK_ORDERS_DELIVER,
+            }
+        ),
     ),
 }

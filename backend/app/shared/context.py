@@ -1,9 +1,12 @@
 """Request metadata used for auditing (who did what, from where)."""
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta, timezone
 
 from fastapi import Request
+
+# Colombia has no daylight saving time: a fixed offset avoids depending on tzdata.
+BOGOTA = timezone(timedelta(hours=-5), "America/Bogota")
 
 
 def utcnow() -> datetime:

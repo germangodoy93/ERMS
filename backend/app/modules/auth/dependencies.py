@@ -83,5 +83,14 @@ def require_permissions(*required: Perm) -> Callable[[User], User]:
     return dependency
 
 
+def require_any_permission(*options: Perm) -> Callable[[User], User]:
+    def dependency(user: CurrentUser) -> User:
+        if not set(options) & user.permission_codes:
+            raise PermissionDeniedError("No tiene permisos para realizar esta acción.")
+        return user
+
+    return dependency
+
+
 def get_auth_service(session: DbSession, settings: AppSettings) -> AuthService:
     return AuthService(session, settings)

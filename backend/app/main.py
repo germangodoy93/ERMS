@@ -15,6 +15,8 @@ from app.modules.organizations.router import router as organization_router
 from app.modules.privacy.router import router as privacy_router
 from app.modules.roles.router import router as roles_router
 from app.modules.users.router import router as users_router
+from app.modules.workorders.router import router as work_orders_router
+from app.modules.workorders.router import terms_router as reception_terms_router
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -54,6 +56,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         customers_router,
         catalog_router,
         devices_router,
+        reception_terms_router,
+        work_orders_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)
     return app

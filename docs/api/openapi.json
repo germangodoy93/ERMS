@@ -2299,10 +2299,862 @@
           }
         }
       }
+    },
+    "/api/v1/reception-terms": {
+      "get": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Condiciones vigentes",
+        "operationId": "get_terms_api_v1_reception_terms_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentReceptionTerms"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Publicar una nueva versión de las condiciones",
+        "operationId": "publish_terms_api_v1_reception_terms_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceptionTermsPublish"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceptionTermsRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders": {
+      "get": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Buscar órdenes",
+        "operationId": "list_work_orders_api_v1_work_orders_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Status"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "technician_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Technician Id"
+            }
+          },
+          {
+            "name": "unassigned",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Unassigned"
+            }
+          },
+          {
+            "name": "open",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Open"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Número, cliente, IMEI, serial o modelo",
+              "title": "Q"
+            },
+            "description": "Número, cliente, IMEI, serial o modelo"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Página (desde 1)",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "Página (desde 1)"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Elementos por página",
+              "default": 20,
+              "title": "Size"
+            },
+            "description": "Elementos por página"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_WorkOrderListItem_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Recibir un equipo (crear orden)",
+        "operationId": "create_work_order_api_v1_work_orders_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkOrderCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/technicians": {
+      "get": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Técnicos que se pueden asignar",
+        "operationId": "list_technicians_api_v1_work_orders_technicians_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PersonRef"
+                  },
+                  "type": "array",
+                  "title": "Response List Technicians Api V1 Work Orders Technicians Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders/{order_id}": {
+      "get": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Detalle de la orden",
+        "operationId": "get_work_order_api_v1_work_orders__order_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Corregir datos de recepción",
+        "operationId": "update_work_order_api_v1_work_orders__order_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkOrderUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/assignment": {
+      "put": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Asignar técnico",
+        "operationId": "assign_work_order_api_v1_work_orders__order_id__assignment_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Assignment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/status": {
+      "post": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Cambiar de estado",
+        "operationId": "change_status_api_v1_work_orders__order_id__status_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusChange"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/delivery": {
+      "post": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Entregar el equipo",
+        "operationId": "deliver_api_v1_work_orders__order_id__delivery_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/reception-act.pdf": {
+      "get": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Acta de recepción en PDF",
+        "operationId": "reception_act_api_v1_work_orders__order_id__reception_act_pdf_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/photos": {
+      "get": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Fotos del equipo",
+        "operationId": "list_photos_api_v1_work_orders__order_id__photos_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Subir foto (requiere autorización de fotos del cliente)",
+        "operationId": "upload_photo_api_v1_work_orders__order_id__photos_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_photo_api_v1_work_orders__order_id__photos_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/photos/{attachment_id}": {
+      "get": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Contenido de una foto",
+        "operationId": "photo_content_api_v1_work_orders__order_id__photos__attachment_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "attachment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attachment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "image/jpeg": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "work-orders"
+        ],
+        "summary": "Eliminar foto",
+        "operationId": "delete_photo_api_v1_work_orders__order_id__photos__attachment_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "attachment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Attachment Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "Accessory": {
+        "type": "string",
+        "enum": [
+          "CHARGER",
+          "CABLE",
+          "CASE",
+          "BATTERY",
+          "SIM",
+          "SD_CARD",
+          "CONTROLLER",
+          "BOX",
+          "OTHER"
+        ],
+        "title": "Accessory"
+      },
+      "AccessoryItem": {
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/Accessory"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "title": "AccessoryItem"
+      },
       "AnonymizeRequest": {
         "properties": {
           "channel": {
@@ -2315,6 +3167,27 @@
           "channel"
         ],
         "title": "AnonymizeRequest"
+      },
+      "Assignment": {
+        "properties": {
+          "technician_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Technician Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "technician_id"
+        ],
+        "title": "Assignment"
       },
       "AuditActor": {
         "properties": {
@@ -2417,6 +3290,20 @@
           "created_at"
         ],
         "title": "AuditLogRead"
+      },
+      "Body_upload_photo_api_v1_work_orders__order_id__photos_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_photo_api_v1_work_orders__order_id__photos_post"
       },
       "CategoryRead": {
         "properties": {
@@ -2687,6 +3574,31 @@
         ],
         "title": "CurrentPrivacyPolicy",
         "description": "What reception needs: the policy in force and the authorization texts to show."
+      },
+      "CurrentReceptionTerms": {
+        "properties": {
+          "terms": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReceptionTermsRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "template": {
+            "type": "string",
+            "title": "Template",
+            "description": "Texto base sugerido para la primera versión"
+          }
+        },
+        "type": "object",
+        "required": [
+          "terms",
+          "template"
+        ],
+        "title": "CurrentReceptionTerms"
       },
       "CustomerCreate": {
         "properties": {
@@ -3027,6 +3939,61 @@
         ],
         "title": "CustomerRead"
       },
+      "CustomerSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "id_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Type"
+          },
+          "id_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Number"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "full_name",
+          "phone",
+          "id_type",
+          "id_number"
+        ],
+        "title": "CustomerSummary"
+      },
       "CustomerUpdate": {
         "properties": {
           "id_type": {
@@ -3137,6 +4104,56 @@
         "type": "object",
         "title": "CustomerUpdate",
         "description": "Only the fields present in the request are changed."
+      },
+      "DeliveryRequest": {
+        "properties": {
+          "picked_up_by_customer": {
+            "type": "boolean",
+            "title": "Picked Up By Customer"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "document": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "picked_up_by_customer"
+        ],
+        "title": "DeliveryRequest",
+        "description": "Who picked up the device. When it is not the customer, name and document are required."
       },
       "DeviceCreate": {
         "properties": {
@@ -3594,6 +4611,59 @@
           "customer_name"
         ],
         "title": "DeviceSearchItem"
+      },
+      "DeviceSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "manufacturer": {
+            "type": "string",
+            "title": "Manufacturer"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "imei": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imei"
+          },
+          "serial_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Serial Number"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "category",
+          "manufacturer",
+          "model",
+          "imei",
+          "serial_number"
+        ],
+        "title": "DeviceSummary"
       },
       "DeviceUpdate": {
         "properties": {
@@ -4244,6 +5314,51 @@
         ],
         "title": "Page[UserRead]"
       },
+      "Page_WorkOrderListItem_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WorkOrderListItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Page"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Size"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "size"
+        ],
+        "title": "Page[WorkOrderListItem]"
+      },
+      "PaymentMethod": {
+        "type": "string",
+        "enum": [
+          "CASH",
+          "TRANSFER",
+          "CARD",
+          "NEQUI",
+          "DAVIPLATA"
+        ],
+        "title": "PaymentMethod"
+      },
       "PermissionRead": {
         "properties": {
           "code": {
@@ -4261,6 +5376,91 @@
           "description"
         ],
         "title": "PermissionRead"
+      },
+      "PersonRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "full_name"
+        ],
+        "title": "PersonRef"
+      },
+      "PhotoList": {
+        "properties": {
+          "demo": {
+            "type": "boolean",
+            "title": "Demo",
+            "description": "True mientras las fotos se guardan en almacenamiento de demostración"
+          },
+          "max_photos": {
+            "type": "integer",
+            "title": "Max Photos"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PhotoRead"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "demo",
+          "max_photos",
+          "items"
+        ],
+        "title": "PhotoList"
+      },
+      "PhotoRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "title": "Size Bytes"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "file_name",
+          "size_bytes",
+          "created_at"
+        ],
+        "title": "PhotoRead"
+      },
+      "Priority": {
+        "type": "string",
+        "enum": [
+          "NORMAL",
+          "HIGH",
+          "URGENT"
+        ],
+        "title": "Priority"
       },
       "PrivacyPolicyDraft": {
         "properties": {
@@ -4390,6 +5590,51 @@
         ],
         "title": "ReadinessResponse"
       },
+      "ReceptionTermsPublish": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "maxLength": 20000,
+            "minLength": 100,
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "ReceptionTermsPublish"
+      },
+      "ReceptionTermsRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Published At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "content",
+          "published_at"
+        ],
+        "title": "ReceptionTermsRead"
+      },
       "ResetPasswordRequest": {
         "properties": {
           "token": {
@@ -4490,6 +5735,101 @@
         ],
         "title": "RoleRef"
       },
+      "Status": {
+        "type": "string",
+        "enum": [
+          "RECIBIDO",
+          "INSPECCION",
+          "DIAGNOSTICO",
+          "COTIZACION",
+          "PENDIENTE_AUTORIZACION",
+          "APROBADO",
+          "COTIZACION_RECHAZADA",
+          "EN_REPARACION",
+          "CONTROL_CALIDAD",
+          "LISTO_ENTREGA",
+          "ENTREGADO",
+          "CANCELADO",
+          "NO_REPARABLE"
+        ],
+        "title": "Status"
+      },
+      "StatusChange": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "StatusChange"
+      },
+      "StatusHistoryItem": {
+        "properties": {
+          "from_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Status"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "to_status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "changed_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "changed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Changed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "from_status",
+          "to_status",
+          "reason",
+          "changed_by",
+          "changed_at"
+        ],
+        "title": "StatusHistoryItem"
+      },
       "TemporaryPasswordSet": {
         "properties": {
           "temporary_password": {
@@ -4533,6 +5873,16 @@
           "must_change_password"
         ],
         "title": "TokenResponse"
+      },
+      "UnlockMethod": {
+        "type": "string",
+        "enum": [
+          "NOT_REQUIRED",
+          "CUSTOMER_IN_PERSON",
+          "CUSTOMER_UNLOCKS"
+        ],
+        "title": "UnlockMethod",
+        "description": "ERMS never stores unlock passwords or patterns (project rule)."
       },
       "UserCreate": {
         "properties": {
@@ -4788,6 +6138,466 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WorkOrderCreate": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "device_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Device Id"
+          },
+          "reported_issue": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 5,
+            "title": "Reported Issue"
+          },
+          "physical_condition": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 3,
+            "title": "Physical Condition"
+          },
+          "accessories": {
+            "items": {
+              "$ref": "#/components/schemas/AccessoryItem"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Accessories"
+          },
+          "unlock_method": {
+            "$ref": "#/components/schemas/UnlockMethod"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/Priority",
+            "default": "NORMAL"
+          },
+          "estimated_delivery_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Delivery Date"
+          },
+          "diagnostic_fee": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Diagnostic Fee",
+            "default": "0"
+          },
+          "advance_amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Advance Amount",
+            "default": "0"
+          },
+          "advance_method": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "assigned_technician_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned Technician Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "device_id",
+          "reported_issue",
+          "physical_condition",
+          "unlock_method"
+        ],
+        "title": "WorkOrderCreate"
+      },
+      "WorkOrderListItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "number": {
+            "type": "string",
+            "title": "Number"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/Priority"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Received At"
+          },
+          "estimated_delivery_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Delivery Date"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/CustomerSummary"
+          },
+          "device": {
+            "$ref": "#/components/schemas/DeviceSummary"
+          },
+          "assigned_technician": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "status",
+          "priority",
+          "received_at",
+          "estimated_delivery_date",
+          "customer",
+          "device",
+          "assigned_technician"
+        ],
+        "title": "WorkOrderListItem"
+      },
+      "WorkOrderRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "number": {
+            "type": "string",
+            "title": "Number"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/Priority"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Received At"
+          },
+          "estimated_delivery_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Delivery Date"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/CustomerSummary"
+          },
+          "device": {
+            "$ref": "#/components/schemas/DeviceSummary"
+          },
+          "assigned_technician": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "branch": {
+            "type": "string",
+            "title": "Branch"
+          },
+          "reported_issue": {
+            "type": "string",
+            "title": "Reported Issue"
+          },
+          "physical_condition": {
+            "type": "string",
+            "title": "Physical Condition"
+          },
+          "accessories": {
+            "items": {
+              "$ref": "#/components/schemas/AccessoryItem"
+            },
+            "type": "array",
+            "title": "Accessories"
+          },
+          "unlock_method": {
+            "$ref": "#/components/schemas/UnlockMethod"
+          },
+          "diagnostic_fee": {
+            "type": "string",
+            "title": "Diagnostic Fee"
+          },
+          "advance_amount": {
+            "type": "string",
+            "title": "Advance Amount"
+          },
+          "advance_method": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "terms_version": {
+            "type": "integer",
+            "title": "Terms Version"
+          },
+          "received_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "delivered_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivered At"
+          },
+          "delivered_to_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivered To Name"
+          },
+          "delivered_to_document": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivered To Document"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/StatusHistoryItem"
+            },
+            "type": "array",
+            "title": "History"
+          },
+          "allowed_transitions": {
+            "items": {
+              "$ref": "#/components/schemas/Status"
+            },
+            "type": "array",
+            "title": "Allowed Transitions",
+            "description": "Estados a los que el usuario actual puede llevar la orden"
+          },
+          "customer_allows_photos": {
+            "type": "boolean",
+            "title": "Customer Allows Photos"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "status",
+          "priority",
+          "received_at",
+          "estimated_delivery_date",
+          "customer",
+          "device",
+          "assigned_technician",
+          "branch",
+          "reported_issue",
+          "physical_condition",
+          "accessories",
+          "unlock_method",
+          "diagnostic_fee",
+          "advance_amount",
+          "advance_method",
+          "notes",
+          "terms_version",
+          "received_by",
+          "delivered_at",
+          "delivered_to_name",
+          "delivered_to_document",
+          "history",
+          "allowed_transitions",
+          "customer_allows_photos",
+          "updated_at"
+        ],
+        "title": "WorkOrderRead"
+      },
+      "WorkOrderUpdate": {
+        "properties": {
+          "reported_issue": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000,
+                "minLength": 5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported Issue"
+          },
+          "physical_condition": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physical Condition"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Priority"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "estimated_delivery_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Delivery Date"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "title": "WorkOrderUpdate",
+        "description": "Reception data that can be corrected while the order is open. Amounts are fixed once\nthe act is printed: corrections go in the notes."
       }
     },
     "securitySchemes": {

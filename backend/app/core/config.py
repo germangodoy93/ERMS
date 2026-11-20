@@ -80,6 +80,15 @@ class Settings(BaseSettings):
     smtp_starttls: bool = True
     smtp_from: str = "ERMS <no-reply@erms.local>"
 
+    # --- Attachments (Sprint 3, demo mode) -------------------------------------
+    # Only the "local" backend exists for now: files go to the server disk. On Railway that
+    # disk is ephemeral, so the UI labels photos as a demo until a provider is chosen.
+    attachments_dir: str = Field(
+        default="var/attachments", description="Directory for the local storage backend."
+    )
+    attachment_max_bytes: int = Field(default=10 * 1024 * 1024, ge=1024)
+    attachment_max_per_order: int = Field(default=20, ge=1, le=100)
+
     @field_validator("jwt_secret")
     @classmethod
     def _strong_jwt_secret(cls, value: SecretStr) -> SecretStr:

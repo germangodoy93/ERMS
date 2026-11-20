@@ -12,7 +12,9 @@ dependencies = [
     "pydantic>=2.14.4",
     "pydantic-settings>=2.16.3",
     "pyjwt>=2.15.1",
+    "python-multipart==0.0.33",
     "redis>=8.1.0",
+    "reportlab>=5.1.0",
     "sqlalchemy>=2.1.9",
     "uvicorn[standard]>=0.54.0",
 ]
@@ -42,6 +44,11 @@ python_version = "3.13"
 strict = true
 plugins = ["pydantic.mypy"]
 exclude = ["alembic/versions"]
+
+[[tool.mypy.overrides]]
+# reportlab ships no type hints; only app/modules/workorders/pdf.py uses it.
+module = ["reportlab.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

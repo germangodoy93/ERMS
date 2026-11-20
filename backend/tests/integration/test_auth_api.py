@@ -49,6 +49,11 @@ def test_me_returns_roles_and_effective_permissions(client: TestClient, tenant: 
         "devices:manage",
         "users:manage",
         "users:read",
+        "work_orders:assign",
+        "work_orders:create",
+        "work_orders:deliver",
+        "work_orders:progress",
+        "work_orders:read",
     ]
     assert me["organization"]["name"] == tenant.organization.name
 

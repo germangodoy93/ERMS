@@ -8,6 +8,7 @@ import os
 import uuid
 from collections.abc import Iterator
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import pytest
 from alembic import command
@@ -20,6 +21,7 @@ from app.core import database
 from app.core.config import Settings, get_settings
 from app.core.email import OutgoingEmail, get_mailer
 from app.core.security import hash_password
+from app.core.storage import LocalStorage, get_storage
 from app.main import create_app
 from app.modules.devices.catalog import seed_manufacturers
 from app.modules.health.checks import BACKEND_ROOT
@@ -33,6 +35,11 @@ TEST_DB_URL = os.environ.get("ERMS_TEST_DATABASE_URL")
 PASSWORD = "Contraseña-de-prueba-123"
 
 BUSINESS_TABLES = (
+    "attachments",
+    "work_order_status_history",
+    "work_orders",
+    "reception_terms",
+    "document_sequences",
     "devices",
     "device_models",
     "manufacturers",
@@ -114,9 +121,15 @@ def mailer() -> CapturingMailer:
 
 
 @pytest.fixture
-def client(db: Session, mailer: CapturingMailer) -> Iterator[TestClient]:
+def storage(tmp_path: Path) -> LocalStorage:
+    return LocalStorage(tmp_path / "attachments")
+
+
+@pytest.fixture
+def client(db: Session, mailer: CapturingMailer, storage: LocalStorage) -> Iterator[TestClient]:
     app = create_app()
     app.dependency_overrides[get_mailer] = lambda: mailer
+    app.dependency_overrides[get_storage] = lambda: storage
     with TestClient(app) as test_client:
         yield test_client
 
@@ -212,3 +225,13 @@ def new_customer(**overrides: object) -> dict[str, object]:
     }
     payload.update(overrides)
     return payload
+
+
+def publish_terms(client: TestClient, admin_headers: dict[str, str]) -> dict[str, object]:
+    template = client.get("/api/v1/reception-terms", headers=admin_headers).json()["template"]
+    response = client.post(
+        "/api/v1/reception-terms", headers=admin_headers, json={"content": template}
+    )
+    assert response.status_code == 201, response.text
+    body: dict[str, object] = response.json()
+    return body
