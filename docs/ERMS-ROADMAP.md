@@ -26,6 +26,8 @@ Celery pueden pasar al Sprint 4 si la capacidad es baja.
   (PM-04), después de los avisos por WhatsApp.
 - Ensamble de equipos de escritorio con reglas de compatibilidad y cuellos de botella (PM-03),
   después del agente v2.
+- Asistente virtual de IA en el chat de la landing (PM-05): orienta al cliente, da rangos de
+  costo del catálogo y crea la solicitud para el técnico.
 - Adaptador Android (ADB) y adaptador Linux.
 - Capa de IA con proveedor real, base de conocimiento y patrones de fallas.
 - Facturación electrónica DIAN mediante proveedor autorizado.
