@@ -122,12 +122,14 @@ taller está obligado (responsabilidades 52, 48 o 47; ver la investigación del 
 |---|---|---|
 | 1 | Bases operativas | Almacenamiento definitivo de fotos y proveedor de correo (hoy las fotos están en modo demostración y la recuperación de contraseña no envía correos en producción) |
 | 2 | Avisos al cliente por WhatsApp | Fase A sin costo: botón que abre WhatsApp con el mensaje listo (enlace `wa.me`), enviado por el asesor. Fase B: envío automático con la API oficial de WhatsApp Cloud (plantillas de utilidad, cerca de USD 0,0008 por mensaje en Colombia; requiere número dedicado y verificación del negocio en Meta) |
-| 3 | Agente v2 – mantenimiento | PM-01 |
-| 4 | Ensamble de equipos | PM-03 |
-| 5 | Facturación electrónica DIAN | Mediante proveedor autorizado (costo mensual o por factura) |
-| 6 | IA por fotos | PM-02 (requiere el puesto 1) |
-| 7 | Android | Diagnóstico por ADB |
-| 8 | Crecimiento | Órdenes de compra (R-08), varias sedes con RLS, Celery y Redis |
+| 3 | Atención remota, en sitio y recogida | PM-04 |
+| 4 | Agente v2 – mantenimiento | PM-01 |
+| 5 | Ensamble de equipos | PM-03 |
+| PM-04 | **Atención remota, en sitio y recogida.** Como taller, quiero atender sin que el cliente venga al local, con un cobro que proteja a ambas partes | **Modalidades de la orden:** en taller (actual), remota, en sitio y recogida/envío. Remota y en sitio siguen *Agendada → En curso → Finalizada* (con cotización, pago y garantía) y se pueden convertir en una orden de taller enlazada. **Remota:** Asistencia rápida de Windows (Quick Assist); autorización de acceso remoto del cliente; registro de técnico, inicio, fin y trabajo; el código de la sesión no se guarda; se puede usar el agente de diagnóstico. **En sitio:** dirección y localidad del servicio, recargo de desplazamiento por zona, llegada y salida marcadas por el técnico (sin rastreo de ubicación), repuestos descontados del inventario, cierre con nombre y documento de quien recibe, acta PDF, aviso "técnico en camino". **Recogida o envío:** (a) el taller recoge y devuelve con cargo por zona (misma tabla de recargos); (b) el cliente envía por transportadora a su cargo: transportadora y número de guía, estado del empaque y fotos al abrirlo como evidencia, acta de recepción al llegar; la devolución la paga el cliente (o contra entrega). **Cobro inteligente:** catálogo de servicios con precio fijo; revisión corta de 20 min con valor fijo (valor configurable) en la que se da el precio cerrado; anticipo del 50 % para clientes nuevos y saldo al confirmar que funciona; si no se soluciona, solo se cobra la revisión y se devuelve el resto del anticipo; contador de tiempo y aprobación del cliente por WhatsApp antes de exceder el estimado; con 3 servicios pagados a tiempo, el cliente puede pagar al final; resumen por WhatsApp al terminar; garantía de servicio de 15 días; pagos por Nequi, Daviplata, transferencia o Bre-B confirmados por el asesor (pasarela con comisión, opcional después). **Agenda:** lunes a viernes 8:00–18:00 y sábado 8:00–12:00 (configurable), festivos de Colombia calculados (Ley Emiliani), aviso de cruce de citas por técnico. |
+| 6 | Facturación electrónica DIAN | Mediante proveedor autorizado (costo mensual o por factura) |
+| 7 | IA por fotos | PM-02 (requiere el puesto 1) |
+| 8 | Android | Diagnóstico por ADB |
+| 9 | Crecimiento | Órdenes de compra (R-08), varias sedes con RLS, Celery y Redis |
 
 | ID | Historia | Criterios de aceptación propuestos |
 |---|---|---|

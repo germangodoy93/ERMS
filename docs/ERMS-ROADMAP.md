@@ -22,6 +22,8 @@ Celery pueden pasar al Sprint 4 si la capacidad es baja.
 - Celery y Redis cuando haya trabajo largo (correos masivos, reportes pesados).
 - Agente v2 – mantenimiento: antivirus (Microsoft Defender) y limpieza del sistema con
   autorización y confirmación explícitas (PM-01 en el backlog).
+- Atención remota (Quick Assist), en sitio y recogida/envío, con agenda y cobro por etapas
+  (PM-04), después de los avisos por WhatsApp.
 - Ensamble de equipos de escritorio con reglas de compatibilidad y cuellos de botella (PM-03),
   después del agente v2.
 - Adaptador Android (ADB) y adaptador Linux.
