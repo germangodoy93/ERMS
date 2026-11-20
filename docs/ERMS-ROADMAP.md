@@ -28,6 +28,8 @@ Celery pueden pasar al Sprint 4 si la capacidad es baja.
   después del agente v2.
 - Asistente virtual de IA en el chat de la landing (PM-05): orienta al cliente, da rangos de
   costo del catálogo y crea la solicitud para el técnico.
+- Campañas publicitarias con registro de gastos, atribución de clientes y sugerencias de IA
+  (PM-06).
 - Adaptador Android (ADB) y adaptador Linux.
 - Capa de IA con proveedor real, base de conocimiento y patrones de fallas.
 - Facturación electrónica DIAN mediante proveedor autorizado.
