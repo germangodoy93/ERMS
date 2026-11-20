@@ -18,6 +18,8 @@ Celery pueden pasar al Sprint 4 si la capacidad es baja.
 
 ## Después del MVP
 
+- Agente v2 – mantenimiento: antivirus (Microsoft Defender) y limpieza del sistema con
+  autorización y confirmación explícitas (PM-01 en el backlog).
 - Adaptador Android (ADB) y adaptador Linux.
 - Capa de IA con proveedor real, base de conocimiento y patrones de fallas.
 - Facturación electrónica DIAN mediante proveedor autorizado.

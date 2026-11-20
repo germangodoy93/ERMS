@@ -79,7 +79,7 @@ estos requerimientos detectados en el análisis:
 | ID | Requerimiento | Sprint |
 |---|---|---|
 | R-01 | Consentimiento de tratamiento de datos (Ley 1581 de 2012) | 2 ✅ |
-| R-02 | Estado `COTIZACION_RECHAZADA` y devolución sin reparar | 3 |
+| R-02 | Estado `COTIZACION_RECHAZADA` y devolución sin reparar | 3 ✅ |
 | R-03 | Numeración de documentos sin colisiones (`document_sequences`) | 3 ✅ |
 | R-04 | Consentimiento antes de ejecutar el agente en el equipo del cliente | 4 ✅ |
 | R-05 | Token de agente de un solo uso, limitado a una sesión | 4 ✅ |
@@ -87,3 +87,10 @@ estos requerimientos detectados en el análisis:
 | R-07 | Existencias por sede (`stock_levels`) | 5 |
 | R-08 | Compras a proveedores (`purchase_orders`) | 5 |
 | R-09 | Backups programados de PostgreSQL | 6 |
+
+## Después del MVP
+
+| ID | Historia | Criterios de aceptación propuestos |
+|---|---|---|
+| PM-01 | **Agente v2 – mantenimiento.** Como técnico, quiero analizar virus y limpiar el sistema desde el agente | Modo separado del diagnóstico (que sigue siendo solo lectura). Autorización nueva y separada del cliente ("Mantenimiento del equipo"). Cada acción la ordena el técnico desde ERMS **y** se confirma en el equipo mostrando exactamente qué se hará. Antivirus: estado, firmas, amenazas y análisis rápido con Microsoft Defender; eliminar o poner en cuarentena solo con confirmación. Limpieza: vista previa con tamaño (temporales de Windows, papelera, caché de Windows Update, miniaturas); **nunca** documentos, fotos, descargas ni datos de navegación. Todo queda registrado en la orden. |
+| PM-02 | Revisión del equipo con IA a partir de fotos | Proveedor de IA y almacenamiento definitivos; resultados `AI_SUGGESTION`, nunca comprobados |
