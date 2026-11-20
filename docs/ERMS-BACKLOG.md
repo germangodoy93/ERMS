@@ -115,16 +115,16 @@ estos requerimientos detectados en el análisis:
 
 ## Después del MVP
 
-Prioridad propuesta (2026-11-20). El puesto 3 depende de confirmar si el taller está obligado a
-facturar electrónicamente (revisar el RUT: responsabilidad 52 "Facturador electrónico").
+Prioridad acordada (2026-11-20). Antes de planear la facturación DIAN, confirmar en el RUT si el
+taller está obligado (responsabilidades 52, 48 o 47; ver la investigación del 2026-11-20).
 
 | Puesto | Sprint | Contenido |
 |---|---|---|
 | 1 | Bases operativas | Almacenamiento definitivo de fotos y proveedor de correo (hoy las fotos están en modo demostración y la recuperación de contraseña no envía correos en producción) |
 | 2 | Avisos al cliente por WhatsApp | Fase A sin costo: botón que abre WhatsApp con el mensaje listo (enlace `wa.me`), enviado por el asesor. Fase B: envío automático con la API oficial de WhatsApp Cloud (plantillas de utilidad, cerca de USD 0,0008 por mensaje en Colombia; requiere número dedicado y verificación del negocio en Meta) |
-| 3 | Facturación electrónica DIAN | Mediante proveedor autorizado (costo mensual o por factura) |
-| 4 | Agente v2 – mantenimiento | PM-01 |
-| 5 | Ensamble de equipos | PM-03 |
+| 3 | Agente v2 – mantenimiento | PM-01 |
+| 4 | Ensamble de equipos | PM-03 |
+| 5 | Facturación electrónica DIAN | Mediante proveedor autorizado (costo mensual o por factura) |
 | 6 | IA por fotos | PM-02 (requiere el puesto 1) |
 | 7 | Android | Diagnóstico por ADB |
 | 8 | Crecimiento | Órdenes de compra (R-08), varias sedes con RLS, Celery y Redis |
