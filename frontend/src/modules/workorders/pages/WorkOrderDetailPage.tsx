@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { saveBlob } from "@/lib/download";
 import { formatDateTime, formatPhone } from "@/lib/format";
 import { PERMS, useCan } from "@/modules/auth/permissions";
+import { ImeiCheckButton } from "@/modules/devices/components/ImeiCheckButton";
 import { errorMessage } from "@/services/errors";
 import type { WorkOrder, WorkOrderStatus } from "@/types/api";
 
@@ -135,7 +136,16 @@ function OrderDetail({ order }: { order: WorkOrder }) {
               <Field label="Equipo">
                 {order.device.category} · {order.device.manufacturer} {order.device.model}
               </Field>
-              <Field label="IMEI">{order.device.imei ?? "—"}</Field>
+              <Field label="IMEI">
+                {order.device.imei ? (
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono">{order.device.imei}</span>
+                    <ImeiCheckButton imei={order.device.imei} compact />
+                  </span>
+                ) : (
+                  "—"
+                )}
+              </Field>
               <Field label="Serial">{order.device.serial_number ?? "—"}</Field>
               <Field label="Desbloqueo">{UNLOCK_LABELS[order.unlock_method]}</Field>
             </dl>

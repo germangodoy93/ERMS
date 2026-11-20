@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { errorMessage } from "@/services/errors";
+import { ImeiCheckButton } from "@/modules/devices/components/ImeiCheckButton";
 
 import { useSearchDevices } from "../hooks";
 
@@ -94,7 +95,12 @@ export function DevicesPage() {
                     </div>
                   </TableCell>
                   <TableCell className="hidden font-mono text-xs sm:table-cell">
-                    {device.imei && <div>IMEI {device.imei}</div>}
+                    {device.imei && (
+                      <div className="flex flex-col items-start gap-1">
+                        <span>IMEI {device.imei}</span>
+                        <ImeiCheckButton imei={device.imei} compact />
+                      </div>
+                    )}
                     {device.serial_number && <div>S/N {device.serial_number}</div>}
                   </TableCell>
                   <TableCell>

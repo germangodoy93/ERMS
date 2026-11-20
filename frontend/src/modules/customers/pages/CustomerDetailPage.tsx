@@ -37,6 +37,7 @@ import { DeviceFormDialog } from "@/modules/devices/components/DeviceFormDialog"
 import { useCustomerDevices } from "@/modules/devices/hooks";
 import { errorMessage } from "@/services/errors";
 import type { Customer, Device } from "@/types/api";
+import { ImeiCheckButton } from "@/modules/devices/components/ImeiCheckButton";
 
 import {
   AnonymizeDialog,
@@ -268,7 +269,12 @@ function DevicesTab({ customer }: { customer: Customer }) {
                   <div className="text-muted-foreground text-xs">{device.model.category.name}</div>
                 </TableCell>
                 <TableCell className="hidden font-mono text-xs sm:table-cell">
-                  {device.imei && <div>IMEI {device.imei}</div>}
+                  {device.imei && (
+                    <div className="flex flex-col items-start gap-1">
+                      <span>IMEI {device.imei}</span>
+                      <ImeiCheckButton imei={device.imei} compact />
+                    </div>
+                  )}
                   {device.serial_number && <div>S/N {device.serial_number}</div>}
                   {!device.imei && !device.serial_number && "—"}
                 </TableCell>

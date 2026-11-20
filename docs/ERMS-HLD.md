@@ -126,6 +126,7 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 | 024 | Numeración con `INSERT … ON CONFLICT DO UPDATE … RETURNING` | `SELECT … FOR UPDATE` | Una sola sentencia atómica, también para el primer número del año. |
 | 025 | Las órdenes no guardan contraseñas de desbloqueo; se registra el método | Campo cifrado | Regla del proyecto: no recolectar contraseñas. El cliente desbloquea o se la da en persona al técnico. |
 | 026 | Las fotos se re-codifican (JPEG, máx. 2048 px, sin EXIF) | Guardar el original | Elimina la ubicación GPS y otros metadatos personales, valida que sea una imagen real y controla el tamaño. |
+| 027 | Consulta de IMEI reportados: botón que copia el IMEI y abre la consulta pública oficial (imeicolombia.com.co) | Automatizar el formulario o pagar GSMA Device Check | La consulta oficial no tiene API y exige verificación humana; automatizarla sería no oficial y frágil. GSMA tiene costo. |
 
 ## 6. Riesgos
 
