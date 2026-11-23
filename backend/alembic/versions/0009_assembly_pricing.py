@@ -33,9 +33,7 @@ def upgrade() -> None:
     )
     op.add_column(
         "organizations",
-        sa.Column(
-            "assembly_margin_percent", sa.Numeric(5, 2), server_default="15", nullable=False
-        ),
+        sa.Column("assembly_margin_percent", sa.Numeric(5, 2), server_default="15", nullable=False),
     )
     op.execute(
         "UPDATE parts SET unit_cost = sale_price, "
