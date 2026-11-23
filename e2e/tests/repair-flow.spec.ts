@@ -34,10 +34,23 @@ async function login(page: Page): Promise<string> {
   return PASSWORD;
 }
 
+/**
+ * Clicks a button that saves something. Panels refetch and remount after every change; on a
+ * slow CI machine a click during that swap is lost, so wait for the network to be idle first
+ * and again after the action.
+ */
+async function save(page: Page, button: Locator) {
+  await page.waitForLoadState("networkidle");
+  await expect(button).toBeEnabled();
+  await button.click();
+  await page.waitForLoadState("networkidle");
+}
+
 /** Clicks a status action in "Gestión" and confirms it. */
 async function transition(page: Page, action: string, status: string) {
+  await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: action, exact: true }).click();
-  await page.getByRole("dialog").getByRole("button", { name: "Confirmar" }).click();
+  await save(page, page.getByRole("dialog").getByRole("button", { name: "Confirmar" }));
   await expect(page.getByRole("dialog")).toBeHidden();
   await expect(statusBadge(page)).toHaveText(status);
 }
@@ -93,37 +106,38 @@ test("reception → diagnostic → quote → repair → QC → payment → deliv
   const screen = page.getByRole("radiogroup", { name: "Pantalla" });
   if (await screen.count()) await screen.getByRole("radio", { name: "Falla" }).click();
   await page.getByRole("button", { name: 'Marcar pendientes como "No probado"' }).click();
-  await page.getByRole("button", { name: "Guardar resultados" }).click();
+  await save(page, page.getByRole("button", { name: "Guardar resultados" }));
   await page.getByLabel("Conclusión del técnico").fill("Pantalla dañada por golpe.");
   await page.getByLabel("Reparación recomendada (opcional)").fill("Cambiar la pantalla.");
-  await page.getByRole("button", { name: "Cerrar diagnóstico" }).click();
+  await save(page, page.getByRole("button", { name: "Cerrar diagnóstico" }));
   await expect(page.getByText(/Cerrado el/)).toBeVisible();
   await transition(page, "Pasar a cotización", "Cotización");
 
   // --- Quote with a part from inventory, sent and approved. --------------------------------
-  await page.getByRole("button", { name: "Crear cotización" }).click();
+  await save(page, page.getByRole("button", { name: "Crear cotización" }));
   await page.getByRole("button", { name: "Repuesto", exact: true }).click();
   await selectOption(page, "Del inventario (opcional)", new RegExp(data.partName));
-  await page.getByRole("button", { name: "Guardar", exact: true }).click();
-  await page.getByRole("button", { name: "Enviar al cliente" }).click();
+  await save(page, page.getByRole("button", { name: "Guardar", exact: true }));
+  await save(page, page.getByRole("button", { name: "Enviar al cliente" }));
   await expect(statusBadge(page)).toHaveText("Pendiente de autorización");
+  await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: "Cliente aprobó" }).click();
-  await page.getByRole("dialog").getByRole("button", { name: "Confirmar" }).click();
+  await save(page, page.getByRole("dialog").getByRole("button", { name: "Confirmar" }));
   await expect(statusBadge(page)).toHaveText("Aprobado");
 
   // --- Repair: task, part consumed, quality check. ---------------------------------------
   await transition(page, "Iniciar reparación", "En reparación");
   await page.getByLabel("Nuevo trabajo").fill("Cambio de pantalla completo.");
   await page.getByLabel("Minutos de trabajo").fill("45");
-  await page.getByRole("button", { name: "Registrar trabajo" }).click();
+  await save(page, page.getByRole("button", { name: "Registrar trabajo" }));
   await selectOption(page, "Usar repuesto del inventario", new RegExp(data.partName));
-  await page.getByRole("button", { name: "Descontar" }).click();
+  await save(page, page.getByRole("button", { name: "Descontar" }));
   await expect(page.getByText("Repuesto descontado del inventario.")).toBeVisible();
   await transition(page, "Enviar a control de calidad", "Control de calidad");
   for (const group of await page.getByRole("radiogroup", { name: /^Calidad:/ }).all()) {
     await group.getByRole("radio", { name: "Bien" }).click();
   }
-  await page.getByRole("button", { name: "Registrar control de calidad" }).click();
+  await save(page, page.getByRole("button", { name: "Registrar control de calidad" }));
   await transition(page, "Marcar listo para entrega", "Listo para entrega");
 
   // --- Payment of the balance and delivery with a 30-day warranty. -----------------------
@@ -131,14 +145,14 @@ test("reception → diagnostic → quote → repair → QC → payment → deliv
   // balance: wait until everything settled before paying (cash is the default method).
   await page.waitForLoadState("networkidle");
   await expect(page.getByLabel("Valor del pago")).not.toHaveValue(/^0?$/);
-  await page.getByRole("button", { name: "Registrar pago" }).click();
+  await save(page, page.getByRole("button", { name: "Registrar pago" }));
   await expect(page.getByText(/^Pago registrado: RC-/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Comprobante" }).first()).toBeVisible();
   await page.getByRole("button", { name: "Entregar equipo", exact: true }).click();
   dialog = page.getByRole("dialog");
   await expect(dialog.getByText(/Saldo pendiente/)).toHaveCount(0);
   await dialog.getByLabel("Días de garantía (opcional)").fill("30");
-  await dialog.getByRole("button", { name: "Registrar entrega" }).click();
+  await save(page, dialog.getByRole("button", { name: "Registrar entrega" }));
   await expect(dialog).toBeHidden();
   await expect(statusBadge(page)).toHaveText("Entregado");
 
@@ -160,7 +174,7 @@ test("reception → diagnostic → quote → repair → QC → payment → deliv
   dialog = page.getByRole("dialog");
   await dialog.getByLabel("Falla que reporta el cliente").fill("La pantalla volvió a fallar.");
   await dialog.getByLabel("Estado físico al recibirlo").fill("Sin golpes nuevos.");
-  await dialog.getByRole("button", { name: "Abrir reclamo" }).click();
+  await save(page, dialog.getByRole("button", { name: "Abrir reclamo" }));
   await page.waitForURL(
     (url) => url.href !== orderUrl && /\/ordenes\/[0-9a-f-]{36}$/.test(url.href),
   );
