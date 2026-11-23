@@ -127,8 +127,12 @@ test("reception → diagnostic → quote → repair → QC → payment → deliv
   await transition(page, "Marcar listo para entrega", "Listo para entrega");
 
   // --- Payment of the balance and delivery with a 30-day warranty. -----------------------
-  await selectOption(page, "Medio", "Efectivo");
+  // The panels refetch after the status change and the payment form remounts with the new
+  // balance: wait until everything settled before paying (cash is the default method).
+  await page.waitForLoadState("networkidle");
+  await expect(page.getByLabel("Valor del pago")).not.toHaveValue(/^0?$/);
   await page.getByRole("button", { name: "Registrar pago" }).click();
+  await expect(page.getByText(/^Pago registrado: RC-/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Comprobante" }).first()).toBeVisible();
   await page.getByRole("button", { name: "Entregar equipo", exact: true }).click();
   dialog = page.getByRole("dialog");
