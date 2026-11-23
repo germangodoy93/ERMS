@@ -10,7 +10,10 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   forbidOnly: Boolean(process.env.CI),
-  reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : [["list"]],
+  // "github" turns failures into annotations, readable without signing in to GitHub.
+  reporter: process.env.CI
+    ? [["list"], ["github"], ["html", { open: "never" }]]
+    : [["list"]],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:5173",
     locale: "es-CO",
