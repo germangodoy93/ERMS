@@ -20,6 +20,19 @@ class AssemblyCategory(StrEnum):
     CASE = "CASE"
     COOLER = "COOLER"
     RGB = "RGB"
+    # Setup (sold with the PC in the same order)
+    MONITOR = "MONITOR"
+    KEYBOARD = "KEYBOARD"
+    MOUSE = "MOUSE"
+    PAD = "PAD"
+    HEADSET = "HEADSET"
+    MIC = "MIC"
+    SPEAKER = "SPEAKER"
+    CAMERA = "CAMERA"
+    STREAM = "STREAM"
+    CHAIR = "CHAIR"
+    DESK = "DESK"
+    LIGHT = "LIGHT"
 
 
 CATEGORY_LABELS: dict[AssemblyCategory, str] = {
@@ -32,7 +45,35 @@ CATEGORY_LABELS: dict[AssemblyCategory, str] = {
     AssemblyCategory.CASE: "Gabinete",
     AssemblyCategory.COOLER: "Refrigeración",
     AssemblyCategory.RGB: "RGB",
+    AssemblyCategory.MONITOR: "Monitores",
+    AssemblyCategory.KEYBOARD: "Teclado",
+    AssemblyCategory.MOUSE: "Mouse",
+    AssemblyCategory.PAD: "Pad",
+    AssemblyCategory.HEADSET: "Audífonos",
+    AssemblyCategory.MIC: "Micrófono",
+    AssemblyCategory.SPEAKER: "Parlantes",
+    AssemblyCategory.CAMERA: "Cámara",
+    AssemblyCategory.STREAM: "Streaming",
+    AssemblyCategory.CHAIR: "Silla",
+    AssemblyCategory.DESK: "Escritorio",
+    AssemblyCategory.LIGHT: "Luces",
 }
+SETUP: frozenset["AssemblyCategory"] = frozenset(
+    {
+        AssemblyCategory.MONITOR,
+        AssemblyCategory.KEYBOARD,
+        AssemblyCategory.MOUSE,
+        AssemblyCategory.PAD,
+        AssemblyCategory.HEADSET,
+        AssemblyCategory.MIC,
+        AssemblyCategory.SPEAKER,
+        AssemblyCategory.CAMERA,
+        AssemblyCategory.STREAM,
+        AssemblyCategory.CHAIR,
+        AssemblyCategory.DESK,
+        AssemblyCategory.LIGHT,
+    }
+)
 
 # Categories a build cannot do without (the GPU is optional with integrated graphics).
 REQUIRED: tuple[AssemblyCategory, ...] = (
@@ -44,9 +85,29 @@ REQUIRED: tuple[AssemblyCategory, ...] = (
     AssemblyCategory.CASE,
     AssemblyCategory.COOLER,
 )
-MULTI: frozenset[AssemblyCategory] = frozenset({AssemblyCategory.STORAGE, AssemblyCategory.RGB})
-MAX_STORAGE = 4
-MAX_RGB = 8
+# Categories where several parts can be chosen, with their limit (as in the simulator).
+MULTI_LIMITS: dict[AssemblyCategory, int] = {
+    AssemblyCategory.STORAGE: 4,
+    AssemblyCategory.RGB: 8,
+    AssemblyCategory.MONITOR: 3,
+    AssemblyCategory.MIC: 2,
+    AssemblyCategory.STREAM: 3,
+    AssemblyCategory.LIGHT: 2,
+}
+MULTI: frozenset[AssemblyCategory] = frozenset(MULTI_LIMITS)
+MAX_STORAGE = MULTI_LIMITS[AssemblyCategory.STORAGE]
+MAX_RGB = MULTI_LIMITS[AssemblyCategory.RGB]
+
+
+class DeskShape(StrEnum):
+    STRAIGHT = "STRAIGHT"
+    L = "L"
+
+
+class PcPosition(StrEnum):
+    AUTO = "AUTO"
+    DESK = "DESK"
+    FLOOR = "FLOOR"
 
 
 class UseProfile(StrEnum):
@@ -68,8 +129,16 @@ PsuForm = Literal["ATX", "SFX"]
 Index = Annotated[int, Field(ge=0, le=100)]
 
 
+StyleValue = str | int | float | bool
+
+
 class _Spec(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+    style: dict[str, StyleValue] | None = Field(
+        default=None,
+        description="Detalles visuales para el 3D (color, RGB, ventiladores…); no afectan reglas",
+    )
 
 
 class CpuSpec(_Spec):
@@ -140,6 +209,73 @@ class RgbSpec(_Spec):
     lcd: bool = False
 
 
+class MonitorSpec(_Spec):
+    inches: float = Field(ge=10, le=65)
+    resolution: Literal["FHD", "QHD", "4K", "5K", "UWQHD", "DQHD"] | None = None
+    hz: int | None = Field(default=None, ge=30, le=1000)
+    oled: bool = False
+    curved: bool = False
+    ultrawide: Literal[0, 1, 2] = Field(default=0, description="0 = 16:9, 1 = 21:9, 2 = 32:9")
+    pro: bool = Field(default=False, description="Monitor para diseño")
+
+
+class KeyboardSpec(_Spec):
+    size: Literal["60%", "75%", "TKL", "100%", "PAD"]
+    low_profile: bool = False
+    hall_effect: bool = False
+    wireless: bool = False
+
+
+class MouseSpec(_Spec):
+    wireless: bool = False
+
+
+class PadSpec(_Spec):
+    size: Literal["M", "L", "XL", "XXL"]
+
+
+class HeadsetSpec(_Spec):
+    earbuds: bool = False
+    wireless: bool = False
+    rgb: bool = False
+
+
+class MicSpec(_Spec):
+    arm: bool = Field(default=False, description="Es un brazo, no un micrófono")
+    xlr: bool = Field(default=False, description="Necesita interfaz de audio")
+    rgb: bool = False
+
+
+class SpeakerSpec(_Spec):
+    kind: Literal["BAR", "PAIR", "ROBOT"]
+    rgb: bool = False
+
+
+class CameraSpec(_Spec):
+    resolution: str | None = Field(default=None, max_length=10)
+
+
+class StreamSpec(_Spec):
+    kind: Literal["DECK", "LIGHT"]
+    key_columns: int = Field(default=0, ge=0, le=10)
+    key_rows: int = Field(default=0, ge=0, le=6)
+    dials: bool = False
+
+
+class ChairSpec(_Spec):
+    pass
+
+
+class DeskSpec(_Spec):
+    width_cm: int = Field(ge=60, le=300)
+    integrated_case: bool = Field(default=False, description="Escritorio con gabinete integrado")
+
+
+class LightSpec(_Spec):
+    kind: Literal["LINES", "SQUARES"]
+    pieces: int = Field(ge=1, le=50)
+
+
 SPEC_MODELS: dict[AssemblyCategory, type[_Spec]] = {
     AssemblyCategory.CPU: CpuSpec,
     AssemblyCategory.BOARD: BoardSpec,
@@ -150,6 +286,18 @@ SPEC_MODELS: dict[AssemblyCategory, type[_Spec]] = {
     AssemblyCategory.CASE: CaseSpec,
     AssemblyCategory.COOLER: CoolerSpec,
     AssemblyCategory.RGB: RgbSpec,
+    AssemblyCategory.MONITOR: MonitorSpec,
+    AssemblyCategory.KEYBOARD: KeyboardSpec,
+    AssemblyCategory.MOUSE: MouseSpec,
+    AssemblyCategory.PAD: PadSpec,
+    AssemblyCategory.HEADSET: HeadsetSpec,
+    AssemblyCategory.MIC: MicSpec,
+    AssemblyCategory.SPEAKER: SpeakerSpec,
+    AssemblyCategory.CAMERA: CameraSpec,
+    AssemblyCategory.STREAM: StreamSpec,
+    AssemblyCategory.CHAIR: ChairSpec,
+    AssemblyCategory.DESK: DeskSpec,
+    AssemblyCategory.LIGHT: LightSpec,
 }
 
 

@@ -408,3 +408,82 @@ def test_cost_template_and_update_from_excel(client: TestClient, shop: Shop) -> 
     )
     assert no_columns.status_code == 422
     assert "columnas Código y Costo" in no_columns.json()["detail"]
+
+
+SETUP = [
+    ("ENS-MONITOR-M14", 'XPG 27" Rift 180 Hz QHD', "MONITOR", "749000",
+     {"inches": 27, "resolution": "QHD", "hz": 180, "style": {"white": False}}),
+    ("ENS-MONITOR-M19", 'ASUS ProArt PA278 27" QHD', "MONITOR", "1189000",
+     {"inches": 27, "resolution": "QHD", "pro": True}),
+    ("ENS-KEYBOARD-K32", "Razer BlackWidow V4 75%", "KEYBOARD", "799000", {"size": "75%"}),
+    ("ENS-DESK-E3", "Cougar E-Grave 160", "DESK", "1099000",
+     {"width_cm": 160, "style": {"finish": "black", "rgb": True}}),
+]  # fmt: skip
+
+
+def test_setup_is_priced_apart_and_sold_with_the_pc(client: TestClient, shop: Shop) -> None:
+    _ok(_import(client, shop))
+    items = [
+        {"sku": sku, "name": name, "category": cat, "cost": cost, "specs": specs}
+        for sku, name, cat, cost, specs in SETUP
+    ]
+    _ok(client.post(f"{API}/catalog/import", headers=shop.admin, json={"items": items}))
+    catalog = {p["sku"]: p for p in _ok(client.get(f"{API}/catalog", headers=shop.tech))}
+    assert catalog["ENS-MONITOR-M14"]["specs"]["style"] == {"white": False}
+    selection = _selection(client, shop) | {
+        "monitor": [catalog["ENS-MONITOR-M14"]["id"], catalog["ENS-MONITOR-M19"]["id"]],
+        "keyboard": catalog["ENS-KEYBOARD-K32"]["id"],
+        "desk": catalog["ENS-DESK-E3"]["id"],
+        "desk_shape": "L",
+        "pc_position": "FLOOR",
+    }
+    result = _ok(client.post(f"{API}/evaluate", headers=shop.tech, json={"selection": selection}))
+    assert result["price"] == "11180000.00"  # the PC alone
+    # 862.000 + 1.368.000 + 919.000 + 1.264.000 (cost + 15 %, rounded up)
+    assert result["setup_price"] == "4413000.00"
+    assert result["ready"] is True
+    wrong = selection | {"keyboard": catalog["ENS-DESK-E3"]["id"]}
+    assert (
+        client.post(f"{API}/evaluate", headers=shop.tech, json={"selection": wrong}).status_code
+        == 422
+    )
+    too_many = selection | {"monitor": [catalog["ENS-MONITOR-M14"]["id"]] * 4}
+    assert (
+        client.post(f"{API}/evaluate", headers=shop.tech, json={"selection": too_many}).status_code
+        == 422
+    )
+
+    build = _ok(
+        client.post(
+            f"{API}/builds",
+            headers=shop.tech,
+            json={"name": "PC + setup", "selection": selection, "labor_price": "100000"},
+        ),
+        201,
+    )
+    assert build["selection"]["desk_shape"] == "L"
+    assert build["selection"]["pc_position"] == "FLOOR"
+    assert len(build["selection"]["monitor"]) == 2
+    assert build["price"] == "15593000.00"  # PC + setup
+
+    customer = _ok(
+        client.post(
+            "/api/v1/customers",
+            headers=shop.reception,
+            json=new_customer(id_type=None, id_number=None, full_name="Cliente Setup"),
+        ),
+        201,
+    )
+    order = _ok(
+        client.post(
+            f"{API}/builds/{build['id']}/order",
+            headers=shop.tech,
+            json={"customer_id": customer["id"]},
+        ),
+        201,
+    )
+    quote = _ok(client.get(f"{ORDERS}/{order['id']}/quotes", headers=shop.tech))["quotes"][0]
+    assert len(quote["items"]) == 13  # 8 PC parts + 4 setup + labor
+    assert quote["total"] == "15693000.00"
+    checklist = _ok(client.get(f"{ORDERS}/{order['id']}/assembly", headers=shop.tech))
+    assert "monitor" not in [s["code"] for s in checklist["steps"]]  # setup is not assembled

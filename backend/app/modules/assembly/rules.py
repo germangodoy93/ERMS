@@ -13,6 +13,7 @@ from app.modules.assembly.catalog import (
     BLOCKED_REASON,
     CATEGORY_LABELS,
     REQUIRED,
+    SETUP,
     AssemblyCategory,
     Step,
     UseProfile,
@@ -45,6 +46,29 @@ class Build:
     cooler: Piece | None = None
     storage: list[Piece] = field(default_factory=list)
     rgb: list[Piece] = field(default_factory=list)
+    # Setup
+    monitor: list[Piece] = field(default_factory=list)
+    keyboard: Piece | None = None
+    mouse: Piece | None = None
+    pad: Piece | None = None
+    headset: Piece | None = None
+    mic: list[Piece] = field(default_factory=list)
+    speaker: Piece | None = None
+    camera: Piece | None = None
+    stream: list[Piece] = field(default_factory=list)
+    chair: Piece | None = None
+    desk: Piece | None = None
+    light: list[Piece] = field(default_factory=list)
+
+    def setup_pieces(self) -> list[Piece]:
+        out: list[Piece] = []
+        for category in SETUP:
+            value = self.get(category)
+            if isinstance(value, list):
+                out.extend(value)
+            elif value is not None:
+                out.append(value)
+        return out
 
     def get(self, category: AssemblyCategory) -> Piece | list[Piece] | None:
         value: Piece | list[Piece] | None = getattr(self, category.value.lower())
@@ -52,7 +76,10 @@ class Build:
 
     def with_piece(self, piece: Piece) -> "Build":
         """A copy of the build with `piece` chosen (added for multi-choice categories)."""
-        copy = replace(self, storage=list(self.storage), rgb=list(self.rgb))
+        copy = replace(self)
+        for key, value in vars(copy).items():
+            if isinstance(value, list):  # lists are copied so the original stays untouched
+                setattr(copy, key, list(value))
         name = piece.category.value.lower()
         current = getattr(copy, name)
         if isinstance(current, list):
@@ -83,6 +110,7 @@ class Evaluation:
     watts: int
     recommended_psu_w: int
     price: Decimal
+    setup_price: Decimal
     gaming_index: int
     work_index: int
     modules: int
@@ -285,6 +313,7 @@ def evaluate(
     price += sum((p.price for p in [*b.storage, *b.rgb]), Decimal("0"))
     if ram:
         price += ram.price * units
+    setup_price = sum((p.price for p in b.setup_pieces()), Decimal("0"))
     if cpu:
         gaming = (
             round(gpu["gaming_index"] * 0.75 + cpu["gaming_index"] * 0.25)
@@ -301,6 +330,7 @@ def evaluate(
         watts=watts,
         recommended_psu_w=recommended,
         price=price,
+        setup_price=setup_price,
         gaming_index=gaming,
         work_index=work,
         modules=modules,
@@ -361,6 +391,8 @@ def incompatibility(
     b: Build, candidate: Piece, profile: UseProfile, limits: Thresholds
 ) -> str | None:
     """The first error that choosing `candidate` would cause in its own category."""
+    if candidate.category in SETUP:
+        return None  # setup advice depends on the 3D layout and never blocks the sale
     result = evaluate(b.with_piece(candidate), profile, limits)
     return next((e.message for e in result.errors if candidate.category in e.categories), None)
 

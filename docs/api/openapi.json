@@ -6031,7 +6031,19 @@
           "PSU",
           "CASE",
           "COOLER",
-          "RGB"
+          "RGB",
+          "MONITOR",
+          "KEYBOARD",
+          "MOUSE",
+          "PAD",
+          "HEADSET",
+          "MIC",
+          "SPEAKER",
+          "CAMERA",
+          "STREAM",
+          "CHAIR",
+          "DESK",
+          "LIGHT"
         ],
         "title": "AssemblyCategory"
       },
@@ -7996,6 +8008,14 @@
         "title": "DeliveryRequest",
         "description": "Who picked up the device. When it is not the customer, name and document are required."
       },
+      "DeskShape": {
+        "type": "string",
+        "enum": [
+          "STRAIGHT",
+          "L"
+        ],
+        "title": "DeskShape"
+      },
       "DeviceCreate": {
         "properties": {
           "model_id": {
@@ -8905,7 +8925,12 @@
           "price": {
             "type": "string",
             "title": "Price",
-            "description": "Piezas, IVA incluido según el inventario"
+            "description": "Piezas del PC, IVA incluido"
+          },
+          "setup_price": {
+            "type": "string",
+            "title": "Setup Price",
+            "description": "Monitores, periféricos y mobiliario del setup"
           },
           "gaming_index": {
             "type": "integer",
@@ -8940,6 +8965,7 @@
           "watts",
           "recommended_psu_w",
           "price",
+          "setup_price",
           "gaming_index",
           "work_index",
           "ram_gb"
@@ -10362,6 +10388,15 @@
         ],
         "title": "PaymentRead"
       },
+      "PcPosition": {
+        "type": "string",
+        "enum": [
+          "AUTO",
+          "DESK",
+          "FLOOR"
+        ],
+        "title": "PcPosition"
+      },
       "PermissionRead": {
         "properties": {
           "code": {
@@ -11699,6 +11734,146 @@
             "type": "array",
             "maxItems": 8,
             "title": "Rgb"
+          },
+          "monitor": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Monitor"
+          },
+          "keyboard": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keyboard"
+          },
+          "mouse": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mouse"
+          },
+          "pad": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pad"
+          },
+          "headset": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Headset"
+          },
+          "mic": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 2,
+            "title": "Mic"
+          },
+          "speaker": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speaker"
+          },
+          "camera": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Camera"
+          },
+          "stream": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Stream"
+          },
+          "chair": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chair"
+          },
+          "desk": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Desk"
+          },
+          "light": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 2,
+            "title": "Light"
+          },
+          "desk_shape": {
+            "$ref": "#/components/schemas/DeskShape",
+            "default": "STRAIGHT"
+          },
+          "pc_position": {
+            "$ref": "#/components/schemas/PcPosition",
+            "default": "AUTO"
           }
         },
         "type": "object",

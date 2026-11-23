@@ -16,6 +16,8 @@ class AssemblyBuild(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         CheckConstraint("status IN ('DRAFT', 'ORDERED')", name="status_valid"),
         CheckConstraint("profile IN ('OFFICE', 'DESIGN', 'GAMING')", name="profile_valid"),
         CheckConstraint("ram_units BETWEEN 1 AND 4", name="ram_units_valid"),
+        CheckConstraint("desk_shape IN ('STRAIGHT', 'L')", name="desk_shape_valid"),
+        CheckConstraint("pc_position IN ('AUTO', 'DESK', 'FLOOR')", name="pc_position_valid"),
         CheckConstraint("labor_price >= 0", name="labor_price_positive"),
         CheckConstraint(
             "(status = 'ORDERED') = (work_order_id IS NOT NULL)", name="ordered_has_order"
@@ -29,6 +31,12 @@ class AssemblyBuild(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     profile: Mapped[str] = mapped_column(String(10), nullable=False)
     status: Mapped[str] = mapped_column(String(10), nullable=False, default="DRAFT")
     ram_units: Mapped[int] = mapped_column(Integer, nullable=False, default=2)
+    desk_shape: Mapped[str] = mapped_column(
+        String(10), nullable=False, default="STRAIGHT", server_default="STRAIGHT"
+    )
+    pc_position: Mapped[str] = mapped_column(
+        String(10), nullable=False, default="AUTO", server_default="AUTO"
+    )
     labor_price: Mapped[Decimal] = mapped_column(
         Numeric(14, 2), nullable=False, default=Decimal("0")
     )

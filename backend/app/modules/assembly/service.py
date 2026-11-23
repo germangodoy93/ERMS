@@ -25,6 +25,7 @@ from app.core.exceptions import BusinessRuleError, NotFoundError, PermissionDeni
 from app.core.storage import Storage
 from app.modules.assembly.catalog import (
     CATEGORY_LABELS,
+    MULTI,
     AssemblyCategory,
     UseProfile,
     validate_specs,
@@ -325,6 +326,8 @@ class AssemblyService:
         build.name = data.name
         build.profile = data.profile.value
         build.ram_units = data.selection.ram_units
+        build.desk_shape = data.selection.desk_shape.value
+        build.pc_position = data.selection.pc_position.value
         build.labor_price = data.labor_price
         build.notes = data.notes
         build.items = [AssemblyBuildItem(part_id=pid) for pid in _ordered_ids(data.selection)]
@@ -540,14 +543,13 @@ class AssemblyService:
         if missing:
             raise NotFoundError("Una de las piezas elegidas no existe.")
         build = Build(ram_units=selection.ram_units)
-        for category, attr in SINGLE.items():
-            pid = getattr(selection, attr)
-            if pid:
-                setattr(build, attr, self._check_slot(parts[pid], category))
-        build.storage = [
-            self._check_slot(parts[pid], AssemblyCategory.STORAGE) for pid in selection.storage
-        ]
-        build.rgb = [self._check_slot(parts[pid], AssemblyCategory.RGB) for pid in selection.rgb]
+        for category in AssemblyCategory:
+            pieces = [self._check_slot(parts[pid], category) for pid in selection.ids_of(category)]
+            attr = category.value.lower()
+            if category in MULTI:
+                setattr(build, attr, pieces)
+            elif pieces:
+                setattr(build, attr, pieces[0])
         return build
 
     @staticmethod
@@ -657,6 +659,7 @@ class AssemblyService:
             watts=result.watts,
             recommended_psu_w=result.recommended_psu_w,
             price=result.price,
+            setup_price=result.setup_price,
             gaming_index=result.gaming_index,
             work_index=result.work_index,
             ram_gb=result.ram_gb,
@@ -671,12 +674,13 @@ class AssemblyService:
             if build.work_order_id
             else None
         )
+        totals = evaluate(pieces)
         return BuildSummary(
             id=build.id,
             name=build.name,
             profile=UseProfile(build.profile),
             status=build.status,
-            price=evaluate(pieces).price,
+            price=totals.price + totals.setup_price,
             work_order_id=build.work_order_id,
             work_order_number=number,
             updated_at=build.updated_at,
@@ -710,28 +714,33 @@ def _piece(part: Part) -> Piece:
 
 
 def _pieces(build: Build) -> list[Piece]:
+    """PC parts first (as in the quote), then the setup."""
     singles = [getattr(build, attr) for attr in SINGLE.values()]
-    return [p for p in singles if p] + build.storage + build.rgb
+    return [p for p in singles if p] + build.storage + build.rgb + build.setup_pieces()
 
 
 def _ordered_ids(selection: Selection) -> list[uuid.UUID]:
-    singles = [getattr(selection, attr) for attr in SINGLE.values()]
-    return [p for p in singles if p] + list(selection.storage) + list(selection.rgb)
+    return [pid for category in AssemblyCategory for pid in selection.ids_of(category)]
 
 
 def _selection(build: AssemblyBuild, session: Session) -> Selection:
     ids = [i.part_id for i in build.items]
     rows = session.execute(select(Part.id, Part.assembly_category).where(Part.id.in_(ids)))
     categories: dict[uuid.UUID, Any] = {row[0]: row[1] for row in rows}
-    data: dict[str, Any] = {"ram_units": build.ram_units, "storage": [], "rgb": []}
+    data: dict[str, Any] = {
+        "ram_units": build.ram_units,
+        "desk_shape": build.desk_shape,
+        "pc_position": build.pc_position,
+    }
+    for category in MULTI:
+        data[category.value.lower()] = []
     for pid in ids:
         category = AssemblyCategory(categories[pid])
-        if category is AssemblyCategory.STORAGE:
-            data["storage"].append(pid)
-        elif category is AssemblyCategory.RGB:
-            data["rgb"].append(pid)
+        attr = category.value.lower()
+        if category in MULTI:
+            data[attr].append(pid)
         else:
-            data[SINGLE[category]] = pid
+            data[attr] = pid
     return Selection.model_validate(data)
 
 

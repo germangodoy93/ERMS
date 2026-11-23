@@ -6,13 +6,20 @@ from typing import Any
 from pydantic import BaseModel, Field, field_validator
 
 from app.modules.assembly.catalog import (
-    MAX_RGB,
-    MAX_STORAGE,
+    MULTI_LIMITS,
     AssemblyCategory,
+    DeskShape,
+    PcPosition,
     UseProfile,
 )
 from app.modules.workorders.schemas import MoneyOut, PersonRef
 from app.shared.validators import clean_multiline, clean_text
+
+C = AssemblyCategory
+
+
+def _many(category: AssemblyCategory) -> Any:
+    return Field(default_factory=list, max_length=MULTI_LIMITS[category])
 
 
 class CatalogPart(BaseModel):
@@ -34,12 +41,32 @@ class Selection(BaseModel):
     psu: uuid.UUID | None = None
     case: uuid.UUID | None = None
     cooler: uuid.UUID | None = None
-    storage: list[uuid.UUID] = Field(default_factory=list, max_length=MAX_STORAGE)
-    rgb: list[uuid.UUID] = Field(default_factory=list, max_length=MAX_RGB)
+    storage: list[uuid.UUID] = _many(C.STORAGE)
+    rgb: list[uuid.UUID] = _many(C.RGB)
+    # Setup
+    monitor: list[uuid.UUID] = _many(C.MONITOR)
+    keyboard: uuid.UUID | None = None
+    mouse: uuid.UUID | None = None
+    pad: uuid.UUID | None = None
+    headset: uuid.UUID | None = None
+    mic: list[uuid.UUID] = _many(C.MIC)
+    speaker: uuid.UUID | None = None
+    camera: uuid.UUID | None = None
+    stream: list[uuid.UUID] = _many(C.STREAM)
+    chair: uuid.UUID | None = None
+    desk: uuid.UUID | None = None
+    light: list[uuid.UUID] = _many(C.LIGHT)
+    desk_shape: DeskShape = DeskShape.STRAIGHT
+    pc_position: PcPosition = PcPosition.AUTO
+
+    def ids_of(self, category: AssemblyCategory) -> list[uuid.UUID]:
+        value = getattr(self, category.value.lower())
+        if isinstance(value, list):
+            return list(value)
+        return [value] if value else []
 
     def part_ids(self) -> set[uuid.UUID]:
-        singles = (self.cpu, self.board, self.ram, self.gpu, self.psu, self.case, self.cooler)
-        return {p for p in singles if p} | set(self.storage) | set(self.rgb)
+        return {pid for category in AssemblyCategory for pid in self.ids_of(category)}
 
 
 class EvaluateRequest(BaseModel):
@@ -62,7 +89,8 @@ class EvaluationOut(BaseModel):
     ready: bool = Field(description="Completa y sin incompatibilidades")
     watts: int
     recommended_psu_w: int
-    price: MoneyOut = Field(description="Piezas, IVA incluido según el inventario")
+    price: MoneyOut = Field(description="Piezas del PC, IVA incluido")
+    setup_price: MoneyOut = Field(description="Monitores, periféricos y mobiliario del setup")
     gaming_index: int
     work_index: int
     ram_gb: int
