@@ -7,6 +7,7 @@ import { makeMe } from "@/test/fixtures";
 import type { CatalogPart, Evaluation } from "@/types/api";
 
 import { evaluateBuild, getCatalog, saveBuild } from "../api";
+import { EMPTY_SELECTION } from "../presentation";
 import { AssemblyBuilderPage } from "./AssemblyBuilderPage";
 
 vi.mock("../api", () => ({
@@ -51,6 +52,7 @@ const EVALUATION: Evaluation = {
   watts: 300,
   recommended_psu_w: 400,
   price: "1999000.00",
+  setup_price: "0.00",
   gaming_index: 30,
   work_index: 50,
   ram_gb: 0,
@@ -101,7 +103,7 @@ describe("AssemblyBuilderPage", () => {
     fireEvent.click(await screen.findByRole("button", { name: /AMD Ryzen 7 9800X3D/ }));
     await waitFor(() =>
       expect(evaluateBuild).toHaveBeenLastCalledWith({
-        selection: { ram_units: 2, storage: [], rgb: [], cpu: "c1" },
+        selection: { ...EMPTY_SELECTION, cpu: "c1" },
         profile: "GAMING",
         candidates_for: "CPU",
       }),
@@ -116,7 +118,7 @@ describe("AssemblyBuilderPage", () => {
         {
           name: "Gamer de Ana",
           profile: "GAMING",
-          selection: { ram_units: 2, storage: [], rgb: [], cpu: "c1" },
+          selection: { ...EMPTY_SELECTION, cpu: "c1" },
           labor_price: "150000.00",
           notes: null,
         },

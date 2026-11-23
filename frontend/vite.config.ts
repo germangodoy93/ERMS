@@ -18,6 +18,8 @@ export default defineConfig(({ mode }) => {
       alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
     },
     build: {
+      // three.js (~560 kB) is the largest chunk and loads only with the 3D viewer.
+      chunkSizeWarningLimit: 600,
       // Libraries change less often than our code: separate chunks keep them
       // cached in the browser across deploys.
       rolldownOptions: {
@@ -32,6 +34,8 @@ export default defineConfig(({ mode }) => {
                 name: "ui",
                 test: /node_modules[\\/](radix-ui|@radix-ui|lucide-react|sonner)[\\/]/,
               },
+              // Only the 3D viewer needs three.js: its own chunk, downloaded on demand.
+              { name: "three", test: /node_modules[\\/]three[\\/]/ },
               { name: "vendor", test: /node_modules[\\/]/ },
             ],
           },

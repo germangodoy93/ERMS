@@ -5,15 +5,19 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { PERMS, useCan } from "@/modules/auth/permissions";
 import { errorMessage } from "@/services/errors";
 import type { WorkOrder } from "@/types/api";
 
 import { useChecklist, useChecklistActions } from "../hooks";
+import { AssemblyLive3D } from "./AssemblyLive3D";
 
 /** Assembly steps in the real order; a step can only be done after its prerequisites. */
 export function AssemblyChecklistPanel({ order }: { order: WorkOrder }) {
   const checklist = useChecklist(order.id);
   const actions = useChecklistActions(order.id);
+  // The 3D view reads the build and the catalog, which only assemblers can open.
+  const canSee3d = useCan(PERMS.ASSEMBLY_MANAGE);
   if (checklist.isPending) return <Skeleton className="h-40" />;
   if (checklist.isError) {
     return <p className="text-destructive text-sm">{errorMessage(checklist.error)}</p>;
@@ -32,6 +36,7 @@ export function AssemblyChecklistPanel({ order }: { order: WorkOrder }) {
         </Link>{" "}
         · {done} de {data.steps.length} pasos
       </p>
+      {canSee3d && <AssemblyLive3D checklist={data} />}
       {!data.parts_consumed ? (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-dashed p-3">
           <span>

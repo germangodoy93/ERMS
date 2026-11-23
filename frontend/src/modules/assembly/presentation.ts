@@ -10,6 +10,18 @@ export const CATEGORY_LABELS: Record<AssemblyCategory, string> = {
   CASE: "Gabinete",
   COOLER: "Refrigeración",
   RGB: "RGB",
+  MONITOR: "Monitores",
+  KEYBOARD: "Teclado",
+  MOUSE: "Mouse",
+  PAD: "Pad",
+  HEADSET: "Audífonos",
+  MIC: "Micrófono",
+  SPEAKER: "Parlantes",
+  CAMERA: "Cámara",
+  STREAM: "Streaming",
+  CHAIR: "Silla",
+  DESK: "Escritorio",
+  LIGHT: "Luces",
 };
 
 export const PROFILE_LABELS: Record<UseProfile, string> = {
@@ -18,59 +30,82 @@ export const PROFILE_LABELS: Record<UseProfile, string> = {
   GAMING: "Gaming",
 };
 
+const PICK_ONE = "Elija una opción. Las piezas que no encajan muestran el motivo.";
+const SETUP_ONE = "Elija una opción; tóquela otra vez para quitarla.";
+
+/** How many parts can be chosen in multi-choice categories (as in the simulator). */
+export const MULTI_LIMITS: Partial<Record<AssemblyCategory, number>> = {
+  STORAGE: 4,
+  RGB: 8,
+  MONITOR: 3,
+  MIC: 2,
+  STREAM: 3,
+  LIGHT: 2,
+};
+export const MULTI: ReadonlySet<AssemblyCategory> = new Set(
+  Object.keys(MULTI_LIMITS) as AssemblyCategory[],
+);
+
 export const CATEGORY_HINTS: Record<AssemblyCategory, string> = {
-  CPU: "Elija una opción. Las piezas que no encajan muestran el motivo.",
-  BOARD: "Elija una opción. Las piezas que no encajan muestran el motivo.",
+  CPU: PICK_ONE,
+  BOARD: PICK_ONE,
   RAM: "Los precios son por unidad: elija cuántas instalar.",
   GPU: "Opcional si el procesador tiene gráficos integrados.",
   STORAGE: "Puede elegir varias unidades (hasta 4).",
   PSU: "Elija una opción. La marca naranja del consumo es la potencia recomendada.",
-  CASE: "Elija una opción. Las piezas que no encajan muestran el motivo.",
-  COOLER: "Elija una opción. Las piezas que no encajan muestran el motivo.",
+  CASE: PICK_ONE,
+  COOLER: PICK_ONE,
   RGB: "Accesorios opcionales: puede combinar varios.",
+  MONITOR: "Puede elegir hasta 3.",
+  KEYBOARD: SETUP_ONE,
+  MOUSE: SETUP_ONE,
+  PAD: SETUP_ONE,
+  HEADSET: SETUP_ONE,
+  MIC: "Puede elegir hasta 2 (por ejemplo, micrófono y brazo).",
+  SPEAKER: SETUP_ONE,
+  CAMERA: SETUP_ONE,
+  STREAM: "Puede elegir hasta 3.",
+  CHAIR: SETUP_ONE,
+  DESK: SETUP_ONE,
+  LIGHT: "Puede elegir hasta 2.",
 };
 
-const MAX: Partial<Record<AssemblyCategory, number>> = { STORAGE: 4, RGB: 8 };
-export const MULTI: ReadonlySet<AssemblyCategory> = new Set(["STORAGE", "RGB"]);
+/** Key of the category in the Selection (CPU → cpu, MONITOR → monitor…). */
+const key = (category: AssemblyCategory) => category.toLowerCase() as keyof Selection;
 
-type SingleKey = "cpu" | "board" | "ram" | "gpu" | "psu" | "case" | "cooler";
-const SINGLE: Record<Exclude<AssemblyCategory, "STORAGE" | "RGB">, SingleKey> = {
-  CPU: "cpu",
-  BOARD: "board",
-  RAM: "ram",
-  GPU: "gpu",
-  PSU: "psu",
-  CASE: "case",
-  COOLER: "cooler",
+export const EMPTY_SELECTION: Selection = {
+  ram_units: 2,
+  storage: [],
+  rgb: [],
+  monitor: [],
+  mic: [],
+  stream: [],
+  light: [],
+  desk_shape: "STRAIGHT",
+  pc_position: "AUTO",
 };
-
-export const EMPTY_SELECTION: Selection = { ram_units: 2, storage: [], rgb: [] };
 
 export function selectedIds(selection: Selection, category: AssemblyCategory): string[] {
-  if (category === "STORAGE") return selection.storage;
-  if (category === "RGB") return selection.rgb;
-  const id = selection[SINGLE[category]];
-  return id ? [id] : [];
+  const value = selection[key(category)];
+  if (Array.isArray(value)) return value;
+  return typeof value === "string" && value ? [value] : [];
 }
 
 /** Choosing an already chosen part removes it (as in the simulator). */
 export function toggle(selection: Selection, part: CatalogPart): Selection {
   const { category, id } = part;
-  if (category === "STORAGE" || category === "RGB") {
-    const key = category === "STORAGE" ? "storage" : "rgb";
-    const current = selection[key];
-    if (current.includes(id)) return { ...selection, [key]: current.filter((x) => x !== id) };
-    if (current.length >= (MAX[category] ?? 99)) return selection;
-    return { ...selection, [key]: [...current, id] };
+  const k = key(category);
+  if (MULTI.has(category)) {
+    const current = selectedIds(selection, category);
+    if (current.includes(id)) return { ...selection, [k]: current.filter((x) => x !== id) };
+    if (current.length >= (MULTI_LIMITS[category] ?? 99)) return selection;
+    return { ...selection, [k]: [...current, id] };
   }
-  const key = SINGLE[category];
-  return { ...selection, [key]: selection[key] === id ? null : id };
+  return { ...selection, [k]: selection[k] === id ? null : id };
 }
 
 export function clearCategory(selection: Selection, category: AssemblyCategory): Selection {
-  if (category === "STORAGE") return { ...selection, storage: [] };
-  if (category === "RGB") return { ...selection, rgb: [] };
-  return { ...selection, [SINGLE[category]]: null };
+  return { ...selection, [key(category)]: MULTI.has(category) ? [] : null };
 }
 
 type Specs = Record<string, unknown>;
@@ -113,23 +148,80 @@ export function specText(category: AssemblyCategory, s: Specs): string {
       return s.kind === "FAN_KIT"
         ? `Kit de ${n(s.fan_count)} ventiladores ARGB de 120 mm${s.infinity ? " con efecto infinito" : ""}${s.lcd ? " y pantalla LCD" : ""}`
         : (RGB_KIND[String(s.kind)] ?? String(s.kind));
+    case "MONITOR":
+      return `${n(s.inches)}"${s.resolution ? ` · ${String(s.resolution)}` : ""}${s.hz ? ` · ${n(s.hz)} Hz` : ""}${s.oled ? " · OLED" : ""}${s.curved ? " · curvo" : ""}${s.pro ? " · para diseño" : ""}`;
+    case "KEYBOARD":
+      return `${s.size === "PAD" ? "Keypad para juegos" : `Formato ${String(s.size)}`}${s.low_profile ? " · perfil bajo" : ""}${s.hall_effect ? " · switches magnéticos (Hall)" : ""}${s.wireless ? " · inalámbrico" : ""}`;
+    case "MOUSE":
+      return s.wireless ? "Inalámbrico" : "Con cable";
+    case "PAD":
+      return `Tamaño ${String(s.size)}`;
+    case "HEADSET":
+      return s.earbuds
+        ? "Audífonos in-ear con estuche"
+        : `Diadema${s.wireless ? " inalámbrica" : ""}${s.rgb ? " · RGB" : ""}`;
+    case "MIC":
+      return s.arm
+        ? "Brazo articulado para micrófono"
+        : `Micrófono${s.rgb ? " con RGB" : ""}${s.xlr ? " · XLR (necesita interfaz)" : ""}`;
+    case "SPEAKER":
+      return (
+        (
+          {
+            BAR: "Barra de sonido",
+            PAIR: "Par de parlantes",
+            ROBOT: "Parlantes de diseño futurista",
+          } as Record<string, string>
+        )[String(s.kind)] ?? "Parlantes"
+      );
+    case "CAMERA":
+      return `Cámara web${s.resolution ? ` ${String(s.resolution)}` : ""}`;
+    case "STREAM":
+      return s.kind === "LIGHT"
+        ? "Panel de luz para cámara"
+        : "Controlador con teclas programables";
+    case "CHAIR":
+      return "Silla gamer";
+    case "DESK":
+      return `${n(s.width_cm)} cm de ancho${s.integrated_case ? " · con gabinete integrado" : ""}`;
+    case "LIGHT":
+      return `Paneles de luz RGB para la pared (${n(s.pieces)} piezas)`;
   }
 }
 
 /** Parts of the catalog chosen in the selection, by category. */
 export function chosen(catalog: CatalogPart[], selection: Selection) {
   const byId = new Map(catalog.map((p) => [p.id, p]));
-  const one = (id: string | null | undefined) => (id ? byId.get(id) : undefined);
+  const one = (category: AssemblyCategory) => {
+    const id = selectedIds(selection, category)[0];
+    return id ? byId.get(id) : undefined;
+  };
+  const many = (category: AssemblyCategory) =>
+    selectedIds(selection, category)
+      .map((id) => byId.get(id))
+      .filter((p) => p !== undefined);
   return {
-    cpu: one(selection.cpu),
-    board: one(selection.board),
-    ram: one(selection.ram),
-    gpu: one(selection.gpu),
-    psu: one(selection.psu),
-    case: one(selection.case),
-    cooler: one(selection.cooler),
-    storage: selection.storage.map((id) => byId.get(id)).filter((p) => p !== undefined),
-    rgb: selection.rgb.map((id) => byId.get(id)).filter((p) => p !== undefined),
+    cpu: one("CPU"),
+    board: one("BOARD"),
+    ram: one("RAM"),
+    gpu: one("GPU"),
+    psu: one("PSU"),
+    case: one("CASE"),
+    cooler: one("COOLER"),
+    storage: many("STORAGE"),
+    rgb: many("RGB"),
+    monitor: many("MONITOR"),
+    keyboard: one("KEYBOARD"),
+    mouse: one("MOUSE"),
+    pad: one("PAD"),
+    headset: one("HEADSET"),
+    mic: many("MIC"),
+    speaker: one("SPEAKER"),
+    camera: one("CAMERA"),
+    stream: many("STREAM"),
+    chair: one("CHAIR"),
+    desk: one("DESK"),
+    light: many("LIGHT"),
   };
 }
 

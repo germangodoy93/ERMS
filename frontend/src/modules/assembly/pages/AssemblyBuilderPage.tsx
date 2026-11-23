@@ -17,16 +17,20 @@ import { cn } from "@/lib/utils";
 import { formatMoney, parseMoney } from "@/modules/workorders/presentation";
 import { errorMessage } from "@/services/errors";
 import {
-  ASSEMBLY_CATEGORIES,
+  PC_CATEGORIES,
+  SETUP_CATEGORIES,
   USE_PROFILES,
   type AssemblyCategory,
   type BuildRead,
+  type DeskShape,
   type Evaluation,
+  type PcPosition,
   type Selection,
   type UseProfile,
 } from "@/types/api";
 
 import { CaseSideView } from "../components/CaseSideView";
+import { Viewer3D } from "../components/Viewer3D";
 import { OrderBuildDialog } from "../components/OrderBuildDialog";
 import { useBuild, useCatalog, useEvaluation, useSaveBuild } from "../hooks";
 import {
@@ -41,6 +45,11 @@ import {
   specText,
   toggle,
 } from "../presentation";
+import { setupAdvice } from "../setup";
+import type { SceneInput } from "../three/viewer";
+
+type Mode = "build" | "setup";
+const WEBGL = typeof window !== "undefined" && "WebGLRenderingContext" in window;
 
 export function AssemblyBuilderPage() {
   const { buildId } = useParams();
@@ -62,7 +71,12 @@ function Builder({ saved }: { saved?: BuildRead }) {
   const [selection, setSelection] = useState<Selection>(saved?.selection ?? EMPTY_SELECTION);
   const [labor, setLabor] = useState(saved ? String(Number(saved.labor_price)) : "0");
   const [notes, setNotes] = useState(saved?.notes ?? "");
-  const [tab, setTab] = useState<AssemblyCategory>("CPU");
+  const [mode, setMode] = useState<Mode>("build");
+  const [pcTab, setPcTab] = useState<AssemblyCategory>("CPU");
+  const [setupTab, setSetupTab] = useState<AssemblyCategory>("MONITOR");
+  const [view, setView] = useState<"3d" | "2d">(WEBGL ? "3d" : "2d");
+  const tab = mode === "setup" ? setupTab : pcTab;
+  const setTab = mode === "setup" ? setSetupTab : setPcTab;
   const [search, setSearch] = useState("");
   const [onlyCompatible, setOnlyCompatible] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -76,6 +90,29 @@ function Builder({ saved }: { saved?: BuildRead }) {
   const evaluation = useEvaluation(request);
   const parts = useMemo(() => chosen(catalog.data ?? [], selection), [catalog.data, selection]);
   const laborValue = parseMoney(labor);
+  const ev = evaluation.data;
+  const lightsOn = Boolean(ev?.ready);
+  const scene = useMemo<SceneInput>(
+    () => ({
+      pc: {
+        parts,
+        ramModules: modulesOf(parts, selection),
+        bad: new Set(ev?.errors.flatMap((e) => e.categories) ?? []),
+        done: null,
+        fresh: null,
+        lightsOn,
+      },
+      setup:
+        mode === "setup"
+          ? {
+              parts,
+              shape: selection.desk_shape ?? "STRAIGHT",
+              position: selection.pc_position ?? "AUTO",
+            }
+          : null,
+    }),
+    [parts, selection, ev, lightsOn, mode],
+  );
   const query = useDeferredValue(search.trim().toLowerCase());
 
   const change = (next: Selection) => {
@@ -112,7 +149,6 @@ function Builder({ saved }: { saved?: BuildRead }) {
     return <p className="text-destructive text-sm">{errorMessage(catalog.error)}</p>;
   }
 
-  const ev = evaluation.data;
   const bad = new Set<AssemblyCategory>(ev?.errors.flatMap((e) => e.categories) ?? []);
   const cards = catalog.data
     .filter((p) => p.category === tab)
@@ -155,23 +191,68 @@ function Builder({ saved }: { saved?: BuildRead }) {
         </Alert>
       )}
 
+      <nav className="bg-muted flex w-fit gap-1 rounded-xl p-1" aria-label="Modo">
+        {(
+          [
+            ["build", "Configurar PC"],
+            ["setup", "Setup"],
+          ] as const
+        ).map(([m, label]) => (
+          <button
+            key={m}
+            type="button"
+            aria-pressed={mode === m}
+            onClick={() => {
+              setMode(m);
+              setSearch("");
+            }}
+            className={cn(
+              "rounded-lg px-4 py-2 text-sm font-medium",
+              mode === m && "bg-foreground text-background",
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+
       <Stats evaluation={ev} psuWatts={Number(parts.psu?.specs.watts ?? 0)} labor={laborValue} />
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
         <div className="grid gap-4">
-          <div className="bg-muted/30 h-[clamp(340px,60vh,600px)] rounded-xl border p-3">
-            <CaseSideView
-              parts={parts}
-              modules={ev?.ram_gb ? modulesOf(parts, selection) : 0}
-              bad={bad}
-            />
-          </div>
+          {WEBGL && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-fit"
+              onClick={() => setView(view === "3d" ? "2d" : "3d")}
+            >
+              {view === "3d" ? "Ver en 2D" : "Ver en 3D"}
+            </Button>
+          )}
+          {view === "3d" ? (
+            <div className="h-[clamp(420px,72vh,760px)]">
+              <Viewer3D
+                scene={scene}
+                setupMode={mode === "setup"}
+                onUnavailable={() => setView("2d")}
+              />
+            </div>
+          ) : (
+            <div className="bg-muted/30 h-[clamp(340px,60vh,600px)] rounded-xl border p-3">
+              <CaseSideView
+                parts={parts}
+                modules={ev?.ram_gb ? modulesOf(parts, selection) : 0}
+                bad={bad}
+              />
+            </div>
+          )}
           {ev && <Performance evaluation={ev} />}
         </div>
 
         <div className="grid gap-3">
           <div className="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Categoría">
-            {ASSEMBLY_CATEGORIES.map((c) => (
+            {(mode === "setup" ? SETUP_CATEGORIES : PC_CATEGORIES).map((c) => (
               <Button
                 key={c}
                 role="tab"
@@ -191,6 +272,9 @@ function Builder({ saved }: { saved?: BuildRead }) {
             ))}
           </div>
           <p className="text-muted-foreground text-sm">{CATEGORY_HINTS[tab]}</p>
+          {mode === "setup" && (
+            <SetupLayoutChips selection={selection} editable={editable} onChange={change} />
+          )}
           {tab === "RAM" && (
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground text-sm">Unidades</span>
@@ -270,7 +354,19 @@ function Builder({ saved }: { saved?: BuildRead }) {
         </div>
       </div>
 
-      {ev && <Issues evaluation={ev} />}
+      {mode === "setup" ? (
+        <SetupReview
+          advice={setupAdvice(
+            parts,
+            selection.desk_shape ?? "STRAIGHT",
+            selection.pc_position ?? "AUTO",
+            catalog.data.filter((p) => p.category === "DESK"),
+          )}
+          evaluation={ev}
+        />
+      ) : (
+        ev && <Issues evaluation={ev} />
+      )}
 
       <section className="grid gap-4 rounded-xl border p-4">
         <h2 className="text-lg font-semibold">Datos de la configuración</h2>
@@ -349,6 +445,96 @@ function Builder({ saved }: { saved?: BuildRead }) {
   );
 }
 
+function SetupLayoutChips({
+  selection,
+  editable,
+  onChange,
+}: {
+  selection: Selection;
+  editable: boolean;
+  onChange: (next: Selection) => void;
+}) {
+  const shape = selection.desk_shape ?? "STRAIGHT";
+  const position = selection.pc_position ?? "AUTO";
+  const chip = (active: boolean, label: string, onClick: () => void) => (
+    <Button
+      key={label}
+      size="sm"
+      variant={active ? "default" : "outline"}
+      aria-pressed={active}
+      disabled={!editable}
+      onClick={onClick}
+    >
+      {label}
+    </Button>
+  );
+  const shapes: [DeskShape, string][] = [
+    ["STRAIGHT", "Recto"],
+    ["L", "En L"],
+  ];
+  const positions: [PcPosition, string][] = [
+    ["AUTO", shape === "L" ? "En el ala" : "Automática"],
+    ["DESK", "Escritorio"],
+    ["FLOOR", "Piso"],
+  ];
+  return (
+    <div className="grid gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-muted-foreground text-sm">Forma del escritorio</span>
+        {shapes.map(([value, label]) =>
+          chip(shape === value, label, () => onChange({ ...selection, desk_shape: value })),
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-muted-foreground text-sm">Ubicación del PC</span>
+        {positions.map(([value, label]) =>
+          chip(position === value, label, () => onChange({ ...selection, pc_position: value })),
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SetupReview({ advice, evaluation }: { advice: string[]; evaluation?: Evaluation }) {
+  let pc: { cls: string; text: string } | null = null;
+  if (evaluation?.errors.length) {
+    const n = evaluation.errors.length;
+    pc = {
+      cls: "text-destructive",
+      text: `El PC tiene ${n} incompatibilidad${n > 1 ? "es" : ""}: corríjalas en «Configurar PC» para que encienda.`,
+    };
+  } else if (evaluation?.missing.length) {
+    pc = {
+      cls: "text-muted-foreground",
+      text: `Faltan piezas del PC (${evaluation.missing.map((c) => CATEGORY_LABELS[c]).join(", ")}): sin ellas no enciende.`,
+    };
+  } else if (evaluation) {
+    pc = {
+      cls: "text-success",
+      text: "Completo y compatible: las pantallas y el RGB están encendidos.",
+    };
+  }
+  return (
+    <section className="grid gap-2">
+      <h2 className="text-lg font-semibold">Revisión del setup</h2>
+      <ul className="grid gap-1.5">
+        {pc && (
+          <li className="bg-muted/40 rounded-md p-2.5 text-sm">
+            <b className={cn("mr-2", pc.cls)}>PC</b>
+            {pc.text}
+          </li>
+        )}
+        {advice.map((text) => (
+          <li key={text} className="bg-muted/40 rounded-md p-2.5 text-sm">
+            <b className="text-warning mr-2">Aviso</b>
+            {text}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 function modulesOf(parts: ReturnType<typeof chosen>, selection: Selection): number {
   return parts.ram ? Number(parts.ram.specs.modules) * selection.ram_units : 0;
 }
@@ -365,7 +551,8 @@ function Stats({
   const watts = evaluation?.watts ?? 0;
   const rec = evaluation?.recommended_psu_w ?? 0;
   const pct = psuWatts ? Math.min(100, (watts / psuWatts) * 100) : Math.min(100, watts / 12);
-  const total = Number(evaluation?.price ?? 0) + Number(labor ?? 0);
+  const setup = Number(evaluation?.setup_price ?? 0);
+  const total = Number(evaluation?.price ?? 0) + setup + Number(labor ?? 0);
   const state = !evaluation
     ? ["text-muted-foreground", "Calculando…"]
     : evaluation.errors.length
@@ -384,7 +571,9 @@ function Stats({
         <p className="text-muted-foreground text-xs">Total</p>
         <p className="text-2xl font-semibold tabular-nums">{formatMoney(String(total))}</p>
         <p className="text-muted-foreground text-xs">
-          Piezas {formatMoney(evaluation?.price ?? "0")} · mano de obra {formatMoney(labor ?? "0")}
+          PC {formatMoney(evaluation?.price ?? "0")}
+          {setup > 0 && ` · setup ${formatMoney(String(setup))}`} · mano de obra{" "}
+          {formatMoney(labor ?? "0")}
         </p>
       </div>
       <div>

@@ -893,7 +893,8 @@ export interface Report {
 
 // --- PC assembly (Sprint E1) ---------------------------------------------------------
 
-export const ASSEMBLY_CATEGORIES = [
+/** PC parts (the configurator tabs). */
+export const PC_CATEGORIES = [
   "CPU",
   "BOARD",
   "RAM",
@@ -904,7 +905,25 @@ export const ASSEMBLY_CATEGORIES = [
   "COOLER",
   "RGB",
 ] as const;
+/** Setup sold with the PC in the same order. */
+export const SETUP_CATEGORIES = [
+  "MONITOR",
+  "KEYBOARD",
+  "MOUSE",
+  "PAD",
+  "HEADSET",
+  "MIC",
+  "SPEAKER",
+  "CAMERA",
+  "STREAM",
+  "CHAIR",
+  "DESK",
+  "LIGHT",
+] as const;
+export const ASSEMBLY_CATEGORIES = [...PC_CATEGORIES, ...SETUP_CATEGORIES] as const;
 export type AssemblyCategory = (typeof ASSEMBLY_CATEGORIES)[number];
+export type DeskShape = "STRAIGHT" | "L";
+export type PcPosition = "AUTO" | "DESK" | "FLOOR";
 
 export const USE_PROFILES = ["OFFICE", "DESIGN", "GAMING"] as const;
 export type UseProfile = (typeof USE_PROFILES)[number];
@@ -930,6 +949,20 @@ export interface Selection {
   cooler?: string | null;
   storage: string[];
   rgb: string[];
+  monitor?: string[];
+  keyboard?: string | null;
+  mouse?: string | null;
+  pad?: string | null;
+  headset?: string | null;
+  mic?: string[];
+  speaker?: string | null;
+  camera?: string | null;
+  stream?: string[];
+  chair?: string | null;
+  desk?: string | null;
+  light?: string[];
+  desk_shape?: DeskShape;
+  pc_position?: PcPosition;
 }
 
 export interface EvaluateRequest {
@@ -951,6 +984,8 @@ export interface Evaluation {
   watts: number;
   recommended_psu_w: number;
   price: string;
+  /** Monitors, peripherals and furniture of the setup. */
+  setup_price: string;
   gaming_index: number;
   work_index: number;
   ram_gb: number;
