@@ -143,7 +143,18 @@ test("reception → diagnostic → quote → repair → QC → payment → deliv
   await expect(statusBadge(page)).toHaveText("Entregado");
 
   // --- Warranty claim opens a new order without diagnostic fee. --------------------------
-  await expect(page.getByText(/^30 días: del/)).toBeVisible();
+  const warrantyCard = page
+    .getByText("Garantía", { exact: true })
+    .locator("xpath=ancestor::*[@data-slot='card'][1]");
+  try {
+    await expect(page.getByText(/^30 días: del/)).toBeVisible();
+  } catch {
+    // Diagnose an intermittent CI failure: stale screen or warranty not created?
+    const before = await warrantyCard.innerText().catch(() => "(sin tarjeta)");
+    await page.reload();
+    const after = await warrantyCard.innerText().catch(() => "(sin tarjeta)");
+    throw new Error(`Garantía no visible. Antes: «${before}». Tras recargar: «${after}».`);
+  }
   await expect(page.getByText("Vigente")).toBeVisible();
   await page.getByRole("button", { name: "Abrir reclamo de garantía" }).click();
   dialog = page.getByRole("dialog");
