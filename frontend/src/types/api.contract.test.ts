@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import {
   ACCESSORIES,
+  ASSEMBLY_CATEGORIES,
   COMPONENT_STATUSES,
   CONSENT_CHANNELS,
   CONSENT_PURPOSES,
@@ -14,6 +15,7 @@ import {
   PAYMENT_METHODS,
   PRIORITIES,
   UNLOCK_METHODS,
+  USE_PROFILES,
   WORK_ORDER_STATUSES,
 } from "./api";
 
@@ -354,6 +356,7 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
       "device",
       "estimated_delivery_date",
       "id",
+      "kind",
       "number",
       "priority",
       "received_at",
@@ -389,6 +392,7 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
       "estimated_delivery_date",
       "history",
       "id",
+      "kind",
       "notes",
       "number",
       "physical_condition",
@@ -545,6 +549,7 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
   },
   PartRead: {
     all: [
+      "assembly_category",
       "id",
       "is_active",
       "kind",
@@ -555,6 +560,7 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
       "price_includes_tax",
       "sale_price",
       "sku",
+      "specs",
       "stock",
       "tax_rate",
       "unit_cost",
@@ -577,6 +583,7 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
   },
   PartWrite: {
     all: [
+      "assembly_category",
       "is_active",
       "kind",
       "min_stock",
@@ -585,6 +592,7 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
       "price_includes_tax",
       "sale_price",
       "sku",
+      "specs",
       "tax_rate",
       "unit_cost",
     ],
@@ -882,6 +890,8 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
   OrganizationRead: {
     all: [
       "address",
+      "assembly_bottleneck_gap",
+      "assembly_min_ram_gb",
       "city",
       "email",
       "id",
@@ -894,6 +904,8 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
     ],
     required: [
       "address",
+      "assembly_bottleneck_gap",
+      "assembly_min_ram_gb",
       "city",
       "email",
       "id",
@@ -906,12 +918,142 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
     ],
   },
   OrganizationUpdate: {
-    all: ["address", "city", "email", "legal_name", "name", "phone", "tax_id", "warranty_days"],
+    all: [
+      "address",
+      "assembly_bottleneck_gap",
+      "assembly_min_ram_gb",
+      "city",
+      "email",
+      "legal_name",
+      "name",
+      "phone",
+      "tax_id",
+      "warranty_days",
+    ],
     required: [],
   },
   DeliveryRequest: {
     all: ["balance_reason", "document", "name", "notes", "picked_up_by_customer", "warranty_days"],
     required: ["picked_up_by_customer"],
+  },
+  CatalogPart: {
+    all: ["category", "id", "name", "sale_price", "sku", "specs", "stock"],
+    required: ["category", "id", "name", "sale_price", "sku", "specs", "stock"],
+  },
+  Selection: {
+    all: ["board", "case", "cooler", "cpu", "gpu", "psu", "ram", "ram_units", "rgb", "storage"],
+    required: [],
+  },
+  EvaluateRequest: {
+    all: ["candidates_for", "profile", "selection"],
+    required: ["selection"],
+  },
+  IssueOut: {
+    all: ["categories", "message"],
+    required: ["categories", "message"],
+  },
+  EvaluationOut: {
+    all: [
+      "candidates",
+      "errors",
+      "gaming_index",
+      "missing",
+      "price",
+      "ram_gb",
+      "ready",
+      "recommended_psu_w",
+      "warnings",
+      "watts",
+      "work_index",
+    ],
+    required: [
+      "errors",
+      "gaming_index",
+      "missing",
+      "price",
+      "ram_gb",
+      "ready",
+      "recommended_psu_w",
+      "warnings",
+      "watts",
+      "work_index",
+    ],
+  },
+  BuildSummary: {
+    all: [
+      "id",
+      "name",
+      "price",
+      "profile",
+      "status",
+      "updated_at",
+      "work_order_id",
+      "work_order_number",
+    ],
+    required: [
+      "id",
+      "name",
+      "price",
+      "profile",
+      "status",
+      "updated_at",
+      "work_order_id",
+      "work_order_number",
+    ],
+  },
+  BuildRead: {
+    all: [
+      "created_by",
+      "editable",
+      "evaluation",
+      "id",
+      "labor_price",
+      "name",
+      "notes",
+      "price",
+      "profile",
+      "selection",
+      "status",
+      "updated_at",
+      "work_order_id",
+      "work_order_number",
+    ],
+    required: [
+      "created_by",
+      "editable",
+      "evaluation",
+      "id",
+      "labor_price",
+      "name",
+      "notes",
+      "price",
+      "profile",
+      "selection",
+      "status",
+      "updated_at",
+      "work_order_id",
+      "work_order_number",
+    ],
+  },
+  BuildWrite: {
+    all: ["labor_price", "name", "notes", "profile", "selection"],
+    required: ["name", "selection"],
+  },
+  StepOut: {
+    all: ["blocked_reason", "code", "done", "title"],
+    required: ["blocked_reason", "code", "done", "title"],
+  },
+  AssemblyChecklist: {
+    all: ["build_id", "build_name", "can_work", "parts_consumed", "steps"],
+    required: ["build_id", "build_name", "can_work", "parts_consumed", "steps"],
+  },
+  CatalogImportItem: {
+    all: ["category", "name", "sale_price", "sku", "specs"],
+    required: ["category", "name", "sale_price", "sku", "specs"],
+  },
+  CatalogImportResult: {
+    all: ["created", "errors", "updated"],
+    required: ["created", "errors", "updated"],
   },
 };
 
@@ -992,6 +1134,15 @@ describe("API contract (docs/api/openapi.json)", () => {
         "/api/v1/work-orders/{order_id}/warranty/claims/{claim_id}/decision",
         "/api/v1/dashboard",
         "/api/v1/reports/{kind}",
+        "/api/v1/assembly/catalog",
+        "/api/v1/assembly/catalog/import",
+        "/api/v1/assembly/evaluate",
+        "/api/v1/assembly/builds",
+        "/api/v1/assembly/builds/{build_id}",
+        "/api/v1/assembly/builds/{build_id}/order",
+        "/api/v1/work-orders/{order_id}/assembly",
+        "/api/v1/work-orders/{order_id}/assembly/consume",
+        "/api/v1/work-orders/{order_id}/assembly/steps/{code}",
       ]),
     );
   });
@@ -1004,6 +1155,8 @@ describe("API contract (docs/api/openapi.json)", () => {
     expect(schema("IdType").enum).toEqual([...ID_TYPES]);
     expect(schema("CustomerKind").enum).toEqual([...CUSTOMER_KINDS]);
     expect(schema("Status").enum).toEqual([...WORK_ORDER_STATUSES]);
+    expect(schema("AssemblyCategory").enum).toEqual([...ASSEMBLY_CATEGORIES]);
+    expect(schema("UseProfile").enum).toEqual([...USE_PROFILES]);
     expect(schema("Priority").enum).toEqual([...PRIORITIES]);
     expect(schema("UnlockMethod").enum).toEqual([...UNLOCK_METHODS]);
     expect(schema("Accessory").enum).toEqual([...ACCESSORIES]);

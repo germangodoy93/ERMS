@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { saveBlob } from "@/lib/download";
 import { formatDateTime, formatPhone } from "@/lib/format";
 import { PERMS, useCan } from "@/modules/auth/permissions";
+import { AssemblyChecklistPanel } from "@/modules/assembly/components/AssemblyChecklistPanel";
 import { DiagnosticPanel } from "@/modules/diagnostics/components/DiagnosticPanel";
 import { WarrantyPanel } from "@/modules/reports/components/WarrantyPanel";
 import { BillingPanel } from "@/modules/workshop/components/BillingPanel";
@@ -202,14 +203,25 @@ function OrderDetail({ order }: { order: WorkOrder }) {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Diagnóstico</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DiagnosticPanel order={order} />
-        </CardContent>
-      </Card>
+      {order.kind === "ASSEMBLY" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Ensamble</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AssemblyChecklistPanel order={order} />
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Diagnóstico</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DiagnosticPanel order={order} />
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

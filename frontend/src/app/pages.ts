@@ -1,6 +1,14 @@
 import { lazy } from "react";
 
 // Application pages are loaded on demand: the login screen does not download the whole app.
+export const AssemblyBuilderPage = lazy(() =>
+  import("@/modules/assembly/pages/AssemblyBuilderPage").then((m) => ({
+    default: m.AssemblyBuilderPage,
+  })),
+);
+export const AssemblyPage = lazy(() =>
+  import("@/modules/assembly/pages/AssemblyPage").then((m) => ({ default: m.AssemblyPage })),
+);
 export const AuditPage = lazy(() =>
   import("@/modules/audit/pages/AuditPage").then((m) => ({ default: m.AuditPage })),
 );

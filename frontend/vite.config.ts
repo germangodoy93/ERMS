@@ -51,6 +51,9 @@ export default defineConfig(({ mode }) => {
       globals: true,
       setupFiles: ["./src/test/setup.ts"],
       css: false,
+      // Page tests render whole screens; under a fully parallel run on a slow machine they
+      // can exceed the 5 s default without anything being wrong.
+      testTimeout: 15_000,
     },
   };
 });

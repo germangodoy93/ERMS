@@ -19,6 +19,16 @@ export const organizationSchema = z.object({
     .trim()
     .regex(/^\d{1,4}$/, "Use días completos.")
     .refine((v) => Number(v) >= 1 && Number(v) <= 3650, "Entre 1 y 3650 días."),
+  assembly_bottleneck_gap: z
+    .string()
+    .trim()
+    .regex(/^d{1,3}$/, "Use un número entero.")
+    .refine((v) => Number(v) >= 5 && Number(v) <= 100, "Entre 5 y 100 puntos."),
+  assembly_min_ram_gb: z
+    .string()
+    .trim()
+    .regex(/^d{1,3}$/, "Use un número entero.")
+    .refine((v) => Number(v) >= 4 && Number(v) <= 256, "Entre 4 y 256 GB."),
 });
 export type OrganizationValues = z.infer<typeof organizationSchema>;
 

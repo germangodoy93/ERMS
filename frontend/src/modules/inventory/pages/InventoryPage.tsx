@@ -29,6 +29,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDateTime } from "@/lib/format";
+import { CATEGORY_LABELS, specText } from "@/modules/assembly/presentation";
 import { PERMS, useCan } from "@/modules/auth/permissions";
 import { formatMoney, parseMoney, todayInBogota } from "@/modules/workorders/presentation";
 import { MOVEMENT_LABELS, PART_KIND_LABELS } from "@/modules/workshop/presentation";
@@ -128,6 +129,8 @@ export function InventoryPage() {
                   <div className="font-medium">{part.name}</div>
                   <div className="text-muted-foreground font-mono text-xs">
                     {part.sku} · {PART_KIND_LABELS[part.kind]}
+                    {part.assembly_category &&
+                      ` · ensamble: ${CATEGORY_LABELS[part.assembly_category].toLowerCase()}`}
                     {!part.is_active && " · inactivo"}
                   </div>
                 </TableCell>
@@ -329,6 +332,14 @@ function PartDetailDialog({
             {part.sku} · existencia {part.stock} · costo {formatMoney(part.unit_cost)}
           </DialogDescription>
         </DialogHeader>
+        {part.assembly_category && part.specs && (
+          <p className="bg-muted/40 rounded-md p-2.5 text-sm">
+            <span className="font-medium">
+              Ensamble · {CATEGORY_LABELS[part.assembly_category]}:
+            </span>{" "}
+            {specText(part.assembly_category, part.specs)}
+          </p>
+        )}
         {canManage && (
           <div className="flex flex-wrap items-end gap-2 rounded-md border border-dashed p-3">
             <div className="grid gap-1.5">

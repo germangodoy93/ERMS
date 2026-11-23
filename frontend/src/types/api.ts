@@ -159,10 +159,14 @@ export interface Organization {
   phone: string | null;
   email: string | null;
   warranty_days: number;
+  assembly_bottleneck_gap: number;
+  assembly_min_ram_gb: number;
 }
 
 export interface OrganizationUpdate {
   warranty_days?: number | null;
+  assembly_bottleneck_gap?: number | null;
+  assembly_min_ram_gb?: number | null;
   name?: string | null;
   legal_name?: string | null;
   tax_id?: string | null;
@@ -437,6 +441,8 @@ export interface WorkOrderListItem {
   customer: WorkOrderCustomer;
   device: WorkOrderDevice;
   assigned_technician: PersonRef | null;
+  /** SERVICE = reparación; ASSEMBLY = PC armada a la medida. */
+  kind: "SERVICE" | "ASSEMBLY";
 }
 
 export interface StatusHistoryItem {
@@ -596,6 +602,8 @@ export interface PartItem {
   is_active: boolean;
   stock: number;
   low_stock: boolean;
+  assembly_category: AssemblyCategory | null;
+  specs: Record<string, unknown> | null;
 }
 
 export interface PartWrite {
@@ -609,6 +617,9 @@ export interface PartWrite {
   min_stock: number;
   notes?: string | null;
   is_active: boolean;
+  /** Omitted = unchanged. */
+  assembly_category?: AssemblyCategory | null;
+  specs?: Record<string, unknown> | null;
 }
 
 export interface Supplier {
@@ -872,4 +883,128 @@ export interface Report {
   summary: [string, string][];
   /** Column indexes holding peso amounts (plain numbers, for Excel). */
   money_columns: number[];
+}
+
+// --- PC assembly (Sprint E1) ---------------------------------------------------------
+
+export const ASSEMBLY_CATEGORIES = [
+  "CPU",
+  "BOARD",
+  "RAM",
+  "GPU",
+  "STORAGE",
+  "PSU",
+  "CASE",
+  "COOLER",
+  "RGB",
+] as const;
+export type AssemblyCategory = (typeof ASSEMBLY_CATEGORIES)[number];
+
+export const USE_PROFILES = ["OFFICE", "DESIGN", "GAMING"] as const;
+export type UseProfile = (typeof USE_PROFILES)[number];
+
+export interface CatalogPart {
+  id: string;
+  sku: string;
+  name: string;
+  category: AssemblyCategory;
+  sale_price: string;
+  stock: number;
+  specs: Record<string, unknown>;
+}
+
+export interface Selection {
+  cpu?: string | null;
+  board?: string | null;
+  ram?: string | null;
+  ram_units: number;
+  gpu?: string | null;
+  psu?: string | null;
+  case?: string | null;
+  cooler?: string | null;
+  storage: string[];
+  rgb: string[];
+}
+
+export interface EvaluateRequest {
+  selection: Selection;
+  profile: UseProfile;
+  candidates_for?: AssemblyCategory | null;
+}
+
+export interface AssemblyIssue {
+  message: string;
+  categories: AssemblyCategory[];
+}
+
+export interface Evaluation {
+  errors: AssemblyIssue[];
+  warnings: AssemblyIssue[];
+  missing: AssemblyCategory[];
+  ready: boolean;
+  watts: number;
+  recommended_psu_w: number;
+  price: string;
+  gaming_index: number;
+  work_index: number;
+  ram_gb: number;
+  /** Part id → why it does not fit the current selection. */
+  candidates: Record<string, string>;
+}
+
+export interface BuildSummary {
+  id: string;
+  name: string;
+  profile: UseProfile;
+  status: "DRAFT" | "ORDERED";
+  price: string;
+  work_order_id: string | null;
+  work_order_number: string | null;
+  updated_at: string;
+}
+
+export interface BuildRead extends BuildSummary {
+  selection: Selection;
+  labor_price: string;
+  notes: string | null;
+  created_by: PersonRef | null;
+  evaluation: Evaluation;
+  editable: boolean;
+}
+
+export interface BuildWrite {
+  name: string;
+  profile: UseProfile;
+  selection: Selection;
+  labor_price: string;
+  notes?: string | null;
+}
+
+export interface AssemblyStep {
+  code: string;
+  title: string;
+  done: boolean;
+  blocked_reason: string | null;
+}
+
+export interface AssemblyChecklist {
+  build_id: string;
+  build_name: string;
+  steps: AssemblyStep[];
+  parts_consumed: boolean;
+  can_work: boolean;
+}
+
+export interface CatalogImportItem {
+  sku: string;
+  name: string;
+  category: AssemblyCategory;
+  sale_price: string;
+  specs: Record<string, unknown>;
+}
+
+export interface CatalogImportResult {
+  created: number;
+  updated: number;
+  errors: string[];
 }

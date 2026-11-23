@@ -27,6 +27,7 @@ export const PERMS = {
   PAYMENTS_MANAGE: "payments:manage",
   REPORTS_READ: "reports:read",
   WARRANTIES_MANAGE: "warranties:manage",
+  ASSEMBLY_MANAGE: "assembly:manage",
 } as const;
 
 export type PermissionCode = (typeof PERMS)[keyof typeof PERMS];

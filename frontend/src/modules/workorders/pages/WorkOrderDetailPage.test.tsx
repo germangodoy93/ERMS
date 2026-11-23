@@ -84,6 +84,7 @@ function order(overrides: Partial<WorkOrder> = {}): WorkOrder {
   return {
     id: "o1",
     number: "ER-2026-000001",
+    kind: "SERVICE",
     status: "CONTROL_CALIDAD",
     priority: "NORMAL",
     received_at: "2026-11-20T15:00:00Z",

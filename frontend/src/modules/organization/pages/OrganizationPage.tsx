@@ -82,6 +82,8 @@ function OrganizationForm({ organization }: { organization: Organization }) {
       phone: organization.phone ?? "",
       email: organization.email ?? "",
       warranty_days: String(organization.warranty_days),
+      assembly_bottleneck_gap: String(organization.assembly_bottleneck_gap),
+      assembly_min_ram_gb: String(organization.assembly_min_ram_gb),
     },
   });
 
@@ -96,6 +98,8 @@ function OrganizationForm({ organization }: { organization: Organization }) {
       phone: values.phone || null,
       email: values.email || null,
       warranty_days: Number(values.warranty_days),
+      assembly_bottleneck_gap: Number(values.assembly_bottleneck_gap),
+      assembly_min_ram_gb: Number(values.assembly_min_ram_gb),
     };
     try {
       const saved = await update.mutateAsync(payload);
@@ -108,6 +112,8 @@ function OrganizationForm({ organization }: { organization: Organization }) {
         phone: saved.phone ?? "",
         email: saved.email ?? "",
         warranty_days: String(saved.warranty_days),
+        assembly_bottleneck_gap: String(saved.assembly_bottleneck_gap),
+        assembly_min_ram_gb: String(saved.assembly_min_ram_gb),
       });
       toast.success("Datos del taller guardados.");
     } catch (error) {
@@ -164,6 +170,19 @@ function OrganizationForm({ organization }: { organization: Organization }) {
               hint="Se aplica al entregar un equipo reparado; se puede ajustar en cada entrega."
               error={errors.warranty_days?.message}
               {...register("warranty_days")}
+            />
+            <FormField
+              label="Ensamble: diferencia para avisar cuello de botella"
+              inputMode="numeric"
+              hint="Puntos de diferencia entre el índice del procesador y el de la gráfica."
+              error={errors.assembly_bottleneck_gap?.message}
+              {...register("assembly_bottleneck_gap")}
+            />
+            <FormField
+              label="Ensamble: RAM mínima para diseño y gaming (GB)"
+              inputMode="numeric"
+              error={errors.assembly_min_ram_gb?.message}
+              {...register("assembly_min_ram_gb")}
             />
             <FormField
               label="Correo para consultas y reclamos"
