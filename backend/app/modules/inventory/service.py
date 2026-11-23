@@ -152,7 +152,9 @@ class InventoryService:
         else:
             part = Part(organization_id=actor.organization_id)
             self._session.add(part)
-        for field, value in data.model_dump().items():
+        # The assembly fields are only touched when sent, so older clients keep the specs.
+        keep = {"assembly_category", "specs"} - data.model_fields_set
+        for field, value in data.model_dump(exclude=keep).items():
             setattr(part, field, Decimal(value) if field == "tax_rate" else value)
         self._session.flush()
         self._record(actor, context, "inventory.part_saved", "part", part.id, {"sku": part.sku})
@@ -405,4 +407,6 @@ def _part_read(part: Part, stock: int) -> PartRead:
         is_active=part.is_active,
         stock=stock,
         low_stock=stock <= part.min_stock,
+        assembly_category=part.assembly_category,
+        specs=part.specs,
     )

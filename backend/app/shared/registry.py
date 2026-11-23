@@ -3,6 +3,7 @@
 Alembic's env.py imports this module; add each new module's `models` here.
 """
 
+from app.modules.assembly import models as assembly_models
 from app.modules.attachments import models as attachments_models
 from app.modules.audit import models as audit_models
 from app.modules.auth import models as auth_models
@@ -23,6 +24,7 @@ from app.shared.models import Base
 
 __all__ = [
     "Base",
+    "assembly_models",
     "attachments_models",
     "audit_models",
     "auth_models",

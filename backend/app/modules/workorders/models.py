@@ -66,6 +66,7 @@ class WorkOrder(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         CheckConstraint(
             "advance_amount = 0 OR advance_method IS NOT NULL", name="advance_has_method"
         ),
+        CheckConstraint("kind IN ('SERVICE', 'ASSEMBLY')", name="kind_valid"),
         Index("ix_work_orders_organization_id_status", "organization_id", "status"),
         Index("ix_work_orders_organization_id_received_at", "organization_id", "received_at"),
     )
@@ -113,6 +114,9 @@ class WorkOrder(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     delivered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     delivered_to_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
     delivered_to_document: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    kind: Mapped[str] = mapped_column(
+        String(10), nullable=False, default="SERVICE", server_default="SERVICE"
+    )
     warranty_of_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("work_orders.id", ondelete="RESTRICT"),
         nullable=True,

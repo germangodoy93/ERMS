@@ -35,3 +35,6 @@ backend/var/
 
 # Agent build output (PyInstaller)
 diagnostic-agent/build/
+
+# Datos privados del taller (catálogos con precios): nunca al repositorio
+data/private/

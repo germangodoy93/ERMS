@@ -18,6 +18,8 @@ class OrganizationRead(BaseModel):
     phone: str | None
     email: str | None
     warranty_days: int
+    assembly_bottleneck_gap: int
+    assembly_min_ram_gb: int
 
 
 class OrganizationUpdate(BaseModel):
@@ -31,6 +33,15 @@ class OrganizationUpdate(BaseModel):
     phone: str | None = Field(default=None, max_length=30)
     email: EmailStr | None = None
     warranty_days: int | None = Field(default=None, ge=1, le=3650)
+    assembly_bottleneck_gap: int | None = Field(
+        default=None,
+        ge=5,
+        le=100,
+        description="Diferencia de índices que se avisa como cuello de botella",
+    )
+    assembly_min_ram_gb: int | None = Field(
+        default=None, ge=4, le=256, description="RAM mínima recomendada para diseño y gaming"
+    )
 
     _text = field_validator("name", "legal_name", "address", "city")(clean_text)
     _nit = field_validator("tax_id")(optional_nit)

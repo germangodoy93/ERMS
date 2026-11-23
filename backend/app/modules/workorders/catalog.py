@@ -40,6 +40,15 @@ TRANSITIONS: dict[Status, frozenset[Status]] = {
     S.ENTREGADO: frozenset(),
 }
 
+
+def targets(kind: str, source: Status) -> frozenset[Status]:
+    """Allowed next states. An assembly order has no device to inspect or diagnose: it goes
+    from reception straight to the quotation of the configured PC."""
+    if kind == "ASSEMBLY" and source is S.RECIBIDO:
+        return frozenset({S.COTIZACION, S.CANCELADO})
+    return TRANSITIONS[source]
+
+
 # Workshop steps are done by technicians; customer-facing steps by reception.
 # Holding ANY of the listed permissions allows entering the state.
 REQUIRED_PERMISSIONS: dict[Status, frozenset[Perm]] = {

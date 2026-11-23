@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Annotated, Self
+from typing import Annotated, Literal, Self
 
 from pydantic import (
     BaseModel,
@@ -160,6 +160,9 @@ class DeviceSummary(BaseModel):
     serial_number: str | None
 
 
+OrderKind = Literal["SERVICE", "ASSEMBLY"]
+
+
 class WorkOrderListItem(BaseModel):
     id: uuid.UUID
     number: str
@@ -170,6 +173,9 @@ class WorkOrderListItem(BaseModel):
     customer: CustomerSummary
     device: DeviceSummary
     assigned_technician: PersonRef | None
+    kind: OrderKind = Field(
+        default="SERVICE", description="SERVICE = reparación; ASSEMBLY = PC a la medida"
+    )
 
 
 class StatusHistoryItem(BaseModel):

@@ -25,6 +25,12 @@ class Organization(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     warranty_days: Mapped[int] = mapped_column(
         Integer, nullable=False, default=90, server_default="90"
     )
+    assembly_bottleneck_gap: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=25, server_default="25"
+    )
+    assembly_min_ram_gb: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=16, server_default="16"
+    )
     timezone: Mapped[str] = mapped_column(
         String(64), nullable=False, default="America/Bogota", server_default="America/Bogota"
     )

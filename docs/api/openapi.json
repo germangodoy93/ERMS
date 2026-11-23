@@ -5183,6 +5183,556 @@
           }
         }
       }
+    },
+    "/api/v1/assembly/catalog": {
+      "get": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Piezas para ensamble",
+        "operationId": "catalog_api_v1_assembly_catalog_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogPart"
+                  },
+                  "type": "array",
+                  "title": "Response Catalog Api V1 Assembly Catalog Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assembly/catalog/import": {
+      "post": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Importar o actualizar el catálogo de piezas (por código)",
+        "operationId": "import_catalog_api_v1_assembly_catalog_import_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogImport"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogImportResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assembly/evaluate": {
+      "post": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Compatibilidad, consumo y rendimiento",
+        "operationId": "evaluate_api_v1_assembly_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assembly/builds": {
+      "get": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Configuraciones guardadas",
+        "operationId": "builds_api_v1_assembly_builds_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BuildSummary"
+                  },
+                  "type": "array",
+                  "title": "Response Builds Api V1 Assembly Builds Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Guardar una configuración",
+        "operationId": "create_build_api_v1_assembly_builds_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuildWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assembly/builds/{build_id}": {
+      "get": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Configuración",
+        "operationId": "get_build_api_v1_assembly_builds__build_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "build_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Build Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Actualizar configuración",
+        "operationId": "update_build_api_v1_assembly_builds__build_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "build_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Build Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuildWrite"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Borrar borrador",
+        "operationId": "delete_build_api_v1_assembly_builds__build_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "build_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Build Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/assembly/builds/{build_id}/order": {
+      "post": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Crear la orden de ensamble con su cotización",
+        "operationId": "create_order_api_v1_assembly_builds__build_id__order_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "build_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Build Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/assembly": {
+      "get": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Lista de chequeo del ensamble",
+        "operationId": "checklist_api_v1_work_orders__order_id__assembly_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssemblyChecklist"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/assembly/consume": {
+      "post": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Descontar todas las piezas",
+        "operationId": "consume_api_v1_work_orders__order_id__assembly_consume_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssemblyChecklist"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/assembly/steps/{code}": {
+      "post": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Marcar un paso como hecho",
+        "operationId": "complete_step_api_v1_work_orders__order_id__assembly_steps__code__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssemblyChecklist"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5404,6 +5954,60 @@
           "channel"
         ],
         "title": "AnonymizeRequest"
+      },
+      "AssemblyCategory": {
+        "type": "string",
+        "enum": [
+          "CPU",
+          "BOARD",
+          "RAM",
+          "GPU",
+          "STORAGE",
+          "PSU",
+          "CASE",
+          "COOLER",
+          "RGB"
+        ],
+        "title": "AssemblyCategory"
+      },
+      "AssemblyChecklist": {
+        "properties": {
+          "build_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Build Id"
+          },
+          "build_name": {
+            "type": "string",
+            "title": "Build Name"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/StepOut"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "parts_consumed": {
+            "type": "boolean",
+            "title": "Parts Consumed",
+            "description": "Las piezas ya se descontaron del inventario"
+          },
+          "can_work": {
+            "type": "boolean",
+            "title": "Can Work",
+            "description": "La orden está en ensamble y el usuario puede avanzar"
+          }
+        },
+        "type": "object",
+        "required": [
+          "build_id",
+          "build_name",
+          "steps",
+          "parts_consumed",
+          "can_work"
+        ],
+        "title": "AssemblyChecklist"
       },
       "Assignment": {
         "properties": {
@@ -5645,6 +6249,357 @@
           "file"
         ],
         "title": "Body_upload_photo_api_v1_work_orders__order_id__photos_post"
+      },
+      "BuildRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UseProfile"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "price": {
+            "type": "string",
+            "title": "Price"
+          },
+          "work_order_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Work Order Id"
+          },
+          "work_order_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Work Order Number"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "selection": {
+            "$ref": "#/components/schemas/Selection"
+          },
+          "labor_price": {
+            "type": "string",
+            "title": "Labor Price"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evaluation": {
+            "$ref": "#/components/schemas/EvaluationOut"
+          },
+          "editable": {
+            "type": "boolean",
+            "title": "Editable"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "profile",
+          "status",
+          "price",
+          "work_order_id",
+          "work_order_number",
+          "updated_at",
+          "selection",
+          "labor_price",
+          "notes",
+          "created_by",
+          "evaluation",
+          "editable"
+        ],
+        "title": "BuildRead"
+      },
+      "BuildSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UseProfile"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "price": {
+            "type": "string",
+            "title": "Price"
+          },
+          "work_order_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Work Order Id"
+          },
+          "work_order_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Work Order Number"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "profile",
+          "status",
+          "price",
+          "work_order_id",
+          "work_order_number",
+          "updated_at"
+        ],
+        "title": "BuildSummary"
+      },
+      "BuildWrite": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UseProfile",
+            "default": "GAMING"
+          },
+          "selection": {
+            "$ref": "#/components/schemas/Selection"
+          },
+          "labor_price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Labor Price",
+            "default": "0"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "selection"
+        ],
+        "title": "BuildWrite"
+      },
+      "CatalogImport": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogImportItem"
+            },
+            "type": "array",
+            "maxItems": 2000,
+            "minItems": 1,
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "CatalogImport"
+      },
+      "CatalogImportItem": {
+        "properties": {
+          "sku": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 2,
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "category": {
+            "$ref": "#/components/schemas/AssemblyCategory"
+          },
+          "sale_price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Sale Price"
+          },
+          "specs": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Specs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sku",
+          "name",
+          "category",
+          "sale_price",
+          "specs"
+        ],
+        "title": "CatalogImportItem"
+      },
+      "CatalogImportResult": {
+        "properties": {
+          "created": {
+            "type": "integer",
+            "title": "Created"
+          },
+          "updated": {
+            "type": "integer",
+            "title": "Updated"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "Piezas rechazadas con su motivo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created",
+          "updated",
+          "errors"
+        ],
+        "title": "CatalogImportResult"
+      },
+      "CatalogPart": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "category": {
+            "$ref": "#/components/schemas/AssemblyCategory"
+          },
+          "sale_price": {
+            "type": "string",
+            "title": "Sale Price"
+          },
+          "stock": {
+            "type": "integer",
+            "title": "Stock"
+          },
+          "specs": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Specs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "sku",
+          "name",
+          "category",
+          "sale_price",
+          "stock",
+          "specs"
+        ],
+        "title": "CatalogPart"
       },
       "CategoryRead": {
         "properties": {
@@ -7768,6 +8723,113 @@
         "type": "object",
         "title": "DiskInfo"
       },
+      "EvaluateRequest": {
+        "properties": {
+          "selection": {
+            "$ref": "#/components/schemas/Selection"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UseProfile",
+            "default": "GAMING"
+          },
+          "candidates_for": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AssemblyCategory"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Devuelve por qué no encaja cada pieza de esta categoría"
+          }
+        },
+        "type": "object",
+        "required": [
+          "selection"
+        ],
+        "title": "EvaluateRequest"
+      },
+      "EvaluationOut": {
+        "properties": {
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/IssueOut"
+            },
+            "type": "array",
+            "title": "Errors"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/IssueOut"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "missing": {
+            "items": {
+              "$ref": "#/components/schemas/AssemblyCategory"
+            },
+            "type": "array",
+            "title": "Missing"
+          },
+          "ready": {
+            "type": "boolean",
+            "title": "Ready",
+            "description": "Completa y sin incompatibilidades"
+          },
+          "watts": {
+            "type": "integer",
+            "title": "Watts"
+          },
+          "recommended_psu_w": {
+            "type": "integer",
+            "title": "Recommended Psu W"
+          },
+          "price": {
+            "type": "string",
+            "title": "Price",
+            "description": "Piezas, IVA incluido según el inventario"
+          },
+          "gaming_index": {
+            "type": "integer",
+            "title": "Gaming Index"
+          },
+          "work_index": {
+            "type": "integer",
+            "title": "Work Index"
+          },
+          "ram_gb": {
+            "type": "integer",
+            "title": "Ram Gb"
+          },
+          "candidates": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "type": "object",
+            "title": "Candidates",
+            "description": "Pieza → motivo por el que no es compatible"
+          }
+        },
+        "type": "object",
+        "required": [
+          "errors",
+          "warnings",
+          "missing",
+          "ready",
+          "watts",
+          "recommended_psu_w",
+          "price",
+          "gaming_index",
+          "work_index",
+          "ram_gb"
+        ],
+        "title": "EvaluationOut"
+      },
       "ForgotPasswordRequest": {
         "properties": {
           "email": {
@@ -7848,6 +8910,27 @@
           "PPT"
         ],
         "title": "IdType"
+      },
+      "IssueOut": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/AssemblyCategory"
+            },
+            "type": "array",
+            "title": "Categories"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "categories"
+        ],
+        "title": "IssueOut"
       },
       "LivenessResponse": {
         "properties": {
@@ -8216,6 +9299,20 @@
         ],
         "title": "MovementRead"
       },
+      "OrderRequest": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id"
+        ],
+        "title": "OrderRequest"
+      },
       "OrganizationRead": {
         "properties": {
           "id": {
@@ -8300,6 +9397,14 @@
           "warranty_days": {
             "type": "integer",
             "title": "Warranty Days"
+          },
+          "assembly_bottleneck_gap": {
+            "type": "integer",
+            "title": "Assembly Bottleneck Gap"
+          },
+          "assembly_min_ram_gb": {
+            "type": "integer",
+            "title": "Assembly Min Ram Gb"
           }
         },
         "type": "object",
@@ -8313,7 +9418,9 @@
           "city",
           "phone",
           "email",
-          "warranty_days"
+          "warranty_days",
+          "assembly_bottleneck_gap",
+          "assembly_min_ram_gb"
         ],
         "title": "OrganizationRead"
       },
@@ -8436,6 +9543,34 @@
               }
             ],
             "title": "Warranty Days"
+          },
+          "assembly_bottleneck_gap": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100.0,
+                "minimum": 5.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assembly Bottleneck Gap",
+            "description": "Diferencia de índices que se avisa como cuello de botella"
+          },
+          "assembly_min_ram_gb": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 256.0,
+                "minimum": 4.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assembly Min Ram Gb",
+            "description": "RAM mínima recomendada para diseño y gaming"
           }
         },
         "type": "object",
@@ -8755,6 +9890,28 @@
           "low_stock": {
             "type": "boolean",
             "title": "Low Stock"
+          },
+          "assembly_category": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AssemblyCategory"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "specs": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specs"
           }
         },
         "type": "object",
@@ -8863,6 +10020,30 @@
             "type": "boolean",
             "title": "Is Active",
             "default": true
+          },
+          "assembly_category": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AssemblyCategory"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Para el ensamble de PC; si se omite, no se cambia"
+          },
+          "specs": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specs",
+            "description": "Especificaciones técnicas de la categoría de ensamble"
           }
         },
         "type": "object",
@@ -10244,6 +11425,122 @@
         ],
         "title": "RoleRef"
       },
+      "Selection": {
+        "properties": {
+          "cpu": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cpu"
+          },
+          "board": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Board"
+          },
+          "ram": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ram"
+          },
+          "ram_units": {
+            "type": "integer",
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Ram Units",
+            "description": "Unidades del kit de RAM",
+            "default": 2
+          },
+          "gpu": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gpu"
+          },
+          "psu": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Psu"
+          },
+          "case": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case"
+          },
+          "cooler": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cooler"
+          },
+          "storage": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "title": "Storage"
+          },
+          "rgb": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Rgb"
+          }
+        },
+        "type": "object",
+        "title": "Selection"
+      },
       "SmartInfo": {
         "properties": {
           "disk": {
@@ -10464,6 +11761,41 @@
           "changed_at"
         ],
         "title": "StatusHistoryItem"
+      },
+      "StepOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "done": {
+            "type": "boolean",
+            "title": "Done"
+          },
+          "blocked_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocked Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "title",
+          "done",
+          "blocked_reason"
+        ],
+        "title": "StepOut"
       },
       "StockEntryCreate": {
         "properties": {
@@ -11130,6 +12462,15 @@
         "title": "UnlockMethod",
         "description": "ERMS never stores unlock passwords or patterns (project rule)."
       },
+      "UseProfile": {
+        "type": "string",
+        "enum": [
+          "OFFICE",
+          "DESIGN",
+          "GAMING"
+        ],
+        "title": "UseProfile"
+      },
       "UserCreate": {
         "properties": {
           "email": {
@@ -11700,6 +13041,16 @@
                 "type": "null"
               }
             ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "SERVICE",
+              "ASSEMBLY"
+            ],
+            "title": "Kind",
+            "description": "SERVICE = reparación; ASSEMBLY = PC a la medida",
+            "default": "SERVICE"
           }
         },
         "type": "object",
@@ -11765,6 +13116,16 @@
                 "type": "null"
               }
             ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "SERVICE",
+              "ASSEMBLY"
+            ],
+            "title": "Kind",
+            "description": "SERVICE = reparación; ASSEMBLY = PC a la medida",
+            "default": "SERVICE"
           },
           "branch": {
             "type": "string",

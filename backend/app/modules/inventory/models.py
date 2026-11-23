@@ -3,6 +3,7 @@
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Any
 
 from sqlalchemy import (
     Boolean,
@@ -18,6 +19,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.shared.models import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -53,6 +55,10 @@ class Part(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         CheckConstraint("unit_cost >= 0 AND sale_price >= 0", name="prices_positive"),
         CheckConstraint("tax_rate IN (0, 19)", name="tax_rate_valid"),
         CheckConstraint("min_stock >= 0", name="min_stock_positive"),
+        CheckConstraint(
+            "(assembly_category IS NULL) = (specs IS NULL)", name="assembly_specs_together"
+        ),
+        Index("ix_parts_organization_id_assembly_category", "organization_id", "assembly_category"),
     )
 
     organization_id: Mapped[uuid.UUID] = mapped_column(
@@ -71,6 +77,12 @@ class Part(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default="true"
+    )
+    assembly_category: Mapped[str | None] = mapped_column(
+        String(10), nullable=True, comment="Categoría para el ensamble de PC (CPU, BOARD, …)"
+    )
+    specs: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB, nullable=True, comment="Especificaciones técnicas según la categoría de ensamble"
     )
 
 

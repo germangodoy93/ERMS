@@ -9,6 +9,8 @@ from app.modules.organizations.schemas import OrganizationUpdate
 from app.modules.users.models import User
 from app.shared.context import RequestContext
 
+NOT_NULL = frozenset({"name", "warranty_days", "assembly_bottleneck_gap", "assembly_min_ram_gb"})
+
 # Data of the "Responsable del tratamiento" that the privacy policy must state.
 REQUIRED_FOR_POLICY: dict[str, str] = {
     "legal_name": "Razón social o nombre del responsable",
@@ -43,9 +45,10 @@ class OrganizationService:
         changes: dict[str, Any] = {}
         for field in data.model_fields_set:
             value = getattr(data, field)
-            if field in ("name", "warranty_days") and value is None:
+            if field in NOT_NULL and value is None:
                 raise BusinessRuleError(
-                    "El nombre del taller y los días de garantía son obligatorios."
+                    "El nombre del taller, los días de garantía y los valores del ensamble "
+                    "son obligatorios."
                 )
             if getattr(organization, field) != value:
                 changes[field] = [getattr(organization, field), value]

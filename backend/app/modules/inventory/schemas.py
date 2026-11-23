@@ -1,10 +1,11 @@
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Literal
+from typing import Any, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
+from app.modules.assembly.catalog import AssemblyCategory, validate_specs
 from app.modules.workorders.schemas import MoneyOut, PersonRef
 from app.shared.validators import (
     clean_multiline,
@@ -65,6 +66,8 @@ class PartRead(BaseModel):
     is_active: bool
     stock: int
     low_stock: bool
+    assembly_category: AssemblyCategory | None = None
+    specs: dict[str, Any] | None = None
 
 
 class PartWrite(BaseModel):
@@ -78,10 +81,27 @@ class PartWrite(BaseModel):
     min_stock: int = Field(default=0, ge=0, le=100_000)
     notes: str | None = Field(default=None, max_length=2000)
     is_active: bool = True
+    assembly_category: AssemblyCategory | None = Field(
+        default=None, description="Para el ensamble de PC; si se omite, no se cambia"
+    )
+    specs: dict[str, Any] | None = Field(
+        default=None, description="Especificaciones técnicas de la categoría de ensamble"
+    )
 
     _sku = field_validator("sku")(_sku)
     _name = field_validator("name")(clean_text)
     _notes = field_validator("notes")(clean_multiline)
+
+    @model_validator(mode="after")
+    def _assembly(self) -> Self:
+        if self.assembly_category is None:
+            if self.specs is not None:
+                raise ValueError("Las especificaciones requieren una categoría de ensamble.")
+            return self
+        if self.specs is None:
+            raise ValueError("Indique las especificaciones técnicas de la pieza.")
+        self.specs = validate_specs(self.assembly_category, self.specs)
+        return self
 
 
 class StockEntryLine(BaseModel):

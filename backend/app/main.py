@@ -6,6 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import Settings, get_settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import configure_logging
+from app.modules.assembly.router import order_router as assembly_order_router
+from app.modules.assembly.router import router as assembly_router
 from app.modules.audit.router import router as audit_router
 from app.modules.auth.router import router as auth_router
 from app.modules.customers.router import router as customers_router
@@ -74,6 +76,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         payments_router,
         warranties_router,
         reports_router,
+        assembly_router,
+        assembly_order_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)
     return app

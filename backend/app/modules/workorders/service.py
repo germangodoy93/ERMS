@@ -48,9 +48,9 @@ from app.modules.warranties.models import Warranty
 from app.modules.workorders.catalog import (
     CLOSED,
     REQUIRED_PERMISSIONS,
-    TRANSITIONS,
     Status,
     reason_required,
+    targets,
 )
 from app.modules.workorders.models import (
     ReceptionTerms,
@@ -406,7 +406,11 @@ class WorkOrderService:
         source = self._check_transition(actor, order, target)
         if reason_required(source, target) and not reason:
             raise BusinessRuleError("Indique el motivo de este cambio de estado.")
-        if target is Status.COTIZACION and not self._diagnostic_closed(order):
+        if (
+            target is Status.COTIZACION
+            and order.kind != "ASSEMBLY"
+            and not self._diagnostic_closed(order)
+        ):
             raise BusinessRuleError(
                 "Cierre el diagnóstico con su conclusión antes de pasar a cotización."
             )
@@ -539,13 +543,13 @@ class WorkOrderService:
             return []
         return [
             target
-            for target in sorted(TRANSITIONS[source], key=list(Status).index)
+            for target in sorted(targets(order.kind, source), key=list(Status).index)
             if REQUIRED_PERMISSIONS[target] & actor.permission_codes
         ]
 
     def _check_transition(self, actor: User, order: WorkOrder, target: Status) -> Status:
         source = Status(order.status)
-        if target not in TRANSITIONS[source]:
+        if target not in targets(order.kind, source):
             raise BusinessRuleError(f"No se puede pasar de {source.value} a {target.value}.")
         if not REQUIRED_PERMISSIONS[target] & actor.permission_codes:
             raise PermissionDeniedError("No tiene permisos para llevar la orden a ese estado.")
@@ -787,6 +791,7 @@ def _list_item(order: WorkOrder, customer: Customer, technician: User | None) ->
         priority=order.priority,
         received_at=order.received_at,
         estimated_delivery_date=order.estimated_delivery_date,
+        kind=order.kind,
         customer=CustomerSummary(
             id=customer.id,
             full_name=customer.full_name,
