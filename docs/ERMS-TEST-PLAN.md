@@ -184,6 +184,18 @@ La orden de ensamble del preset "Gamer 1440p" nace en cotización con 9 ítems y
 | Contrato | `frontend/src/types/api.contract.test.ts` | 12 esquemas nuevos, 6 actualizados, 9 rutas y los enums de categoría y uso |
 | Precios (0009) | `backend/tests/unit/test_assembly_pricing.py`, `test_assembly_api.py`, `test_commerce_api.py` | Costo + margen redondeado hacia arriba; lectura de montos del proveedor; precio fijado a mano que sobrevive a costos y margen nuevos; recálculo por entrada de inventario y por margen; plantilla y actualización desde CSV (Windows-1252, filas inválidas y códigos desconocidos); costo oculto para el técnico. La migración 0009 convirtió en costo las 185 piezas importadas con 0008 (verificado en local) |
 
+## 11. Pruebas del Sprint E2 (3D y Setup)
+
+Backend: 12 categorías de setup validadas; selección con límites (3 monitores, 2 micrófonos,
+3 streaming, 2 luces); precio del setup aparte; la cotización de la orden incluye PC + setup
+(`test_assembly_api.py::test_setup_is_priced_apart_and_sold_with_the_pc`). Migración 0010 en la
+prueba de esquema. Frontend: `setup.test.ts` (medidas de monitores, escritorio genérico,
+ubicación del PC, sugerencia de escritorio, avisos del simulador). El 3D se revisó con capturas de
+Playwright en Chromium (WebGL por SwiftShader) sobre el catálogo real de 358 piezas: PC con RGB,
+cuarto con escritorio recto y en L, y la orden con la placa en la mesa; sin errores en consola.
+En jsdom (pruebas unitarias) no hay WebGL y el configurador usa la vista 2D, igual que el
+simulador.
+
 **Windows:** si la terminal abre la carpeta como `c:\...` (minúscula), Vitest carga dos copias de
 sí mismo y las pruebas de interfaz fallan con `Invalid Chai property: toBeInTheDocument`.
 Ejecute las pruebas desde una terminal en `C:\...` (ver ERMS-DEVOPS).

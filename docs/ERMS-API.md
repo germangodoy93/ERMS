@@ -385,7 +385,10 @@ Solo técnicos y administradores (`assembly:manage`).
 | `POST /work-orders/{id}/assembly/consume` | `repairs:manage` (en reparación) | Descuenta todas las piezas de una vez (todas o ninguna) |
 | `POST /work-orders/{id}/assembly/steps/{code}` | `repairs:manage` (en reparación) | Marca el paso; 422 "Aún no: …" si falta un paso previo |
 
-`Selection` = `{cpu, board, ram, ram_units, gpu, psu, case, cooler, storage[≤4], rgb[≤8]}`.
+`Selection` = `{cpu, board, ram, ram_units, gpu, psu, case, cooler, storage[≤4], rgb[≤8], monitor[≤3], keyboard, mouse,
+pad, headset, mic[≤2], speaker, camera, stream[≤3], chair, desk, light[≤2], desk_shape (STRAIGHT, L), pc_position (AUTO,
+DESK, FLOOR)}`. `EvaluationOut.setup_price` suma el setup aparte del PC; la cotización de la orden incluye ambos. Las
+especificaciones aceptan `style` (detalles visuales del 3D, sin efecto en las reglas).
 Las especificaciones por categoría están en `app/modules/assembly/catalog.py` (`SPEC_MODELS`);
 `PUT /inventory/parts/{id}` acepta `assembly_category`, `specs` y `price_locked` y, si no se envían, los conserva.
 

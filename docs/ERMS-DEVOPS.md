@@ -36,6 +36,7 @@ verificadas el 2026-11-19:
 | reportlab | 5.1.0 | Sprint 3, acta en PDF. Licencia BSD. Sin tipos: `mypy` lo ignora (`pyproject.toml`) |
 | Pillow | 13.0.0 | Dependencia de reportlab; también valida y limpia las fotos (licencia MIT-CMU) |
 | PyInstaller | 6.22.3 | Sprint 4, solo para construir el agente (licencia GPL con excepción que permite distribuir el ejecutable) |
+| three / @types/three | **0.187.0** (fijadas) | Sprint E2, visor 3D del ensamble. Licencia MIT. Va en su propio fragmento de carga diferida |
 | Playwright (`@playwright/test`) | **1.65.0** (fijada) | Sprint 6, E2E en `e2e/`. No se usa la 1.65.1 por ser muy reciente. Licencia Apache 2.0 |
 | python-multipart | **0.0.33** (fijada) | Subida de fotos en FastAPI. No se usa la 0.0.34 por ser de hace 4 días |
 

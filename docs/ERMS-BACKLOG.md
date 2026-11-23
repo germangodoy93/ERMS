@@ -105,8 +105,15 @@ de pago y almacenamiento definitivo; sus resultados serán `AI_SUGGESTION`, nunc
 | E1-04 | Como asesor, quiero vender la configuración | Orden de ensamble para un cliente con cotización en borrador (piezas + mano de obra, IVA incluido) que sigue el flujo normal hasta la garantía | ✅ |
 | E1-05 | Como técnico, quiero armar en el orden correcto | Lista de chequeo con los pasos del simulador; un paso no se marca antes de sus requisitos; piezas descontadas del inventario de una vez | ✅ |
 
-Pendiente para E2: visor 3D con iluminación RGB y modo Setup (monitores, periféricos,
-escritorio).
+## Sprint E2 – Ensamble de PC: 3D y Setup (PM-03, parte 2)
+
+| ID | Historia | Criterios de aceptación | Estado |
+|---|---|---|---|
+| E2-01 | Como asesor, quiero ver el PC en 3D | Visor del simulador: gabinete, placa, procesador, RAM, M.2, disipador o líquida, gráfica, fuente, cables y RGB con sus colores; vistas 3/4, lateral y superior; zoom; tocar una pieza la nombra; piezas incompatibles en rojo; 2D disponible | ✅ |
+| E2-02 | Como cliente, quiero ver la iluminación | Efectos arcoíris, ola, respiración, fijo y apagado con 8 colores; se enciende solo con el equipo completo y compatible | ✅ |
+| E2-03 | Como asesor, quiero vender el setup con el PC | 12 categorías (monitores, teclado, mouse, pad, audífonos, micrófono, parlantes, cámara, streaming, silla, escritorio, luces) en el inventario con costo + margen; escena 3D del cuarto con escritorio recto o en L y PC en escritorio, piso o ala; revisión del setup; se cotiza en la misma orden | ✅ |
+| E2-04 | Como técnico, quiero ver el armado en 3D | En la orden, el modelo muestra cada pieza al marcar su paso (placa en la mesa hasta montarla) | ✅ |
+| E2-05 | Como dueño, quiero que los detalles visuales sean datos | `specs.style` (colores, RGB, ventiladores, marca) cargado desde el simulador y editable por importación | ✅ |
 
 ## Requerimientos detectados
 

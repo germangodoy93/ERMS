@@ -25,7 +25,7 @@ Celery pueden pasar al Sprint 4 si la capacidad es baja.
 - Atención remota (Quick Assist), en sitio y recogida/envío, con agenda y cobro por etapas
   (PM-04), después de los avisos por WhatsApp.
 - Ensamble de equipos de escritorio (PM-03): ✅ E1 configurador, compatibilidad, cuellos de
-  botella, orden de ensamble y lista de chequeo (2026-11-23). Siguiente: E2 visor 3D y Setup.
+  botella, orden de ensamble y lista de chequeo (2026-11-23). ✅ E2 visor 3D, iluminación RGB, modo Setup y 3D en la lista de chequeo (2026-11-23).
 - Asistente virtual de IA en el chat de la landing (PM-05): orienta al cliente, da rangos de
   costo del catálogo y crea la solicitud para el técnico.
 - Campañas publicitarias con registro de gastos, atribución de clientes y sugerencias de IA

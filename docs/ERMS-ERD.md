@@ -130,7 +130,7 @@ asignar (al moverla se le asigna).
 | `payments` | ✅ 5 | work_order_id, receipt_number (`RC-2026-000001`), kind (ADVANCE, PAYMENT), amount, method (CASH, TRANSFER, CARD, NEQUI, DAVIPLATA), reference, notes, received_by_id, paid_at | `ck(amount > 0)`; `uq(organization_id, receipt_number)` |
 | `warranties` | ✅ 6 | work_order_id, days, starts_on, ends_on, created_by_id, created_at | `uq(work_order_id)`, `ck(days > 0)`, índice en ends_on. Se crea al entregar un equipo reparado (cotización aprobada o trabajos registrados) |
 | `warranty_claims` | ✅ 6 | warranty_id, claim_order_id, reported_issue, status (OPEN, ACCEPTED, REJECTED), resolution, decided_by_id, decided_at, created_by_id | `uq(claim_order_id)`; el reclamo abre una orden nueva |
-| `assembly_builds` | ✅ E1 | name, profile (OFFICE, DESIGN, GAMING), status (DRAFT, ORDERED), ram_units (1-4), labor_price, notes, work_order_id, steps_done JSONB, created_by_id | `uq(work_order_id)`; ORDERED ⇔ tiene orden |
+| `assembly_builds` | ✅ E1 · E2 | name, profile (OFFICE, DESIGN, GAMING), status (DRAFT, ORDERED), ram_units (1-4), desk_shape (STRAIGHT, L), pc_position (AUTO, DESK, FLOOR), labor_price, notes, work_order_id, steps_done JSONB, created_by_id | `uq(work_order_id)`; ORDERED ⇔ tiene orden |
 | `assembly_build_items` | ✅ E1 | build_id, part_id | La categoría sale del repuesto; la RAM usa `ram_units` |
 
 **Transacción de consumo de repuestos (Sprint 5):** en una sola transacción se ejecuta

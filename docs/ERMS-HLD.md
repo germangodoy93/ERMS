@@ -151,6 +151,9 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 | 047 | Piezas de ensamble: la lista del proveedor es el **costo** y el precio de venta es costo + margen del taller (15 %), redondeado hacia arriba a $1.000, salvo precio fijado a mano | Guardar el precio del proveedor como venta | El taller compra a esa lista; venderla tal cual sería sin ganancia. |
 | 048 | Actualización de costos con CSV desde Excel (plantilla descargable), no con el PDF del proveedor ni con xlsx | Leer el PDF; librería de Excel | El PDF mezcla columnas y tiene errores de digitación; CSV no agrega dependencias y Excel lo abre y guarda. |
 | 049 | El costo solo lo ve quien tiene `inventory:manage` | Visible para todos | Decisión del dueño: el técnico ve solo el precio de venta. |
+| 050 | Visor 3D con three.js 0.187 (npm, MIT) en un fragmento propio que solo se descarga al abrir el 3D | Copiar el simulador con three r128 desde un CDN | Versión mantenida, sin dependencias externas en tiempo de ejecución y sin costo de carga para el resto de la aplicación. Se adaptaron el manejo de color (`colorSpace`), las intensidades de luz (unidades físicas) y las sombras (`PCFShadowMap`). |
+| 051 | El setup se vende en la misma orden que el PC y sus piezas son repuestos del inventario | Pedido aparte | Una sola cotización, un solo pago y una sola garantía. |
+| 052 | La revisión del setup se calcula en el navegador (`setup.ts`) | En el servidor | Depende de la distribución 3D y nunca bloquea la venta; las reglas del PC siguen en el servidor. |
 
 ## 6. Riesgos
 
