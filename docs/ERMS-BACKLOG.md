@@ -129,7 +129,7 @@ taller está obligado (responsabilidades 52, 48 o 47; ver la investigación del 
 | 6 | Asistente virtual en el chat de la landing | PM-05 |
 | 7 | Campañas publicitarias (provisional) | PM-06 |
 | 8 | Facturación electrónica DIAN | Mediante proveedor autorizado (costo mensual o por factura) |
-| 9 | IA por fotos | PM-02 (requiere el puesto 1) |
+| 9 | IA por fotos | PM-02 (requiere el puesto 2: fotos guardadas) |
 | 10 | Android | Diagnóstico por ADB |
 | 11 | Crecimiento | Órdenes de compra (R-08), varias sedes con RLS, Celery y Redis |
 
