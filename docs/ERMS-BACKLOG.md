@@ -95,6 +95,19 @@ de pago y almacenamiento definitivo; sus resultados serán `AI_SUGGESTION`, nunc
 | S6-07 | Como dueño, quiero proteger el inicio de sesión | Límite de 20 intentos fallidos por IP cada 15 min (429), además del bloqueo por cuenta | ✅ |
 | S6-08 | Como dueño, quiero respaldos de la base de datos | Backups nativos de Railway (plan Pro) programados y simulacro de restauración documentado | ✅ (configuración manual) |
 
+## Sprint E1 – Ensamble de PC: configurador y venta (PM-03, parte 1)
+
+| ID | Historia | Criterios de aceptación | Estado |
+|---|---|---|---|
+| E1-01 | Como administrador, quiero cargar el catálogo de piezas con sus especificaciones | Importación por archivo (JSON del simulador) que crea o actualiza por código; especificaciones validadas por categoría; el catálogo con precios no se guarda en el repositorio | ✅ |
+| E1-02 | Como asesor, quiero armar un PC y ver qué no encaja | Pestañas por categoría con precio, existencia o "por pedir" y motivo de incompatibilidad; vista lateral del gabinete; consumo y fuente recomendada; índices de juegos y trabajo | ✅ |
+| E1-03 | Como asesor, quiero evitar cuellos de botella | Avisos por uso (oficina, diseño, gaming) con diferencia de índices y RAM mínima configurables en Datos del taller; aviso de velocidad de RAM | ✅ |
+| E1-04 | Como asesor, quiero vender la configuración | Orden de ensamble para un cliente con cotización en borrador (piezas + mano de obra, IVA incluido) que sigue el flujo normal hasta la garantía | ✅ |
+| E1-05 | Como técnico, quiero armar en el orden correcto | Lista de chequeo con los pasos del simulador; un paso no se marca antes de sus requisitos; piezas descontadas del inventario de una vez | ✅ |
+
+Pendiente para E2: visor 3D con iluminación RGB y modo Setup (monitores, periféricos,
+escritorio).
+
 ## Requerimientos detectados
 
 Las historias se detallan en la planificación de cada sprint, a partir de los módulos 2 – 11

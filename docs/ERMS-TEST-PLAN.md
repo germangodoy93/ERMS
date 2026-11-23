@@ -167,6 +167,22 @@ corregidos y cubiertos por pruebas nuevas:
 | Regresiones (UI) | `workorders/hooks.test.tsx`, `DiagnosticPanel.test.tsx`, `BillingPanel.test.tsx` | Los tres errores anteriores |
 | E2E | `e2e/tests/repair-flow.spec.ts` | Flujo completo en Chromium, incluida la descarga del acta y el cambio de contraseña temporal |
 
+## 10. Pruebas del Sprint E1 (ensamble)
+
+Resultado local del 2026-11-23: **195 pruebas de backend** (94 %; módulo de ensamble entre 90 %
+y 100 %) y **164 de frontend**, todas en verde. Con el catálogo real del simulador (185 piezas)
+importado por el proxy web, los seis presets del simulador dan el mismo resultado que en él: los
+cinco válidos quedan listos y "Con errores para practicar" reporta sus seis incompatibilidades.
+La orden de ensamble del preset "Gamer 1440p" nace en cotización con 9 ítems y $9.869.000.
+
+| Prueba | Archivo | Verifica |
+|---|---|---|
+| Reglas | `backend/tests/unit/test_assembly_rules.py` | Preset gamer compatible y su precio; preset con errores; fuente; anclaje del disipador; largo de gráfica; velocidad de RAM; radiador y espacio para ventiladores; Strimer 16 pines; cuellos de botella por uso y umbral; candidatos; orden de pasos; validación de especificaciones |
+| API | `backend/tests/integration/test_assembly_api.py` | Importación idempotente y validada; edición del repuesto sin perder especificaciones; evaluación y candidatos; permisos (solo técnico y administrador); orden completa: cotización, aprobación, descuento sin existencias (422) y con existencias, pasos en orden, control de calidad, pago, entrega y garantía |
+| Migración | `backend/tests/integration/test_database.py` | 0008 coincide con los modelos y se revierte |
+| UI | `frontend/src/modules/assembly/**/*.test.ts(x)` | Selección como el simulador; textos de especificaciones; archivo de catálogo; configurador con motivos, faltantes y guardado; lista de chequeo |
+| Contrato | `frontend/src/types/api.contract.test.ts` | 12 esquemas nuevos, 6 actualizados, 9 rutas y los enums de categoría y uso |
+
 **Windows:** si la terminal abre la carpeta como `c:\...` (minúscula), Vitest carga dos copias de
 sí mismo y las pruebas de interfaz fallan con `Invalid Chai property: toBeInTheDocument`.
 Ejecute las pruebas desde una terminal en `C:\...` (ver ERMS-DEVOPS).

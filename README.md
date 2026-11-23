@@ -4,8 +4,8 @@ Plataforma para gestionar un centro de diagnóstico, mantenimiento y reparación
 computadores, celulares, tablets y consolas: desde la recepción del equipo hasta su entrega y
 garantía.
 
-**Estado:** MVP terminado (Sprint 6: garantías, dashboard, reportes, prueba de punta a punta en
-el navegador). Ver [roadmap](docs/ERMS-ROADMAP.md).
+**Estado:** MVP terminado. Después del MVP: Sprint E1 de ensamble de PC (configurador con
+compatibilidad, orden de ensamble y lista de chequeo). Ver [roadmap](docs/ERMS-ROADMAP.md).
 
 | Capa | Tecnología |
 |---|---|

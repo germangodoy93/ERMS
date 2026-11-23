@@ -144,6 +144,10 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 | 040 | Pantallas cargadas bajo demanda (`React.lazy`) y librerías en fragmentos separados | Un solo archivo | El código propio inicial pasa de 525 kB a 32 kB; las librerías cambian poco y quedan en la caché del navegador. |
 | 041 | Backups con la función nativa de Railway (plan Pro) | `pg_dump` programado propio | Sin código ni almacenamiento adicional; el simulacro de restauración se hace en un entorno duplicado. |
 | 042 | E2E con Playwright contra el stack de Docker Compose en CI; los datos maestros se crean por la API y el flujo de la orden por la interfaz | Todo por la interfaz | Prueba lo que el usuario hace sin volver la prueba lenta y frágil. |
+| 043 | El catálogo de ensamble es el inventario: `parts.assembly_category` + `specs` JSONB validadas por categoría (Pydantic) | Tablas por categoría; datos dentro del código como el simulador | Un solo lugar para precio y existencia; las reglas leen campos explícitos, no adivinan por el nombre del producto. |
+| 044 | Las reglas de compatibilidad corren en el servidor (`assembly/rules.py`, funciones puras) | Solo en el navegador | Una sola fuente de verdad para la pantalla, la orden y las pruebas. |
+| 045 | La venta de un PC armado es una orden `kind = ASSEMBLY` que entra directo a cotización | Flujo de venta aparte | Reutiliza cotización, pagos, control de calidad, entrega, garantía y reportes sin duplicarlos. |
+| 046 | El catálogo con precios se carga por archivo desde la aplicación y vive en `data/private/` (excluido de Git) | Sembrarlo en una migración | El repositorio es público; los precios son información comercial del taller. |
 
 ## 6. Riesgos
 

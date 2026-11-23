@@ -368,6 +368,25 @@ El CSV usa UTF-8 con BOM y `;` para que Excel en español lo abra directamente; 
 `money_columns` van como número sin formato. Las celdas de texto que empiezan por `=`, `+`, `-`,
 `@`, tabulador o retorno de carro se anteponen con `'` para evitar inyección de fórmulas.
 
+### Ensamble de PC (`/assembly`, Sprint E1)
+
+Solo técnicos y administradores (`assembly:manage`).
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET /assembly/catalog` | `assembly:manage` | 200 `CatalogPart[]`: repuestos activos con `assembly_category`, precio, existencia y `specs` |
+| `POST /assembly/catalog/import` | `assembly:manage` + `inventory:manage` | 200 `{created, updated, errors[]}`: crea o actualiza por SKU (precio con IVA 19 % incluido); no toca existencias |
+| `POST /assembly/evaluate` | `assembly:manage` | 200 `EvaluationOut`: `{errors[], warnings[], missing[], ready, watts, recommended_psu_w, price, gaming_index, work_index, ram_gb, candidates}`. Con `candidates_for`, `candidates` da el motivo por el que no encaja cada pieza de esa categoría |
+| `GET/POST /assembly/builds` · `GET/PUT/DELETE /assembly/builds/{id}` | `assembly:manage` | Configuraciones; solo los borradores se editan o borran |
+| `POST /assembly/builds/{id}/order` | `assembly:manage` | 201 `WorkOrderRead`: `{customer_id}`. Exige configuración completa y compatible. Crea el equipo "PC armada a la medida", la orden `kind = ASSEMBLY` en COTIZACION (sin inspección ni diagnóstico) y la cotización en borrador con las piezas y la mano de obra |
+| `GET /work-orders/{id}/assembly` | `work_orders:read` | 200 lista de chequeo `{steps[{code, title, done, blocked_reason}], parts_consumed, can_work}` |
+| `POST /work-orders/{id}/assembly/consume` | `repairs:manage` (en reparación) | Descuenta todas las piezas de una vez (todas o ninguna) |
+| `POST /work-orders/{id}/assembly/steps/{code}` | `repairs:manage` (en reparación) | Marca el paso; 422 "Aún no: …" si falta un paso previo |
+
+`Selection` = `{cpu, board, ram, ram_units, gpu, psu, case, cooler, storage[≤4], rgb[≤8]}`.
+Las especificaciones por categoría están en `app/modules/assembly/catalog.py` (`SPEC_MODELS`);
+`PUT /inventory/parts/{id}` acepta `assembly_category` y `specs` y, si no se envían, las conserva.
+
 ### Salud
 
 ### `GET /api/v1/health/live`

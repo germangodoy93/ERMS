@@ -158,6 +158,14 @@ encuentra en el Root Directory y construye la última etapa (`prod`).
 La configuración se hace en el panel, sin `railway.json`, porque Railway deprecó "Config as
 Code" (vigente solo hasta el 2026-12-01).
 
+### Catálogo de ensamble (datos privados)
+
+El catálogo con precios **no está en el repositorio** (es público). El archivo se genera a partir
+del simulador del taller y se guarda en `data/private/catalogo-ensamble.json` (carpeta excluida
+de Git). Para cargarlo, en producción o en local: *Ensamble de PC → Importar catálogo* con un
+usuario administrador. La importación crea o actualiza por código (SKU) y nunca cambia
+existencias; se puede repetir cuando cambien los precios.
+
 ### Servicio `Postgres`
 
 *New → Database → PostgreSQL*.
