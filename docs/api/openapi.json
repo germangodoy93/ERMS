@@ -7799,7 +7799,7 @@
           "overdue": {
             "type": "integer",
             "title": "Overdue",
-            "description": "Abiertas con fecha estimada de entrega vencida"
+            "description": "Con trabajo pendiente del taller y fecha estimada de entrega vencida (no cuenta canceladas, no reparables, rechazadas ni listas para entrega)"
           },
           "awaiting_customer": {
             "type": "integer",

@@ -92,7 +92,7 @@ function DashboardBody({ data }: { data: NonNullable<ReturnType<typeof useDashbo
         <Kpi
           label="Atrasadas"
           value={data.overdue}
-          hint="Fecha estimada vencida"
+          hint="Trabajo pendiente con fecha estimada vencida"
           icon={<AlertTriangle className="size-4" />}
           tone={data.overdue ? "danger" : "default"}
           to="/ordenes"

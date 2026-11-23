@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.modules.diagnostics import catalog
 from app.modules.warranties.models import Warranty
+from app.modules.workorders.models import WorkOrder
 
 from .conftest import PASSWORD, Shop, Tenant, login
 from .test_commerce_api import ORDERS, _approved, _move, _ok, _order, _part
@@ -223,6 +224,27 @@ def test_dashboard_scopes(client: TestClient, shop: Shop, tenant: Tenant) -> Non
     assert mine["income_month"] is None
     assert mine["technician_load"] is None
     assert mine["received_today"] == 2  # both orders were taken by this technician
+
+
+def test_overdue_counts_only_pending_work(client: TestClient, shop: Shop, db: Session) -> None:
+    late = _order(client, shop)
+    cancelled = _order(client, shop)
+    db.execute(
+        update(WorkOrder)
+        .where(WorkOrder.id.in_([late["id"], cancelled["id"]]))
+        .values(estimated_delivery_date=TODAY - timedelta(days=2))
+    )
+    db.commit()
+    assert _ok(client.get("/api/v1/dashboard", headers=shop.reception))["overdue"] == 2
+    _ok(
+        client.post(
+            f"{ORDERS}/{cancelled['id']}/status",
+            headers=shop.reception,
+            json={"status": "CANCELADO", "reason": "El cliente desistió."},
+        )
+    )
+    # A cancelled order only waits for the device to be returned: it is not late work.
+    assert _ok(client.get("/api/v1/dashboard", headers=shop.reception))["overdue"] == 1
 
 
 def test_reports_formats_and_permissions(client: TestClient, shop: Shop) -> None:

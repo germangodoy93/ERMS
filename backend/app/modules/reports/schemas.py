@@ -28,7 +28,10 @@ class Dashboard(BaseModel):
     open_by_status: list[StatusCount]
     received_today: int
     received_week: int
-    overdue: int = Field(description="Abiertas con fecha estimada de entrega vencida")
+    overdue: int = Field(
+        description="Con trabajo pendiente del taller y fecha estimada de entrega vencida "
+        "(no cuenta canceladas, no reparables, rechazadas ni listas para entrega)"
+    )
     awaiting_customer: int
     expired_quotes: int
     ready_for_delivery: int

@@ -46,6 +46,19 @@ from app.shared.spreadsheet import safe_cell
 
 MAX_RANGE_DAYS = 366
 OPEN = [s.value for s in Status if s is not Status.ENTREGADO]
+# Late = the workshop still owes work after the estimated date. Cancelled, not repairable,
+# rejected or ready orders only wait for the customer to pick the device up.
+OVERDUE = [
+    s
+    for s in OPEN
+    if s
+    not in {
+        Status.CANCELADO.value,
+        Status.NO_REPARABLE.value,
+        Status.COTIZACION_RECHAZADA.value,
+        Status.LISTO_ENTREGA.value,
+    }
+]
 
 
 def _start(day: date) -> datetime:
@@ -102,7 +115,7 @@ class ReportService:
             received_week=self._count(orders().where(WorkOrder.received_at >= _start(week_start))),
             overdue=self._count(
                 orders().where(
-                    WorkOrder.status.in_(OPEN), WorkOrder.estimated_delivery_date < today
+                    WorkOrder.status.in_(OVERDUE), WorkOrder.estimated_delivery_date < today
                 )
             ),
             awaiting_customer=counts.get(Status.PENDIENTE_AUTORIZACION, 0),
