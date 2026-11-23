@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
@@ -20,6 +21,7 @@ class OrganizationRead(BaseModel):
     warranty_days: int
     assembly_bottleneck_gap: int
     assembly_min_ram_gb: int
+    assembly_margin_percent: Decimal
 
 
 class OrganizationUpdate(BaseModel):
@@ -38,6 +40,14 @@ class OrganizationUpdate(BaseModel):
         ge=5,
         le=100,
         description="Diferencia de índices que se avisa como cuello de botella",
+    )
+    assembly_margin_percent: Decimal | None = Field(
+        default=None,
+        ge=0,
+        le=300,
+        max_digits=5,
+        decimal_places=2,
+        description="Margen sobre el costo para el precio de venta de las piezas de ensamble",
     )
     assembly_min_ram_gb: int | None = Field(
         default=None, ge=4, le=256, description="RAM mínima recomendada para diseño y gaming"

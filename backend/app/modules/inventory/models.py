@@ -84,6 +84,13 @@ class Part(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     specs: Mapped[dict[str, Any] | None] = mapped_column(
         JSONB, nullable=True, comment="Especificaciones técnicas según la categoría de ensamble"
     )
+    price_locked: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="false",
+        comment="Precio de venta fijado a mano: no se recalcula con el costo y el margen",
+    )
 
 
 class StockLevel(UUIDPrimaryKeyMixin, Base):

@@ -287,7 +287,7 @@ def test_csv_neutralizes_formulas(client: TestClient, shop: Shop) -> None:
         client.get("/api/v1/customers", headers=shop.reception, params={"q": "hyperlink"})
     )
     assert customers["total"] == 1
-    from app.modules.reports.service import _safe_cell
+    from app.shared.spreadsheet import safe_cell as _safe_cell
 
     assert _safe_cell("=HYPERLINK(1)") == "'=HYPERLINK(1)"
     assert _safe_cell("-5.00") == "-5.00"

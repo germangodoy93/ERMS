@@ -7,6 +7,7 @@ import type {
   CatalogImportItem,
   CatalogImportResult,
   CatalogPart,
+  CostUpdateResult,
   EvaluateRequest,
   Evaluation,
   WorkOrder,
@@ -19,6 +20,18 @@ export async function getCatalog(): Promise<CatalogPart[]> {
 
 export async function importCatalog(items: CatalogImportItem[]): Promise<CatalogImportResult> {
   const { data } = await http.post<CatalogImportResult>("/assembly/catalog/import", { items });
+  return data;
+}
+
+export async function downloadCostTemplate(): Promise<Blob> {
+  const { data } = await http.get<Blob>("/assembly/catalog/costs.csv", { responseType: "blob" });
+  return data;
+}
+
+export async function uploadCosts(file: File): Promise<CostUpdateResult> {
+  const form = new FormData();
+  form.append("file", file);
+  const { data } = await http.post<CostUpdateResult>("/assembly/catalog/costs", form);
   return data;
 }
 

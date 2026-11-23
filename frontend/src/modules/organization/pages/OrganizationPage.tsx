@@ -84,6 +84,7 @@ function OrganizationForm({ organization }: { organization: Organization }) {
       warranty_days: String(organization.warranty_days),
       assembly_bottleneck_gap: String(organization.assembly_bottleneck_gap),
       assembly_min_ram_gb: String(organization.assembly_min_ram_gb),
+      assembly_margin_percent: String(Number(organization.assembly_margin_percent)),
     },
   });
 
@@ -100,6 +101,7 @@ function OrganizationForm({ organization }: { organization: Organization }) {
       warranty_days: Number(values.warranty_days),
       assembly_bottleneck_gap: Number(values.assembly_bottleneck_gap),
       assembly_min_ram_gb: Number(values.assembly_min_ram_gb),
+      assembly_margin_percent: values.assembly_margin_percent.replace(",", "."),
     };
     try {
       const saved = await update.mutateAsync(payload);
@@ -114,6 +116,7 @@ function OrganizationForm({ organization }: { organization: Organization }) {
         warranty_days: String(saved.warranty_days),
         assembly_bottleneck_gap: String(saved.assembly_bottleneck_gap),
         assembly_min_ram_gb: String(saved.assembly_min_ram_gb),
+        assembly_margin_percent: String(Number(saved.assembly_margin_percent)),
       });
       toast.success("Datos del taller guardados.");
     } catch (error) {
@@ -183,6 +186,13 @@ function OrganizationForm({ organization }: { organization: Organization }) {
               inputMode="numeric"
               error={errors.assembly_min_ram_gb?.message}
               {...register("assembly_min_ram_gb")}
+            />
+            <FormField
+              label="Ensamble: margen sobre el costo (%)"
+              inputMode="decimal"
+              hint="Precio de venta = costo del proveedor + margen, redondeado hacia arriba a $1.000. Al cambiarlo se recalculan las piezas no fijadas a mano."
+              error={errors.assembly_margin_percent?.message}
+              {...register("assembly_margin_percent")}
             />
             <FormField
               label="Correo para consultas y reclamos"

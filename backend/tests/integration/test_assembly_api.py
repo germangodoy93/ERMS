@@ -8,6 +8,8 @@ from fastapi.testclient import TestClient
 from .conftest import Shop, new_customer
 
 API = "/api/v1/assembly"
+BOM = chr(0xFEFF)
+CRLF = chr(13) + chr(10)
 ORDERS = "/api/v1/work-orders"
 
 # The simulator's "Gamer 1440p" preset (prices include VAT).
@@ -47,7 +49,7 @@ def _ok(response: Any, code: int = 200) -> Any:
 
 def _import(client: TestClient, s: Shop, price_bump: int = 0) -> Any:
     items = [
-        {"sku": sku, "name": name, "category": cat, "sale_price": str(int(p) + price_bump),
+        {"sku": sku, "name": name, "category": cat, "cost": str(int(p) + price_bump),
          "specs": specs}
         for sku, name, cat, p, specs in GAMER
     ]  # fmt: skip
@@ -79,7 +81,7 @@ def test_catalog_import_is_idempotent_and_validated(client: TestClient, shop: Sh
             f"{API}/catalog/import",
             headers=shop.admin,
             json={"items": [{"sku": "x-1", "name": "Mala", "category": "CPU",
-                             "sale_price": "1", "specs": {"socket": "AM5"}}]},
+                             "cost": "1", "specs": {"socket": "AM5"}}]},
         )
     )  # fmt: skip
     assert bad["created"] == 0
@@ -87,19 +89,29 @@ def test_catalog_import_is_idempotent_and_validated(client: TestClient, shop: Sh
 
     catalog = _ok(client.get(f"{API}/catalog", headers=shop.tech))
     cpu = next(p for p in catalog if p["sku"] == "ENS-CPU-C20")
-    assert cpu["sale_price"] == "2000000.00"
+    # Supplier cost 2.000.000 + 15 % = 2.300.000 (rounded up to the next $1.000).
+    assert cpu["sale_price"] == "2300000.00"
     assert cpu["specs"]["socket"] == "AM5"
-    # Editing the part from the old inventory form keeps its specs.
+    assert "unit_cost" not in cpu  # the configurator never shows the cost
+    # Editing the part from the old inventory form keeps its specs; the price follows the cost.
     _ok(
         client.put(
             f"/api/v1/inventory/parts/{cpu['id']}",
             headers=shop.admin,
             json={"sku": cpu["sku"], "name": cpu["name"], "kind": "COMPONENT",
-                  "sale_price": "1999000", "tax_rate": 19, "price_includes_tax": True},
+                  "unit_cost": "1999000", "sale_price": "1", "tax_rate": 19,
+                  "price_includes_tax": True},
         )
     )  # fmt: skip
     part = _ok(client.get(f"/api/v1/inventory/parts/{cpu['id']}", headers=shop.admin))
     assert (part["assembly_category"], part["specs"]["cores"]) == ("CPU", 8)
+    assert (part["unit_cost"], part["sale_price"], part["price_locked"]) == (
+        "1999000.00",
+        "2299000.00",
+        False,
+    )
+    tech_view = _ok(client.get(f"/api/v1/inventory/parts/{cpu['id']}", headers=shop.tech))
+    assert tech_view["unit_cost"] is None
     wrong = client.put(
         f"/api/v1/inventory/parts/{cpu['id']}",
         headers=shop.admin,
@@ -130,7 +142,7 @@ def test_evaluate_and_candidates(client: TestClient, shop: Shop) -> None:
     assert result["ready"] is True
     assert result["errors"] == []
     assert result["watts"] == 484
-    assert result["price"] == "9719000.00"
+    assert result["price"] == "11180000.00"  # sale prices: cost + 15 %
     lga = next(
         p["id"]
         for p in _ok(client.get(f"{API}/catalog", headers=shop.tech))
@@ -221,7 +233,7 @@ def test_assembly_order_from_build_to_warranty(client: TestClient, shop: Shop) -
     assert len(draft["items"]) == 9  # 8 parts + labor
     ram = next(i for i in draft["items"] if i["description"].startswith("16 GB DDR5"))
     assert ram["quantity"] == "2.00"
-    assert draft["total"] == "9869000.00"  # 9.719.000 in parts + 150.000 labor
+    assert draft["total"] == "11330000.00"  # 11.180.000 in parts + 150.000 labor
     _ok(client.post(f"{ORDERS}/{oid}/quotes/{draft['id']}/send", headers=shop.admin))
     _ok(
         client.post(
@@ -294,7 +306,7 @@ def test_assembly_order_from_build_to_warranty(client: TestClient, shop: Shop) -
     )
     _ok(client.post(f"{ORDERS}/{oid}/status", headers=shop.tech, json={"status": "LISTO_ENTREGA"}))
     billing = _ok(client.get(f"{ORDERS}/{oid}/billing", headers=shop.reception))
-    assert billing["balance"] == "9869000.00"
+    assert billing["balance"] == "11330000.00"
     _ok(
         client.post(
             f"{ORDERS}/{oid}/payments",
@@ -317,3 +329,82 @@ def test_assembly_is_for_technicians_and_admins(client: TestClient, shop: Shop) 
     assert client.get(f"{API}/builds", headers=shop.supervisor).status_code == 403
     assert client.get(f"{API}/builds", headers=shop.admin).status_code == 200
     assert client.get(f"{API}/builds", headers=shop.tech).status_code == 200
+
+
+def test_prices_follow_cost_and_margin_unless_fixed(client: TestClient, shop: Shop) -> None:
+    _ok(_import(client, shop))
+    catalog = {p["sku"]: p for p in _ok(client.get(f"{API}/catalog", headers=shop.tech))}
+    gpu = catalog["ENS-GPU-G11"]
+    assert gpu["sale_price"] == "3909000.00"  # 3.399.000 + 15 % = 3.908.850 -> 3.909.000
+    # Fix the GPU price by hand: it survives new costs and a new margin.
+    _ok(
+        client.put(
+            f"/api/v1/inventory/parts/{gpu['id']}",
+            headers=shop.admin,
+            json={"sku": gpu["sku"], "name": gpu["name"], "kind": "COMPONENT",
+                  "unit_cost": "3399000", "sale_price": "3850000", "tax_rate": 19,
+                  "price_includes_tax": True, "price_locked": True},
+        )
+    )  # fmt: skip
+    margin = {"assembly_margin_percent": "20"}
+    _ok(client.patch("/api/v1/organization", headers=shop.admin, json=margin))
+    catalog = {p["sku"]: p for p in _ok(client.get(f"{API}/catalog", headers=shop.tech))}
+    assert catalog["ENS-GPU-G11"]["sale_price"] == "3850000.00"
+    assert catalog["ENS-CPU-C20"]["sale_price"] == "2399000.00"  # 1.999.000 + 20 % = 2.398.800
+    org = _ok(client.get("/api/v1/organization", headers=shop.admin))
+    assert org["assembly_margin_percent"] == "20.00"
+
+    # A new purchase updates the cost and, with it, the price of parts not fixed by hand.
+    _ok(
+        client.post(
+            "/api/v1/inventory/entries",
+            headers=shop.admin,
+            json={"received_on": date.today().isoformat(),
+                  "lines": [{"part_id": catalog["ENS-CPU-C20"]["id"], "quantity": 1,
+                             "unit_cost": "1800000"}]},
+        ),
+        201,
+    )  # fmt: skip
+    cpu_id = catalog["ENS-CPU-C20"]["id"]
+    cpu = _ok(client.get(f"/api/v1/inventory/parts/{cpu_id}", headers=shop.admin))
+    assert (cpu["unit_cost"], cpu["sale_price"]) == ("1800000.00", "2160000.00")
+
+
+def test_cost_template_and_update_from_excel(client: TestClient, shop: Shop) -> None:
+    _ok(_import(client, shop))
+    assert client.get(f"{API}/catalog/costs.csv", headers=shop.tech).status_code == 403
+    template = client.get(f"{API}/catalog/costs.csv", headers=shop.admin)
+    assert template.status_code == 200
+    text = template.content.decode("utf-8")
+    assert text.startswith(BOM + "Código;Nombre;Categoría;Costo;Precio de venta;Precio fijado")
+    assert "ENS-CPU-C20;AMD Ryzen 7 9800X3D;Procesador;1999000;2299000;No" in text
+
+    # Excel in Spanish may save Windows-1252 with ";" and the supplier's number format.
+    rows = [
+        "Código;Nombre;Costo",
+        "ENS-CPU-C20;Ryzen;$ 1,899,000",
+        "ens-psu-p6;Fuente;407.000",
+        "NO-EXISTE;X;100",
+        "ENS-RAM-R4;RAM;gratis",
+        ";;",
+    ]
+    upload = (CRLF.join(rows) + CRLF).encode("cp1252")
+    result = _ok(
+        client.post(
+            f"{API}/catalog/costs",
+            headers=shop.admin,
+            files={"file": ("costos.csv", upload, "text/csv")},
+        )
+    )
+    assert (result["updated"], result["unchanged"]) == (1, 1)
+    assert result["unknown"] == ["NO-EXISTE"]
+    assert result["errors"] == ["Fila 5 (ENS-RAM-R4): costo inválido."]
+    catalog = {p["sku"]: p for p in _ok(client.get(f"{API}/catalog", headers=shop.tech))}
+    assert catalog["ENS-CPU-C20"]["sale_price"] == "2184000.00"  # 1.899.000 + 15 % = 2.183.850
+    no_columns = client.post(
+        f"{API}/catalog/costs",
+        headers=shop.admin,
+        files={"file": ("x.csv", ("a,b" + CRLF + "1,2" + CRLF).encode(), "text/csv")},
+    )
+    assert no_columns.status_code == 422
+    assert "columnas Código y Costo" in no_columns.json()["detail"]

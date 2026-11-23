@@ -207,8 +207,11 @@ def test_parts_entries_adjustments_and_ledger(client: TestClient, shop: Shop) ->
         201,
     )
     assert (entry["lines"], entry["total_cost"]) == (1, "410000.00")
-    detail = _ok(client.get(f"{INV}/parts/{part['id']}", headers=shop.tech))
+    detail = _ok(client.get(f"{INV}/parts/{part['id']}", headers=shop.supervisor))
     assert (detail["stock"], detail["unit_cost"], detail["low_stock"]) == (5, "82000.00", False)
+    # Only who manages the inventory sees costs.
+    tech_view = _ok(client.get(f"{INV}/parts/{part['id']}", headers=shop.tech))
+    assert (tech_view["stock"], tech_view["unit_cost"]) == (5, None)
 
     adjusted = _ok(
         client.post(

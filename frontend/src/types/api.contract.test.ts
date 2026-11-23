@@ -558,6 +558,7 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
       "name",
       "notes",
       "price_includes_tax",
+      "price_locked",
       "sale_price",
       "sku",
       "specs",
@@ -590,6 +591,7 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
       "name",
       "notes",
       "price_includes_tax",
+      "price_locked",
       "sale_price",
       "sku",
       "specs",
@@ -891,6 +893,7 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
     all: [
       "address",
       "assembly_bottleneck_gap",
+      "assembly_margin_percent",
       "assembly_min_ram_gb",
       "city",
       "email",
@@ -905,6 +908,7 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
     required: [
       "address",
       "assembly_bottleneck_gap",
+      "assembly_margin_percent",
       "assembly_min_ram_gb",
       "city",
       "email",
@@ -921,6 +925,7 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
     all: [
       "address",
       "assembly_bottleneck_gap",
+      "assembly_margin_percent",
       "assembly_min_ram_gb",
       "city",
       "email",
@@ -1048,12 +1053,16 @@ const FIELDS: Record<string, { all: string[]; required: string[] }> = {
     required: ["build_id", "build_name", "can_work", "parts_consumed", "steps"],
   },
   CatalogImportItem: {
-    all: ["category", "name", "sale_price", "sku", "specs"],
-    required: ["category", "name", "sale_price", "sku", "specs"],
+    all: ["category", "cost", "name", "sku", "specs"],
+    required: ["category", "cost", "name", "sku", "specs"],
   },
   CatalogImportResult: {
     all: ["created", "errors", "updated"],
     required: ["created", "errors", "updated"],
+  },
+  CostUpdateResult: {
+    all: ["errors", "unchanged", "unknown", "updated"],
+    required: ["errors", "unchanged", "unknown", "updated"],
   },
 };
 
@@ -1136,6 +1145,8 @@ describe("API contract (docs/api/openapi.json)", () => {
         "/api/v1/reports/{kind}",
         "/api/v1/assembly/catalog",
         "/api/v1/assembly/catalog/import",
+        "/api/v1/assembly/catalog/costs.csv",
+        "/api/v1/assembly/catalog/costs",
         "/api/v1/assembly/evaluate",
         "/api/v1/assembly/builds",
         "/api/v1/assembly/builds/{build_id}",

@@ -148,6 +148,9 @@ RFC 9457 y, desde el Sprint 1, seguridad (JWT y RBAC) y auditoría.
 | 044 | Las reglas de compatibilidad corren en el servidor (`assembly/rules.py`, funciones puras) | Solo en el navegador | Una sola fuente de verdad para la pantalla, la orden y las pruebas. |
 | 045 | La venta de un PC armado es una orden `kind = ASSEMBLY` que entra directo a cotización | Flujo de venta aparte | Reutiliza cotización, pagos, control de calidad, entrega, garantía y reportes sin duplicarlos. |
 | 046 | El catálogo con precios se carga por archivo desde la aplicación y vive en `data/private/` (excluido de Git) | Sembrarlo en una migración | El repositorio es público; los precios son información comercial del taller. |
+| 047 | Piezas de ensamble: la lista del proveedor es el **costo** y el precio de venta es costo + margen del taller (15 %), redondeado hacia arriba a $1.000, salvo precio fijado a mano | Guardar el precio del proveedor como venta | El taller compra a esa lista; venderla tal cual sería sin ganancia. |
+| 048 | Actualización de costos con CSV desde Excel (plantilla descargable), no con el PDF del proveedor ni con xlsx | Leer el PDF; librería de Excel | El PDF mezcla columnas y tiene errores de digitación; CSV no agrega dependencias y Excel lo abre y guarda. |
+| 049 | El costo solo lo ve quien tiene `inventory:manage` | Visible para todos | Decisión del dueño: el técnico ve solo el precio de venta. |
 
 ## 6. Riesgos
 

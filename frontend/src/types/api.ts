@@ -161,12 +161,14 @@ export interface Organization {
   warranty_days: number;
   assembly_bottleneck_gap: number;
   assembly_min_ram_gb: number;
+  assembly_margin_percent: string;
 }
 
 export interface OrganizationUpdate {
   warranty_days?: number | null;
   assembly_bottleneck_gap?: number | null;
   assembly_min_ram_gb?: number | null;
+  assembly_margin_percent?: string | null;
   name?: string | null;
   legal_name?: string | null;
   tax_id?: string | null;
@@ -593,7 +595,8 @@ export interface PartItem {
   sku: string;
   name: string;
   kind: PartKind;
-  unit_cost: string;
+  /** Null unless the user manages the inventory. */
+  unit_cost: string | null;
   sale_price: string;
   tax_rate: number;
   price_includes_tax: boolean;
@@ -604,6 +607,8 @@ export interface PartItem {
   low_stock: boolean;
   assembly_category: AssemblyCategory | null;
   specs: Record<string, unknown> | null;
+  /** Assembly parts: sale price fixed by hand (otherwise cost + margin). */
+  price_locked: boolean;
 }
 
 export interface PartWrite {
@@ -620,6 +625,7 @@ export interface PartWrite {
   /** Omitted = unchanged. */
   assembly_category?: AssemblyCategory | null;
   specs?: Record<string, unknown> | null;
+  price_locked?: boolean | null;
 }
 
 export interface Supplier {
@@ -999,12 +1005,20 @@ export interface CatalogImportItem {
   sku: string;
   name: string;
   category: AssemblyCategory;
-  sale_price: string;
+  /** Supplier price, VAT included. */
+  cost: string;
   specs: Record<string, unknown>;
 }
 
 export interface CatalogImportResult {
   created: number;
   updated: number;
+  errors: string[];
+}
+
+export interface CostUpdateResult {
+  updated: number;
+  unchanged: number;
+  unknown: string[];
   errors: string[];
 }

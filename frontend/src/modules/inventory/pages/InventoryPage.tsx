@@ -181,7 +181,9 @@ function PartDialog({ part, onClose }: { part?: PartItem; onClose: () => void })
   const [sku, setSku] = useState(part?.sku ?? "");
   const [name, setName] = useState(part?.name ?? "");
   const [kind, setKind] = useState<PartKind>(part?.kind ?? "PART");
-  const [cost, setCost] = useState(part ? String(Number(part.unit_cost)) : "");
+  const [cost, setCost] = useState(part?.unit_cost ? String(Number(part.unit_cost)) : "");
+  const [locked, setLocked] = useState(part?.price_locked ?? false);
+  const assembly = Boolean(part?.assembly_category);
   const [price, setPrice] = useState(part ? String(Number(part.sale_price)) : "");
   const [tax, setTax] = useState((part?.tax_rate ?? 0) > 0);
   const [included, setIncluded] = useState(part?.price_includes_tax ?? false);
@@ -207,6 +209,7 @@ function PartDialog({ part, onClose }: { part?: PartItem; onClose: () => void })
           price_includes_tax: tax && included,
           min_stock: Number(minStock) || 0,
           is_active: active,
+          ...(assembly ? { price_locked: locked } : {}),
         },
       });
       toast.success("Repuesto guardado.");
@@ -250,6 +253,8 @@ function PartDialog({ part, onClose }: { part?: PartItem; onClose: () => void })
             label="Precio de venta"
             inputMode="numeric"
             value={price}
+            disabled={assembly && !locked}
+            hint={assembly && !locked ? "Costo + margen del taller" : undefined}
             onChange={(e) => setPrice(e.target.value)}
           />
           <FormField
@@ -274,6 +279,12 @@ function PartDialog({ part, onClose }: { part?: PartItem; onClose: () => void })
             <Label className="flex items-center gap-2 font-normal">
               <Checkbox checked={active} onCheckedChange={(v) => setActive(v === true)} />
               Activo
+            </Label>
+          )}
+          {assembly && (
+            <Label className="flex items-center gap-2 font-normal">
+              <Checkbox checked={locked} onCheckedChange={(v) => setLocked(v === true)} />
+              Precio fijado a mano (no se recalcula con el costo)
             </Label>
           )}
         </div>
@@ -329,7 +340,9 @@ function PartDetailDialog({
         <DialogHeader>
           <DialogTitle>{part.name}</DialogTitle>
           <DialogDescription>
-            {part.sku} · existencia {part.stock} · costo {formatMoney(part.unit_cost)}
+            {part.sku} · existencia {part.stock}
+            {part.unit_cost !== null && ` · costo ${formatMoney(part.unit_cost)}`}
+            {part.price_locked && " · precio fijado a mano"}
           </DialogDescription>
         </DialogHeader>
         {part.assembly_category && part.specs && (

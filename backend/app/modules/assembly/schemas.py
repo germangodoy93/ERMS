@@ -125,7 +125,9 @@ class CatalogImportItem(BaseModel):
     sku: str = Field(min_length=2, max_length=40)
     name: str = Field(min_length=2, max_length=200)
     category: AssemblyCategory
-    sale_price: Decimal = Field(ge=0, max_digits=14, decimal_places=2)
+    cost: Decimal = Field(
+        ge=0, max_digits=14, decimal_places=2, description="Precio del proveedor, IVA incluido"
+    )
     specs: dict[str, Any]
 
 
@@ -137,3 +139,10 @@ class CatalogImportResult(BaseModel):
     created: int
     updated: int
     errors: list[str] = Field(description="Piezas rechazadas con su motivo")
+
+
+class CostUpdateResult(BaseModel):
+    updated: int
+    unchanged: int
+    unknown: list[str] = Field(description="Códigos que no están en el catálogo de ensamble")
+    errors: list[str] = Field(description="Filas que no se pudieron leer")

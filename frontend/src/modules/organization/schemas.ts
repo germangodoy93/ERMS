@@ -24,6 +24,11 @@ export const organizationSchema = z.object({
     .trim()
     .regex(/^d{1,3}$/, "Use un número entero.")
     .refine((v) => Number(v) >= 5 && Number(v) <= 100, "Entre 5 y 100 puntos."),
+  assembly_margin_percent: z
+    .string()
+    .trim()
+    .regex(/^d{1,3}([.,]d{1,2})?$/, "Use un porcentaje, por ejemplo 15.")
+    .refine((v) => Number(v.replace(",", ".")) <= 300, "Máximo 300 %."),
   assembly_min_ram_gb: z
     .string()
     .trim()

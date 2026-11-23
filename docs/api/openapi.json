@@ -5260,6 +5260,71 @@
         ]
       }
     },
+    "/api/v1/assembly/catalog/costs.csv": {
+      "get": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Plantilla de costos para Excel (código, nombre, costo, precio de venta)",
+        "operationId": "cost_template_api_v1_assembly_catalog_costs_csv_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assembly/catalog/costs": {
+      "post": {
+        "tags": [
+          "assembly"
+        ],
+        "summary": "Actualizar costos desde la plantilla guardada en Excel (CSV)",
+        "operationId": "update_costs_api_v1_assembly_catalog_costs_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_update_costs_api_v1_assembly_catalog_costs_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostUpdateResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/assembly/evaluate": {
       "post": {
         "tags": [
@@ -6236,6 +6301,20 @@
         ],
         "title": "BillingRead"
       },
+      "Body_update_costs_api_v1_assembly_catalog_costs_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_update_costs_api_v1_assembly_catalog_costs_post"
+      },
       "Body_upload_photo_api_v1_work_orders__order_id__photos_post": {
         "properties": {
           "file": {
@@ -6502,7 +6581,7 @@
           "category": {
             "$ref": "#/components/schemas/AssemblyCategory"
           },
-          "sale_price": {
+          "cost": {
             "anyOf": [
               {
                 "type": "number",
@@ -6512,7 +6591,8 @@
                 "type": "string"
               }
             ],
-            "title": "Sale Price"
+            "title": "Cost",
+            "description": "Precio del proveedor, IVA incluido"
           },
           "specs": {
             "additionalProperties": true,
@@ -6525,7 +6605,7 @@
           "sku",
           "name",
           "category",
-          "sale_price",
+          "cost",
           "specs"
         ],
         "title": "CatalogImportItem"
@@ -7023,6 +7103,42 @@
           "quantity"
         ],
         "title": "ConsumeRequest"
+      },
+      "CostUpdateResult": {
+        "properties": {
+          "updated": {
+            "type": "integer",
+            "title": "Updated"
+          },
+          "unchanged": {
+            "type": "integer",
+            "title": "Unchanged"
+          },
+          "unknown": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unknown",
+            "description": "Códigos que no están en el catálogo de ensamble"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "Filas que no se pudieron leer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "updated",
+          "unchanged",
+          "unknown",
+          "errors"
+        ],
+        "title": "CostUpdateResult"
       },
       "CpuInfo": {
         "properties": {
@@ -9405,6 +9521,10 @@
           "assembly_min_ram_gb": {
             "type": "integer",
             "title": "Assembly Min Ram Gb"
+          },
+          "assembly_margin_percent": {
+            "type": "string",
+            "title": "Assembly Margin Percent"
           }
         },
         "type": "object",
@@ -9420,7 +9540,8 @@
           "email",
           "warranty_days",
           "assembly_bottleneck_gap",
-          "assembly_min_ram_gb"
+          "assembly_min_ram_gb",
+          "assembly_margin_percent"
         ],
         "title": "OrganizationRead"
       },
@@ -9557,6 +9678,23 @@
             ],
             "title": "Assembly Bottleneck Gap",
             "description": "Diferencia de índices que se avisa como cuello de botella"
+          },
+          "assembly_margin_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 300.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assembly Margin Percent",
+            "description": "Margen sobre el costo para el precio de venta de las piezas de ensamble"
           },
           "assembly_min_ram_gb": {
             "anyOf": [
@@ -9849,8 +9987,16 @@
             "title": "Kind"
           },
           "unit_cost": {
-            "type": "string",
-            "title": "Unit Cost"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit Cost",
+            "description": "Solo para quien administra el inventario; null para los demás"
           },
           "sale_price": {
             "type": "string",
@@ -9912,6 +10058,11 @@
               }
             ],
             "title": "Specs"
+          },
+          "price_locked": {
+            "type": "boolean",
+            "title": "Price Locked",
+            "default": false
           }
         },
         "type": "object",
@@ -10044,6 +10195,18 @@
             ],
             "title": "Specs",
             "description": "Especificaciones técnicas de la categoría de ensamble"
+          },
+          "price_locked": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Locked",
+            "description": "Piezas de ensamble: precio fijado a mano (si no, costo + margen); si se omite, no se cambia"
           }
         },
         "type": "object",

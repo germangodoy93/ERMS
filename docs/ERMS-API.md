@@ -375,7 +375,9 @@ Solo técnicos y administradores (`assembly:manage`).
 | Método y ruta | Permiso | Respuesta |
 |---|---|---|
 | `GET /assembly/catalog` | `assembly:manage` | 200 `CatalogPart[]`: repuestos activos con `assembly_category`, precio, existencia y `specs` |
-| `POST /assembly/catalog/import` | `assembly:manage` + `inventory:manage` | 200 `{created, updated, errors[]}`: crea o actualiza por SKU (precio con IVA 19 % incluido); no toca existencias |
+| `POST /assembly/catalog/import` | `assembly:manage` + `inventory:manage` | 200 `{created, updated, errors[]}`: crea o actualiza por SKU con `cost` (precio del proveedor, IVA incluido); no toca existencias |
+| `GET /assembly/catalog/costs.csv` | `assembly:manage` + `inventory:manage` | Plantilla para Excel (UTF-8 con BOM, `;`): Código, Nombre, Categoría, Costo, Precio de venta, Precio fijado a mano |
+| `POST /assembly/catalog/costs` | `assembly:manage` + `inventory:manage` | Multipart `file` (CSV ≤ 2 MB, `;` o `,`, UTF-8 o Windows-1252) con columnas Código y Costo → 200 `{updated, unchanged, unknown[], errors[]}` |
 | `POST /assembly/evaluate` | `assembly:manage` | 200 `EvaluationOut`: `{errors[], warnings[], missing[], ready, watts, recommended_psu_w, price, gaming_index, work_index, ram_gb, candidates}`. Con `candidates_for`, `candidates` da el motivo por el que no encaja cada pieza de esa categoría |
 | `GET/POST /assembly/builds` · `GET/PUT/DELETE /assembly/builds/{id}` | `assembly:manage` | Configuraciones; solo los borradores se editan o borran |
 | `POST /assembly/builds/{id}/order` | `assembly:manage` | 201 `WorkOrderRead`: `{customer_id}`. Exige configuración completa y compatible. Crea el equipo "PC armada a la medida", la orden `kind = ASSEMBLY` en COTIZACION (sin inspección ni diagnóstico) y la cotización en borrador con las piezas y la mano de obra |
@@ -385,7 +387,12 @@ Solo técnicos y administradores (`assembly:manage`).
 
 `Selection` = `{cpu, board, ram, ram_units, gpu, psu, case, cooler, storage[≤4], rgb[≤8]}`.
 Las especificaciones por categoría están en `app/modules/assembly/catalog.py` (`SPEC_MODELS`);
-`PUT /inventory/parts/{id}` acepta `assembly_category` y `specs` y, si no se envían, las conserva.
+`PUT /inventory/parts/{id}` acepta `assembly_category`, `specs` y `price_locked` y, si no se envían, los conserva.
+
+**Precios de ensamble:** precio de venta = costo × (1 + `organizations.assembly_margin_percent` / 100), redondeado hacia
+arriba al siguiente múltiplo de $1.000, salvo `price_locked`. Se recalcula al importar, al actualizar costos, al registrar
+una entrada de inventario y al cambiar el margen. `PartRead.unit_cost` (y el costo de los movimientos) es `null` para
+quien no tiene `inventory:manage`.
 
 ### Salud
 

@@ -57,7 +57,9 @@ class PartRead(BaseModel):
     sku: str
     name: str
     kind: PartKind
-    unit_cost: MoneyOut
+    unit_cost: MoneyOut | None = Field(
+        description="Solo para quien administra el inventario; null para los demás"
+    )
     sale_price: MoneyOut
     tax_rate: int
     price_includes_tax: bool
@@ -68,6 +70,7 @@ class PartRead(BaseModel):
     low_stock: bool
     assembly_category: AssemblyCategory | None = None
     specs: dict[str, Any] | None = None
+    price_locked: bool = False
 
 
 class PartWrite(BaseModel):
@@ -86,6 +89,11 @@ class PartWrite(BaseModel):
     )
     specs: dict[str, Any] | None = Field(
         default=None, description="Especificaciones técnicas de la categoría de ensamble"
+    )
+    price_locked: bool | None = Field(
+        default=None,
+        description="Piezas de ensamble: precio fijado a mano (si no, costo + margen); "
+        "si se omite, no se cambia",
     )
 
     _sku = field_validator("sku")(_sku)

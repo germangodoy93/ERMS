@@ -163,8 +163,10 @@ Code" (vigente solo hasta el 2026-12-01).
 El catálogo con precios **no está en el repositorio** (es público). El archivo se genera a partir
 del simulador del taller y se guarda en `data/private/catalogo-ensamble.json` (carpeta excluida
 de Git). Para cargarlo, en producción o en local: *Ensamble de PC → Importar catálogo* con un
-usuario administrador. La importación crea o actualiza por código (SKU) y nunca cambia
-existencias; se puede repetir cuando cambien los precios.
+usuario administrador. La importación crea o actualiza por código (SKU) con el **costo** del proveedor y nunca
+cambia existencias. El precio de venta es costo + margen (15 % por defecto, en *Datos del
+taller*). Para una lista nueva del proveedor: *Plantilla de costos* → cambiar la columna Costo
+en Excel → guardar como CSV → *Actualizar costos*.
 
 ### Servicio `Postgres`
 

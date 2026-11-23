@@ -13,6 +13,7 @@ from sqlalchemy import func, or_, select, text
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import BusinessRuleError, ConflictError, NotFoundError
+from app.modules.assembly.pricing import apply_price
 from app.modules.audit.service import AuditService
 from app.modules.inventory.models import (
     InventoryMovement,
@@ -30,6 +31,8 @@ from app.modules.inventory.schemas import (
     StockEntryRead,
     SupplierWrite,
 )
+from app.modules.organizations.models import Organization
+from app.modules.roles.catalog import Perm
 from app.modules.users.models import User
 from app.modules.users.repository import escape_like
 from app.modules.workorders.schemas import PersonRef
@@ -119,7 +122,8 @@ class InventoryService:
         if low_stock:
             query = query.where(func.coalesce(stock.c.quantity, 0) <= Part.min_stock)
         rows = self._session.execute(query.order_by(func.lower(Part.name)).limit(500)).all()
-        return [_part_read(part, quantity) for part, quantity in rows]
+        show = _sees_cost(actor)
+        return [_part_read(part, quantity, show_cost=show) for part, quantity in rows]
 
     def get_part(self, actor: User, part_id: uuid.UUID) -> Part:
         part = self._session.scalar(
@@ -131,7 +135,7 @@ class InventoryService:
 
     def read_part(self, actor: User, part_id: uuid.UUID) -> PartRead:
         part = self.get_part(actor, part_id)
-        return _part_read(part, self.stock_of(actor, part.id))
+        return _part_read(part, self.stock_of(actor, part.id), show_cost=_sees_cost(actor))
 
     def save_part(
         self,
@@ -153,12 +157,15 @@ class InventoryService:
             part = Part(organization_id=actor.organization_id)
             self._session.add(part)
         # The assembly fields are only touched when sent, so older clients keep the specs.
-        keep = {"assembly_category", "specs"} - data.model_fields_set
+        keep = {"assembly_category", "specs", "price_locked"} - data.model_fields_set
+        if data.price_locked is None:
+            keep.add("price_locked")
         for field, value in data.model_dump(exclude=keep).items():
             setattr(part, field, Decimal(value) if field == "tax_rate" else value)
+        apply_price(part, self._margin(actor))
         self._session.flush()
         self._record(actor, context, "inventory.part_saved", "part", part.id, {"sku": part.sku})
-        return _part_read(part, self.stock_of(actor, part.id))
+        return _part_read(part, self.stock_of(actor, part.id), show_cost=_sees_cost(actor))
 
     def stock_of(self, actor: User, part_id: uuid.UUID) -> int:
         branch = self._branch(actor)
@@ -201,6 +208,7 @@ class InventoryService:
                 reference=("stock_entry", entry.id),
             )
             part.unit_cost = line.unit_cost  # last purchase cost
+            apply_price(part, self._margin(actor))
             total += line.unit_cost * line.quantity
         self._record(
             actor,
@@ -242,7 +250,7 @@ class InventoryService:
                 "to": data.counted_quantity,
             },
         )
-        return _part_read(part, data.counted_quantity)
+        return _part_read(part, data.counted_quantity, show_cost=_sees_cost(actor))
 
     def consume(
         self, actor: User, part: Part, quantity: int, reference: tuple[str, uuid.UUID]
@@ -260,6 +268,7 @@ class InventoryService:
 
     def movements(self, actor: User, part_id: uuid.UUID) -> list[MovementRead]:
         part = self.get_part(actor, part_id)
+        show = _sees_cost(actor)
         rows = self._session.execute(
             select(InventoryMovement, User)
             .outerjoin(User, User.id == InventoryMovement.created_by_id)
@@ -273,7 +282,7 @@ class InventoryService:
                 kind=m.kind,
                 quantity=m.quantity,
                 stock_after=m.stock_after,
-                unit_cost=m.unit_cost,
+                unit_cost=m.unit_cost if show else None,
                 reference_type=m.reference_type,
                 reference_id=m.reference_id,
                 reference_label=self._reference_label(m),
@@ -285,6 +294,11 @@ class InventoryService:
         ]
 
     # --- Internals ----------------------------------------------------------------------
+
+    def _margin(self, actor: User) -> Decimal:
+        org = self._session.get(Organization, actor.organization_id)
+        assert org is not None  # noqa: S101 - the actor belongs to it
+        return org.assembly_margin_percent
 
     def _branch(self, actor: User) -> uuid.UUID:
         branch = default_branch(self._session, actor.organization_id)
@@ -392,13 +406,17 @@ class InventoryService:
         )
 
 
-def _part_read(part: Part, stock: int) -> PartRead:
+def _sees_cost(actor: User) -> bool:
+    return Perm.INVENTORY_MANAGE in actor.permission_codes
+
+
+def _part_read(part: Part, stock: int, *, show_cost: bool) -> PartRead:
     return PartRead(
         id=part.id,
         sku=part.sku,
         name=part.name,
         kind=part.kind,
-        unit_cost=part.unit_cost,
+        unit_cost=part.unit_cost if show_cost else None,
         sale_price=part.sale_price,
         tax_rate=int(part.tax_rate),
         price_includes_tax=part.price_includes_tax,
@@ -409,4 +427,5 @@ def _part_read(part: Part, stock: int) -> PartRead:
         low_stock=stock <= part.min_stock,
         assembly_category=part.assembly_category,
         specs=part.specs,
+        price_locked=part.price_locked,
     )

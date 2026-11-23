@@ -16,6 +16,7 @@ import {
   getCatalog,
   getChecklist,
   importCatalog,
+  uploadCosts,
   listBuilds,
   orderBuild,
   saveBuild,
@@ -85,6 +86,18 @@ export function useImportCatalog() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (items: CatalogImportItem[]) => importCatalog(items),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["assembly"] }),
+        queryClient.invalidateQueries({ queryKey: ["inventory"] }),
+      ]),
+  });
+}
+
+export function useUploadCosts() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => uploadCosts(file),
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ["assembly"] }),

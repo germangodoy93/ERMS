@@ -1,4 +1,4 @@
-import { Plus, Trash2, Upload } from "lucide-react";
+import { FileDown, FileSpreadsheet, Plus, Trash2, Upload } from "lucide-react";
 import { useRef } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
@@ -14,13 +14,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { saveBlob } from "@/lib/download";
 import { formatDateTime } from "@/lib/format";
 import { PERMS, useCan } from "@/modules/auth/permissions";
 import { formatMoney } from "@/modules/workorders/presentation";
 import { errorMessage } from "@/services/errors";
 import type { CatalogImportItem } from "@/types/api";
 
-import { useBuilds, useCatalog, useDeleteBuild, useImportCatalog } from "../hooks";
+import { downloadCostTemplate } from "../api";
+import { useBuilds, useCatalog, useDeleteBuild, useImportCatalog, useUploadCosts } from "../hooks";
 import { PROFILE_LABELS, parseCatalogFile } from "../presentation";
 
 export function AssemblyPage() {
@@ -30,6 +32,36 @@ export function AssemblyPage() {
   const importer = useImportCatalog();
   const canImport = useCan(PERMS.INVENTORY_MANAGE);
   const fileInput = useRef<HTMLInputElement>(null);
+  const costInput = useRef<HTMLInputElement>(null);
+  const costs = useUploadCosts();
+
+  const onTemplate = async () => {
+    try {
+      saveBlob(await downloadCostTemplate(), "costos-ensamble.csv");
+    } catch (e) {
+      toast.error(errorMessage(e));
+    }
+  };
+
+  const onCosts = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      const r = await costs.mutateAsync(file);
+      toast.success(
+        `Costos actualizados: ${r.updated} con cambio y ${r.unchanged} iguales. Los precios de venta se recalcularon con el margen.`,
+      );
+      if (r.unknown.length) {
+        toast.warning(
+          `${r.unknown.length} códigos no están en el catálogo: ${r.unknown.slice(0, 5).join(", ")}`,
+        );
+      }
+      if (r.errors.length) toast.error(r.errors.slice(0, 3).join(" "));
+    } catch (e) {
+      toast.error(errorMessage(e));
+    } finally {
+      if (costInput.current) costInput.current.value = "";
+    }
+  };
 
   const onFile = async (file: File | undefined) => {
     if (!file) return;
@@ -56,7 +88,8 @@ export function AssemblyPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Ensamble de PC</h1>
           <p className="text-muted-foreground text-sm">
             Configure equipos a la medida con validación de compatibilidad y cree la orden de
-            ensamble con su cotización.
+            ensamble con su cotización. Los precios de venta son el costo del proveedor más el
+            margen del taller, salvo los fijados a mano.
             {catalog.data && ` ${catalog.data.length} piezas en el catálogo.`}
           </p>
         </div>
@@ -77,6 +110,24 @@ export function AssemblyPage() {
                 onClick={() => fileInput.current?.click()}
               >
                 <Upload /> Importar catálogo
+              </Button>
+              <Button variant="outline" onClick={() => void onTemplate()}>
+                <FileDown /> Plantilla de costos
+              </Button>
+              <input
+                ref={costInput}
+                type="file"
+                accept=".csv,text/csv"
+                className="hidden"
+                aria-label="Archivo de costos"
+                onChange={(e) => void onCosts(e.target.files?.[0])}
+              />
+              <Button
+                variant="outline"
+                disabled={costs.isPending}
+                onClick={() => costInput.current?.click()}
+              >
+                <FileSpreadsheet /> Actualizar costos
               </Button>
             </>
           )}

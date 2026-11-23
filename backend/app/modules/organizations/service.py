@@ -1,15 +1,25 @@
+from decimal import Decimal
 from typing import Any
 
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import BusinessRuleError
+from app.modules.assembly.pricing import reprice_all
 from app.modules.audit.service import AuditService
 from app.modules.organizations.models import Organization
 from app.modules.organizations.schemas import OrganizationUpdate
 from app.modules.users.models import User
 from app.shared.context import RequestContext
 
-NOT_NULL = frozenset({"name", "warranty_days", "assembly_bottleneck_gap", "assembly_min_ram_gb"})
+NOT_NULL = frozenset(
+    {
+        "name",
+        "warranty_days",
+        "assembly_bottleneck_gap",
+        "assembly_min_ram_gb",
+        "assembly_margin_percent",
+    }
+)
 
 # Data of the "Responsable del tratamiento" that the privacy policy must state.
 REQUIRED_FOR_POLICY: dict[str, str] = {
@@ -51,8 +61,12 @@ class OrganizationService:
                     "son obligatorios."
                 )
             if getattr(organization, field) != value:
-                changes[field] = [getattr(organization, field), value]
+                changes[field] = [_plain(getattr(organization, field)), _plain(value)]
                 setattr(organization, field, value)
+        if "assembly_margin_percent" in changes:
+            changes["repriced_parts"] = reprice_all(
+                self._session, organization.id, organization.assembly_margin_percent
+            )
         if changes:
             self._audit.record(
                 "organization.updated",
@@ -64,3 +78,8 @@ class OrganizationService:
                 changes=changes,
             )
         return organization
+
+
+def _plain(value: Any) -> Any:
+    """Audit diffs are JSON: decimals become strings."""
+    return str(value) if isinstance(value, Decimal) else value

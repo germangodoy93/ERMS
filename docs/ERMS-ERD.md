@@ -45,7 +45,7 @@ erDiagram
 
 | Tabla | Sprint | Columnas clave | Restricciones |
 |---|---|---|---|
-| `organizations` | ✅ 0 · 2 | name, slug, tax_id (NIT), timezone, is_active; desde el Sprint 2: legal_name, address, city, phone, email (responsable del tratamiento); desde el Sprint 6: warranty_days (90 por defecto); desde E1: assembly_bottleneck_gap (25) y assembly_min_ram_gb (16) | `uq(slug)` |
+| `organizations` | ✅ 0 · 2 | name, slug, tax_id (NIT), timezone, is_active; desde el Sprint 2: legal_name, address, city, phone, email (responsable del tratamiento); desde el Sprint 6: warranty_days (90 por defecto); desde E1: assembly_bottleneck_gap (25), assembly_min_ram_gb (16) y, desde 0009, assembly_margin_percent (15) | `uq(slug)` |
 | `branches` | ✅ 1 | name, city, address, phone, is_active | `uq(organization_id, name)` |
 | `users` | ✅ 1 | email, full_name, phone, password_hash, must_change_password, is_active, failed_login_count, locked_until, last_login_at, password_changed_at | `uq(email)` **global**; `ck(email = lower(email))` |
 | `roles` | ✅ 1 | code (ADMIN, SUPERVISOR, TECHNICIAN, RECEPTIONIST), name, is_system | `uq(organization_id, code)` |
@@ -118,7 +118,7 @@ asignar (al moverla se le asigna).
 | Tabla | Sprint | Columnas clave | Restricciones |
 |---|---|---|---|
 | `suppliers` | ✅ 5 | name, tax_id (NIT), contact_name, phone, email, is_active | `uq(organization_id, name)` |
-| `parts` | ✅ 5 | sku, name, kind (PART, COMPONENT, ACCESSORY, CONSUMABLE), unit_cost, sale_price, tax_rate (0/19), price_includes_tax, min_stock, notes, is_active; desde E1: assembly_category (CPU, BOARD, RAM, GPU, STORAGE, PSU, CASE, COOLER, RGB) y specs JSONB validadas por categoría | `uq(organization_id, sku)` |
+| `parts` | ✅ 5 | sku, name, kind (PART, COMPONENT, ACCESSORY, CONSUMABLE), unit_cost, sale_price, tax_rate (0/19), price_includes_tax, min_stock, notes, is_active; desde E1: assembly_category (CPU, BOARD, RAM, GPU, STORAGE, PSU, CASE, COOLER, RGB) y specs JSONB validadas por categoría; desde 0009: price_locked (precio de venta fijado a mano) | `uq(organization_id, sku)` |
 | `stock_levels` | ✅ 5 | part_id, branch_id, quantity | `ck(quantity >= 0)`, `uq(part_id, branch_id)`; bloqueo de fila en cada movimiento |
 | `stock_entries` | ✅ 5 | branch_id, supplier_id, invoice_number, received_on, notes, created_by_id | Entrada simple (sin órdenes de compra, decisión del Sprint 5) |
 | `inventory_movements` | ✅ 5 | part_id, branch_id, kind (IN, OUT, ADJUSTMENT, RETURN), quantity con signo, stock_after, unit_cost, reference_type, reference_id, reason, created_by_id | solo inserción; `ck(stock_after >= 0)` |

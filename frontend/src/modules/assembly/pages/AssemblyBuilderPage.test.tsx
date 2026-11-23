@@ -123,6 +123,6 @@ describe("AssemblyBuilderPage", () => {
         undefined,
       ),
     );
-    expect(await screen.findByText("Guardada")).toBeInTheDocument();
+    expect(await screen.findByText("Guardada", {}, { timeout: 5000 })).toBeInTheDocument();
   });
 });

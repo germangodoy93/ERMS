@@ -10,6 +10,9 @@
   consumes all the parts from inventory in one step.
 """
 
+import csv
+import io
+import unicodedata
 import uuid
 from decimal import Decimal
 from typing import Any
@@ -27,6 +30,7 @@ from app.modules.assembly.catalog import (
     validate_specs,
 )
 from app.modules.assembly.models import AssemblyBuild, AssemblyBuildItem
+from app.modules.assembly.pricing import apply_price, parse_pesos
 from app.modules.assembly.rules import (
     Build,
     Evaluation,
@@ -45,6 +49,7 @@ from app.modules.assembly.schemas import (
     CatalogImport,
     CatalogImportResult,
     CatalogPart,
+    CostUpdateResult,
     EvaluateRequest,
     EvaluationOut,
     IssueOut,
@@ -67,10 +72,14 @@ from app.modules.workorders.models import WorkOrder
 from app.modules.workorders.schemas import PersonRef, WorkOrderCreate, WorkOrderRead
 from app.modules.workorders.service import WorkOrderService, may_work_on
 from app.shared.context import RequestContext
+from app.shared.spreadsheet import safe_cell
 
 ASSEMBLY_MANUFACTURER = "Ensamble del taller"
 ASSEMBLY_MODEL = "PC armada a la medida"
 ASSEMBLY_TASK = "Ensamble de PC a la medida"
+BOM = chr(0xFEFF)  # Excel needs it to read UTF-8 accents
+CRLF = chr(13) + chr(10)
+COST_HEADER = ["Código", "Nombre", "Categoría", "Costo", "Precio de venta", "Precio fijado a mano"]
 SINGLE: dict[AssemblyCategory, str] = {
     AssemblyCategory.CPU: "cpu",
     AssemblyCategory.BOARD: "board",
@@ -123,7 +132,8 @@ class AssemblyService:
     def import_catalog(
         self, actor: User, data: CatalogImport, context: RequestContext
     ) -> CatalogImportResult:
-        """Creates or updates parts by SKU. Prices include VAT (19 %); stock is not touched."""
+        """Creates or updates parts by SKU with the supplier cost (VAT included); the sale price
+        is cost + margin unless fixed by hand. Stock is not touched."""
         existing = {
             p.sku: p
             for p in self._session.scalars(
@@ -135,6 +145,7 @@ class AssemblyService:
         }
         created = updated = 0
         errors: list[str] = []
+        margin = self._margin(actor)
         for item in data.items:
             sku = item.sku.strip().upper().replace(" ", "-")
             try:
@@ -160,9 +171,10 @@ class AssemblyService:
             else:
                 updated += 1
             part.name = item.name.strip()
-            part.sale_price = item.sale_price
+            part.unit_cost = item.cost
             part.assembly_category = item.category.value
             part.specs = specs
+            apply_price(part, margin)
         self._session.flush()
         self._audit.record(
             "assembly.catalog_imported",
@@ -174,6 +186,96 @@ class AssemblyService:
             changes={"created": created, "updated": updated, "rejected": len(errors)},
         )
         return CatalogImportResult(created=created, updated=updated, errors=errors)
+
+    def cost_template(self, actor: User) -> bytes:
+        """CSV for Excel (UTF-8 with BOM, ";") with every assembly part and its current cost."""
+        rows = self._session.scalars(
+            select(Part)
+            .where(
+                Part.organization_id == actor.organization_id,
+                Part.assembly_category.is_not(None),
+            )
+            .order_by(Part.assembly_category, Part.name)
+        )
+        out = io.StringIO()
+        writer = csv.writer(out, delimiter=";", lineterminator=CRLF)
+        writer.writerow(COST_HEADER)
+        for p in rows:
+            writer.writerow(
+                [
+                    safe_cell(p.sku),
+                    safe_cell(p.name),
+                    CATEGORY_LABELS[AssemblyCategory(str(p.assembly_category))],
+                    f"{p.unit_cost:.0f}",
+                    f"{p.sale_price:.0f}",
+                    "Sí" if p.price_locked else "No",
+                ]
+            )
+        return (BOM + out.getvalue()).encode("utf-8")
+
+    def update_costs(
+        self, actor: User, content: bytes, context: RequestContext
+    ) -> CostUpdateResult:
+        """Reads "Código" and "Costo" from a CSV saved by Excel and updates the costs; the sale
+        prices follow the margin unless fixed by hand."""
+        rows = _read_csv(content)
+        if not rows:
+            raise BusinessRuleError("El archivo está vacío.")
+        header = [_norm(h) for h in rows[0]]
+        try:
+            code_col = next(i for i, h in enumerate(header) if h in ("codigo", "sku"))
+            cost_col = next(i for i, h in enumerate(header) if h in ("costo", "cost"))
+        except StopIteration:
+            raise BusinessRuleError(
+                "El archivo debe tener las columnas Código y Costo (use la plantilla)."
+            ) from None
+        parts = {
+            p.sku: p
+            for p in self._session.scalars(
+                select(Part).where(
+                    Part.organization_id == actor.organization_id,
+                    Part.assembly_category.is_not(None),
+                )
+            )
+        }
+        margin = self._margin(actor)
+        updated = unchanged = 0
+        unknown: list[str] = []
+        errors: list[str] = []
+        for number, row in enumerate(rows[1:], start=2):
+            if not any(cell.strip() for cell in row):
+                continue
+            code = row[code_col].strip().upper() if len(row) > code_col else ""
+            cost = parse_pesos(row[cost_col]) if len(row) > cost_col else None
+            if not code:
+                errors.append(f"Fila {number}: falta el código.")
+                continue
+            part = parts.get(code)
+            if part is None:
+                unknown.append(code)
+                continue
+            if cost is None or cost <= 0 or cost >= Decimal("1e12"):
+                errors.append(f"Fila {number} ({code}): costo inválido.")
+                continue
+            if part.unit_cost == cost:
+                unchanged += 1
+                continue
+            part.unit_cost = cost
+            apply_price(part, margin)
+            updated += 1
+        self._session.flush()
+        self._audit.record(
+            "assembly.costs_updated",
+            entity_type="part",
+            entity_id=None,
+            organization_id=actor.organization_id,
+            actor_user_id=actor.id,
+            context=context,
+            changes={"updated": updated, "unknown": len(unknown), "errors": len(errors)},
+        )
+        return CostUpdateResult(
+            updated=updated, unchanged=unchanged, unknown=unknown, errors=errors
+        )
 
     # --- Evaluation --------------------------------------------------------------------
     def evaluate(self, actor: User, data: EvaluateRequest) -> EvaluationOut:
@@ -404,6 +506,11 @@ class AssemblyService:
         return self.checklist(actor, order_id)
 
     # --- Helpers -----------------------------------------------------------------------
+    def _margin(self, actor: User) -> Decimal:
+        org = self._session.get(Organization, actor.organization_id)
+        assert org is not None  # noqa: S101 - the actor belongs to it
+        return org.assembly_margin_percent
+
     def _limits(self, actor: User) -> Thresholds:
         org = self._session.get(Organization, actor.organization_id)
         assert org is not None  # noqa: S101 - the actor belongs to it
@@ -626,3 +733,20 @@ def _selection(build: AssemblyBuild, session: Session) -> Selection:
         else:
             data[SINGLE[category]] = pid
     return Selection.model_validate(data)
+
+
+def _norm(text: str) -> str:
+    """Header names compared without accents, case or surrounding spaces."""
+    plain = unicodedata.normalize("NFKD", text.strip().lstrip(BOM).lower())
+    return "".join(ch for ch in plain if not unicodedata.combining(ch))
+
+
+def _read_csv(content: bytes) -> list[list[str]]:
+    """Excel in Spanish saves CSV as UTF-8 (with BOM) or Windows-1252, separated by ";" or ","."""
+    try:
+        text = content.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        text = content.decode("cp1252", errors="replace")
+    first = text.splitlines()[0] if text else ""
+    delimiter = ";" if first.count(";") >= first.count(",") else ","
+    return list(csv.reader(io.StringIO(text), delimiter=delimiter))

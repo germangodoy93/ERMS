@@ -42,6 +42,7 @@ from app.modules.workorders.models import WorkOrder
 from app.modules.workorders.schemas import PersonRef
 from app.shared.context import BOGOTA, utcnow
 from app.shared.money import ZERO, money
+from app.shared.spreadsheet import safe_cell
 
 MAX_RANGE_DAYS = 366
 OPEN = [s.value for s in Status if s is not Status.ENTREGADO]
@@ -481,22 +482,7 @@ def to_csv(report: Report) -> bytes:
     writer = csv.writer(buffer, delimiter=";")
     writer.writerow([f"{report.title} {report.date_from} a {report.date_to}"])
     writer.writerow(report.columns)
-    writer.writerows([_safe_cell(v) for v in row] for row in report.rows)
+    writer.writerows([safe_cell(v) for v in row] for row in report.rows)
     writer.writerow([])
-    writer.writerows([_safe_cell(v) for v in row] for row in report.summary)
+    writer.writerows([safe_cell(v) for v in row] for row in report.summary)
     return ("\ufeff" + buffer.getvalue()).encode("utf-8")
-
-
-FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
-
-
-def _safe_cell(value: object) -> str:
-    """Prevents CSV formula injection: text that starts like a formula is quoted. Numbers
-    (including negative ones) are left as they are."""
-    text = "" if value is None else str(value)
-    if text.startswith(FORMULA_PREFIXES):
-        try:
-            Decimal(text)
-        except ArithmeticError:
-            return "'" + text
-    return text

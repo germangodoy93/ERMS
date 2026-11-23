@@ -1,8 +1,9 @@
 """Organizations (tenant boundary) and their branches (sedes)."""
 
 import uuid
+from decimal import Decimal
 
-from sqlalchemy import Boolean, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKey, Integer, Numeric, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.shared.models import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -30,6 +31,9 @@ class Organization(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     assembly_min_ram_gb: Mapped[int] = mapped_column(
         Integer, nullable=False, default=16, server_default="16"
+    )
+    assembly_margin_percent: Mapped[Decimal] = mapped_column(
+        Numeric(5, 2), nullable=False, default=Decimal("15"), server_default="15"
     )
     timezone: Mapped[str] = mapped_column(
         String(64), nullable=False, default="America/Bogota", server_default="America/Bogota"

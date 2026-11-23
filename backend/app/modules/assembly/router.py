@@ -1,8 +1,9 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Response, UploadFile, status
 
+from app.core.exceptions import BusinessRuleError
 from app.core.storage import Storage, get_storage
 from app.modules.assembly.schemas import (
     AssemblyChecklist,
@@ -12,6 +13,7 @@ from app.modules.assembly.schemas import (
     CatalogImport,
     CatalogImportResult,
     CatalogPart,
+    CostUpdateResult,
     EvaluateRequest,
     EvaluationOut,
     OrderRequest,
@@ -57,6 +59,39 @@ def import_catalog(
     body: CatalogImport, actor: Importer, service: Service, context: Context
 ) -> CatalogImportResult:
     return service.import_catalog(actor, body, context)
+
+
+MAX_COST_FILE = 2 * 1024 * 1024
+
+
+@router.get(
+    "/catalog/costs.csv",
+    response_class=Response,
+    summary="Plantilla de costos para Excel (código, nombre, costo, precio de venta)",
+)
+def cost_template(actor: Importer, service: Service) -> Response:
+    return Response(
+        content=service.cost_template(actor),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="costos-ensamble.csv"'},
+    )
+
+
+@router.post(
+    "/catalog/costs",
+    response_model=CostUpdateResult,
+    summary="Actualizar costos desde la plantilla guardada en Excel (CSV)",
+)
+async def update_costs(
+    actor: Importer,
+    service: Service,
+    context: Context,
+    file: UploadFile,
+) -> CostUpdateResult:
+    content = await file.read(MAX_COST_FILE + 1)
+    if len(content) > MAX_COST_FILE:
+        raise BusinessRuleError("El archivo supera 2 MB.")
+    return service.update_costs(actor, content, context)
 
 
 @router.post(
