@@ -110,3 +110,13 @@ def test_storage_health_check(s3: Any, tmp_path: Any) -> None:
     assert ok.critical is False
     down = StorageCheck(S3Storage(_settings(s3_bucket="no-existe"), client=s3)).run()
     assert down.status is ComponentStatus.ERROR
+    assert down.detail is not None
+    assert "HTTP 404" in down.detail
+    assert "test-secret" not in down.detail
+
+
+def test_pasted_values_are_trimmed() -> None:
+    settings = _settings(s3_secret_access_key="test-secret\n", s3_endpoint=" https://e.test ")
+    assert settings.s3_endpoint == "https://e.test"
+    assert settings.s3_secret_access_key is not None
+    assert settings.s3_secret_access_key.get_secret_value() == "test-secret"

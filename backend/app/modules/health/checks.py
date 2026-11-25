@@ -151,14 +151,14 @@ class StorageCheck:
         start = time.perf_counter()
         try:
             self._storage.ping()
-        except StorageError:
-            logger.warning("Storage health check failed")
+        except StorageError as exc:
+            logger.warning("Storage health check failed", extra={"error": str(exc)})
             return ComponentHealth(
                 name=self.name,
                 status=ComponentStatus.ERROR,
                 critical=self.critical,
                 latency_ms=_elapsed_ms(start),
-                detail="No fue posible conectar con el bucket de fotos.",
+                detail=f"No fue posible conectar con el bucket de fotos ({exc}).",
             )
         return ComponentHealth(
             name=self.name,

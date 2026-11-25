@@ -136,6 +136,14 @@ class Settings(BaseSettings):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
 
+    @field_validator(
+        "s3_bucket", "s3_endpoint", "s3_access_key_id", "s3_secret_access_key", mode="before"
+    )
+    @classmethod
+    def _strip_pasted(cls, value: object) -> object:
+        """Values pasted in a dashboard often carry a trailing space or newline."""
+        return value.strip() if isinstance(value, str) else value
+
     @model_validator(mode="after")
     def _complete_s3(self) -> Self:
         """S3 is all or nothing: half a configuration would silently fall back to demo mode."""

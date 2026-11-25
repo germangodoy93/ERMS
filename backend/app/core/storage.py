@@ -87,6 +87,10 @@ class S3Storage:
             aws_secret_access_key=settings.s3_secret_access_key.get_secret_value(),
             config=Config(
                 s3={"addressing_style": settings.s3_addressing_style},
+                # boto3 >= 1.36 adds CRC checksums by default; several S3-compatible
+                # services reject them, so only send them when the operation requires it.
+                request_checksum_calculation="when_required",
+                response_checksum_validation="when_required",
                 connect_timeout=5,
                 read_timeout=20,
                 retries={"max_attempts": 3, "mode": "standard"},
@@ -120,11 +124,19 @@ class S3Storage:
             raise StorageError("Could not delete the file") from exc
 
     def ping(self) -> None:
-        """Raises StorageError if the bucket cannot be reached with these credentials."""
+        """Raises StorageError if the bucket cannot be reached with these credentials.
+
+        The message carries only the S3 error code or the exception class (never values),
+        so it can be shown in the health check to diagnose the configuration.
+        """
         try:
             self._client.head_bucket(Bucket=self._bucket)
-        except (BotoCoreError, ClientError) as exc:
-            raise StorageError("Bucket not reachable") from exc
+        except ClientError as exc:
+            error = exc.response.get("Error", {})
+            status = exc.response.get("ResponseMetadata", {}).get("HTTPStatusCode")
+            raise StorageError(f"S3 {error.get('Code') or '?'} (HTTP {status})") from exc
+        except BotoCoreError as exc:
+            raise StorageError(type(exc).__name__) from exc
 
 
 @lru_cache
