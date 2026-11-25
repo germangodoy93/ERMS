@@ -8,7 +8,7 @@ from enum import StrEnum
 from functools import lru_cache
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, SecretStr, field_validator, model_validator
+from pydantic import Field, SecretStr, ValidationError, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -139,12 +139,23 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _complete_s3(self) -> Self:
         """S3 is all or nothing: half a configuration would silently fall back to demo mode."""
-        values = (self.s3_bucket, self.s3_endpoint, self.s3_access_key_id)
-        given = [*values, self.s3_secret_access_key]
-        if any(given) and not all(given):
+        secret = self.s3_secret_access_key
+        given = {
+            "S3_BUCKET": self.s3_bucket,
+            "S3_ENDPOINT": self.s3_endpoint,
+            "S3_ACCESS_KEY_ID": self.s3_access_key_id,
+            "S3_SECRET_ACCESS_KEY": secret.get_secret_value() if secret else None,
+        }
+        missing = [name for name, value in given.items() if not (value or "").strip()]
+        if len(missing) == len(given):
+            # All empty: demo mode. Normalize "" (e.g. an unresolved reference) to None.
+            self.s3_bucket = self.s3_endpoint = self.s3_access_key_id = None
+            self.s3_secret_access_key = None
+        elif missing:
+            # Only names, never values: this message ends up in the deploy logs.
             raise ValueError(
                 "S3 storage needs S3_BUCKET, S3_ENDPOINT, S3_ACCESS_KEY_ID and "
-                "S3_SECRET_ACCESS_KEY together"
+                f"S3_SECRET_ACCESS_KEY together; empty or missing: {', '.join(missing)}"
             )
         return self
 
@@ -163,6 +174,19 @@ class Settings(BaseSettings):
         return self.is_production
 
 
+class ConfigurationError(RuntimeError):
+    """Invalid environment. The message names fields and reasons, never values."""
+
+
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()  # values come from the environment
+    try:
+        return Settings()  # values come from the environment
+    except ValidationError as exc:
+        # Pydantic's message quotes the input (secrets included) and would land in the
+        # deploy logs, so only the field names and reasons are reported.
+        problems = "; ".join(
+            f"{'.'.join(str(part) for part in error['loc']) or 'settings'}: {error['msg']}"
+            for error in exc.errors(include_input=False, include_url=False)
+        )
+        raise ConfigurationError(f"Invalid configuration: {problems}") from None

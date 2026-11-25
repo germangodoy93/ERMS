@@ -79,7 +79,13 @@ def test_s3_requires_configuration() -> None:
 def test_s3_settings_are_all_or_nothing() -> None:
     with pytest.raises(ValidationError, match="S3_BUCKET"):
         Settings(database_url=DB, s3_bucket=BUCKET)
+    with pytest.raises(ValidationError, match="empty or missing: S3_ENDPOINT"):
+        _settings(s3_endpoint=" ")
     assert not Settings(database_url=DB).uses_s3
+    blank = Settings(
+        database_url=DB, s3_bucket="", s3_endpoint="", s3_access_key_id="", s3_secret_access_key=""
+    )
+    assert not blank.uses_s3
     assert _settings().uses_s3
 
 

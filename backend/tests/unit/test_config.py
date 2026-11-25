@@ -24,3 +24,34 @@ def test_cors_origins_accept_comma_separated_env(monkeypatch: pytest.MonkeyPatch
 def test_is_production() -> None:
     settings = Settings(database_url="postgresql://u:p@h/db", environment=Environment.PRODUCTION)
     assert settings.is_production
+
+
+@pytest.mark.parametrize(
+    ("env", "secret", "named"),
+    [
+        ({"JWT_SECRET": "short-secret-value"}, "short-secret-value", "jwt_secret"),
+        (
+            {"S3_BUCKET": "photos", "S3_SECRET_ACCESS_KEY": "SUPERSECRETVALUE"},
+            "SUPERSECRETVALUE",
+            "S3_ENDPOINT",
+        ),
+    ],
+)
+def test_invalid_configuration_never_reveals_values(
+    monkeypatch: pytest.MonkeyPatch, env: dict[str, str], secret: str, named: str
+) -> None:
+    from app.core.config import ConfigurationError, get_settings
+
+    for name, value in env.items():
+        monkeypatch.setenv(name, value)
+    get_settings.cache_clear()
+    try:
+        with pytest.raises(ConfigurationError) as caught:
+            get_settings()
+    finally:
+        get_settings.cache_clear()
+    message = str(caught.value)
+    assert named in message
+    assert secret not in message
+    assert caught.value.__cause__ is None
+    assert caught.value.__suppress_context__
