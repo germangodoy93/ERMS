@@ -103,7 +103,7 @@ class S3Storage:
                 Bucket=self._bucket, Key=_check_key(key), Body=data, ContentType="image/jpeg"
             )
         except (BotoCoreError, ClientError) as exc:
-            raise StorageError("Could not store the file") from exc
+            raise StorageError(f"Could not store the file: {_describe(exc)}") from exc
 
     def get(self, key: str) -> bytes:
         try:
@@ -112,16 +112,16 @@ class S3Storage:
         except ClientError as exc:
             if exc.response.get("Error", {}).get("Code") in _MISSING:
                 raise StorageError("File not found") from exc
-            raise StorageError("Could not read the file") from exc
+            raise StorageError(f"Could not read the file: {_describe(exc)}") from exc
         except BotoCoreError as exc:
-            raise StorageError("Could not read the file") from exc
+            raise StorageError(f"Could not read the file: {_describe(exc)}") from exc
         return body
 
     def delete(self, key: str) -> None:
         try:
             self._client.delete_object(Bucket=self._bucket, Key=_check_key(key))
         except (BotoCoreError, ClientError) as exc:
-            raise StorageError("Could not delete the file") from exc
+            raise StorageError(f"Could not delete the file: {_describe(exc)}") from exc
 
     def ping(self) -> None:
         """Raises StorageError if the bucket cannot be reached with these credentials.
@@ -131,12 +131,17 @@ class S3Storage:
         """
         try:
             self._client.head_bucket(Bucket=self._bucket)
-        except ClientError as exc:
-            error = exc.response.get("Error", {})
-            status = exc.response.get("ResponseMetadata", {}).get("HTTPStatusCode")
-            raise StorageError(f"S3 {error.get('Code') or '?'} (HTTP {status})") from exc
-        except BotoCoreError as exc:
-            raise StorageError(type(exc).__name__) from exc
+        except (BotoCoreError, ClientError) as exc:
+            raise StorageError(_describe(exc)) from exc
+
+
+def _describe(exc: Exception) -> str:
+    """S3 error code and HTTP status, or the exception class. Never values or secrets."""
+    if isinstance(exc, ClientError):
+        error = exc.response.get("Error", {})
+        status = exc.response.get("ResponseMetadata", {}).get("HTTPStatusCode")
+        return f"S3 {error.get('Code') or '?'} (HTTP {status})"
+    return type(exc).__name__
 
 
 @lru_cache

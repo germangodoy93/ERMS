@@ -6,6 +6,7 @@ location), fixes the orientation, limits the size and proves the file is a real 
 
 import hashlib
 import io
+import logging
 import uuid
 import warnings
 
@@ -16,6 +17,8 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import BusinessRuleError, NotFoundError, ServiceUnavailableError
 from app.core.storage import Storage, StorageError
 from app.modules.attachments.models import Attachment
+
+logger = logging.getLogger(__name__)
 
 ACCEPTED_FORMATS = frozenset({"JPEG", "PNG", "WEBP"})
 MAX_PIXELS = 50_000_000  # rejects decompression bombs well before memory becomes an issue
@@ -127,6 +130,7 @@ class AttachmentService:
         try:
             self._storage.put(key, clean)
         except StorageError as exc:
+            logger.warning("Photo upload failed", extra={"error": str(exc)})
             raise ServiceUnavailableError(
                 "No fue posible guardar la foto. Intente de nuevo en un momento."
             ) from exc
@@ -150,6 +154,7 @@ class AttachmentService:
         try:
             self._storage.delete(attachment.storage_key)
         except StorageError as exc:
+            logger.warning("Photo deletion failed", extra={"error": str(exc)})
             raise ServiceUnavailableError(
                 "No fue posible eliminar la foto. Intente de nuevo en un momento."
             ) from exc
