@@ -142,7 +142,7 @@ taller está obligado (responsabilidades 52, 48 o 47; ver la investigación del 
 | Puesto | Sprint | Contenido |
 |---|---|---|
 | 1 | Ensamble de equipos | PM-03 ✅ (E1: configurador y venta; E2: 3D, RGB y setup) |
-| 2 | Bases operativas | Almacenamiento definitivo de fotos y proveedor de correo (hoy las fotos están en modo demostración y la recuperación de contraseña no envía correos en producción) |
+| 2 | Fotos guardadas | Almacenamiento definitivo de fotos (hoy están en modo demostración y se pierden en cada despliegue) |
 | 3 | Avisos al cliente por WhatsApp | Fase A sin costo: botón que abre WhatsApp con el mensaje listo (enlace `wa.me`), enviado por el asesor. Fase B: envío automático con la API oficial de WhatsApp Cloud (plantillas de utilidad, cerca de USD 0,0008 por mensaje en Colombia; requiere número dedicado y verificación del negocio en Meta) |
 | 4 | Atención remota, en sitio y recogida | PM-04 |
 | 5 | Agente v2 – mantenimiento | PM-01 |
@@ -152,6 +152,7 @@ taller está obligado (responsabilidades 52, 48 o 47; ver la investigación del 
 | 9 | IA por fotos | PM-02 (requiere el puesto 2: fotos guardadas) |
 | 10 | Android | Diagnóstico por ADB |
 | 11 | Crecimiento | Órdenes de compra (R-08), varias sedes con RLS, Celery y Redis |
+| 12 | Correo electrónico | Proveedor por API HTTPS (Railway bloquea SMTP en Free/Trial/Hobby): recuperación de contraseña, bienvenida de usuarios y correo de prueba. Requiere decidir Resend (dominio propio) o Brevo. Movido al final por decisión del dueño (2026-11-25) |
 
 | ID | Historia | Criterios de aceptación propuestos |
 |---|---|---|
