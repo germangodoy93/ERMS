@@ -51,7 +51,7 @@ Prioridad: **P1** imprescindible para el MVP · **P2** importante · **P3** dese
 | S3-04 | Como técnico o recepcionista, quiero mover la orden por sus estados | Máquina de estados con permisos por estado, motivos obligatorios, propiedad del técnico, historial de solo inserción | ✅ |
 | S3-05 | Como supervisor o recepcionista, quiero asignar técnicos | Solo usuarios activos con permiso técnico | ✅ |
 | S3-06 | Como recepcionista, quiero registrar la entrega | Quién retira (titular o tercero con documento); la orden queda cerrada | ✅ |
-| S3-07 | Como técnico, quiero fotografiar el equipo | Solo con autorización de fotos; sin metadatos GPS; **modo demostración** hasta elegir proveedor | ✅ (demo) |
+| S3-07 | Como técnico, quiero fotografiar el equipo | Solo con autorización de fotos; sin metadatos GPS; **modo demostración** hasta elegir proveedor | ✅ (fotos guardadas en el bucket desde el sprint 2 posterior al MVP, ADR-053) |
 | S3-08 | Como usuario, quiero ver y buscar las órdenes | Vistas: abiertas, mías, sin asignar, esperando al cliente, listas, todas; búsqueda por número, cliente, IMEI, serial o modelo | ✅ |
 
 **Aplazado:** Celery + Redis (sin trabajo en segundo plano que lo justifique todavía; ADR-022) y
@@ -142,7 +142,7 @@ taller está obligado (responsabilidades 52, 48 o 47; ver la investigación del 
 | Puesto | Sprint | Contenido |
 |---|---|---|
 | 1 | Ensamble de equipos | PM-03 ✅ (E1: configurador y venta; E2: 3D, RGB y setup) |
-| 2 | Fotos guardadas | Almacenamiento definitivo de fotos (hoy están en modo demostración y se pierden en cada despliegue) |
+| 2 | Fotos guardadas | Bucket privado de Railway (S3), ADR-053 — programado; falta verificar en producción |
 | 3 | Avisos al cliente por WhatsApp | Fase A sin costo: botón que abre WhatsApp con el mensaje listo (enlace `wa.me`), enviado por el asesor. Fase B: envío automático con la API oficial de WhatsApp Cloud (plantillas de utilidad, cerca de USD 0,0008 por mensaje en Colombia; requiere número dedicado y verificación del negocio en Meta) |
 | 4 | Atención remota, en sitio y recogida | PM-04 |
 | 5 | Agente v2 – mantenimiento | PM-01 |

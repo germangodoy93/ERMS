@@ -85,7 +85,7 @@ def test_token_of_another_type_is_rejected(settings: Settings) -> None:
 
 
 def test_unsigned_token_is_rejected(settings: Settings) -> None:
-    token = jwt.encode({"sub": "x"}, key=None, algorithm="none")
+    token = jwt.encode({"sub": "x"}, key="", algorithm="none")
     with pytest.raises(InvalidAccessTokenError):
         decode_access_token(settings, token)
 

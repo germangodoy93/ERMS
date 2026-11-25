@@ -222,9 +222,9 @@ taller; el serial es único por modelo (409 con el nombre del propietario actual
 | `POST /work-orders/{id}/delivery` | `work_orders:deliver` | 200: `{picked_up_by_customer, name?, document?, notes?}` |
 | `GET /work-orders/{id}/reception-act.pdf` | `work_orders:read` | 200 `application/pdf` (descarga) |
 | `GET /work-orders/{id}/photos` | `work_orders:read` | 200 `{demo, max_photos, items[]}` |
-| `POST /work-orders/{id}/photos` | `work_orders:create` o `progress` | 201: `multipart/form-data` con `file` (JPG, PNG o WEBP; máx. 10 MB) |
+| `POST /work-orders/{id}/photos` | `work_orders:create` o `progress` | 201: `multipart/form-data` con `file` (JPG, PNG o WEBP; máx. 10 MB). 503 si el bucket no responde (no se guarda nada) |
 | `GET /work-orders/{id}/photos/{photo_id}` | `work_orders:read` | 200 `image/jpeg` |
-| `DELETE /work-orders/{id}/photos/{photo_id}` | `work_orders:create` o `progress` | 204 |
+| `DELETE /work-orders/{id}/photos/{photo_id}` | `work_orders:create` o `progress` | 204. 503 si el bucket no responde (la foto se conserva) |
 
 ```json
 // POST /work-orders

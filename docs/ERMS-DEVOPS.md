@@ -89,7 +89,9 @@ verificadas el 2026-11-19:
 | `REFRESH_COOKIE_SECURE` | No | Por defecto `true` solo en producción |
 | `FRONTEND_URL` | Sí en producción | Base de los enlaces enviados por correo (p. ej. el dominio de `web` en Railway) |
 | `SMTP_HOST` · `SMTP_PORT` · `SMTP_USERNAME` · `SMTP_PASSWORD` · `SMTP_STARTTLS` · `SMTP_FROM` | Para recuperar contraseñas | Sin `SMTP_HOST` no se envían correos: se registra el intento sin el enlace. |
-| `ATTACHMENTS_DIR` | No | Carpeta del almacenamiento local de fotos (por defecto `var/attachments`). En Railway es efímera: **modo demostración**. |
+| `S3_BUCKET` · `S3_ENDPOINT` · `S3_ACCESS_KEY_ID` · `S3_SECRET_ACCESS_KEY` | Para guardar fotos | Bucket de Railway (ADR-053). Van juntas: si falta una, la API no arranca. En Railway se referencian desde el bucket: `${{Bucket.BUCKET}}`, `${{Bucket.ENDPOINT}}`, `${{Bucket.ACCESS_KEY_ID}}`, `${{Bucket.SECRET_ACCESS_KEY}}`. |
+| `S3_REGION` · `S3_ADDRESSING_STYLE` | No | `auto` · `virtual` (usar `path` solo si la pestaña *Credentials* del bucket lo indica) |
+| `ATTACHMENTS_DIR` | No | Sin `S3_*`: carpeta local de fotos (por defecto `var/attachments`). En Railway es efímera: **modo demostración**. |
 | `ATTACHMENT_MAX_BYTES` · `ATTACHMENT_MAX_PER_ORDER` | No | 10 MB · 20 |
 | `AGENT_DOWNLOAD_URL` | No | Descarga del agente (por defecto, el último release de GitHub) |
 | `AGENT_PAIRING_MINUTES` · `AGENT_TOKEN_MINUTES` | No | 30 · 15 |

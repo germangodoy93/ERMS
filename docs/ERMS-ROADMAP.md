@@ -18,7 +18,8 @@ Celery pueden pasar al Sprint 4 si la capacidad es baja.
 
 ## Después del MVP
 
-- Proveedor de correo (p. ej. Brevo) y almacenamiento definitivo de fotos.
+- ✅ Almacenamiento definitivo de fotos: bucket privado de Railway (ADR-053).
+- Proveedor de correo por API HTTPS (último puesto del backlog).
 - Celery y Redis cuando haya trabajo largo (correos masivos, reportes pesados).
 - Agente v2 – mantenimiento: antivirus (Microsoft Defender) y limpieza del sistema con
   autorización y confirmación explícitas (PM-01 en el backlog).

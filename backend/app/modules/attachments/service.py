@@ -13,7 +13,7 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import BusinessRuleError, NotFoundError
+from app.core.exceptions import BusinessRuleError, NotFoundError, ServiceUnavailableError
 from app.core.storage import Storage, StorageError
 from app.modules.attachments.models import Attachment
 
@@ -122,22 +122,37 @@ class AttachmentService:
         self._session.add(attachment)
         self._session.flush()
         # Written after the row is valid; if the transaction later fails, an orphan file may
-        # remain, which is harmless (never served without its row).
-        self._storage.put(key, clean)
+        # remain, which is harmless (never served without its row). If the upload fails the
+        # error rolls the row back.
+        try:
+            self._storage.put(key, clean)
+        except StorageError as exc:
+            raise ServiceUnavailableError(
+                "No fue posible guardar la foto. Intente de nuevo en un momento."
+            ) from exc
         return attachment
 
     def content(self, attachment: Attachment) -> bytes:
         try:
             return self._storage.get(attachment.storage_key)
         except StorageError as exc:
-            raise NotFoundError(
-                "El archivo ya no está disponible (almacenamiento de demostración)."
-            ) from exc
+            if self._storage.demo:
+                raise NotFoundError(
+                    "El archivo ya no está disponible (almacenamiento de demostración)."
+                ) from exc
+            raise NotFoundError("El archivo no está disponible.") from exc
 
     def delete(self, attachment: Attachment) -> None:
         self._session.delete(attachment)
         self._session.flush()
-        self._storage.delete(attachment.storage_key)
+        # The photo belongs to the customer: if it cannot be removed from storage the row
+        # is kept (the error rolls back) so the deletion can be retried.
+        try:
+            self._storage.delete(attachment.storage_key)
+        except StorageError as exc:
+            raise ServiceUnavailableError(
+                "No fue posible eliminar la foto. Intente de nuevo en un momento."
+            ) from exc
 
 
 def _safe_name(name: str) -> str:

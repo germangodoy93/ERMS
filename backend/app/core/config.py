@@ -6,9 +6,9 @@ git-ignored `.env` file. See `.env.example` at the repository root.
 
 from enum import StrEnum
 from functools import lru_cache
-from typing import Annotated
+from typing import Annotated, Literal, Self
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -84,11 +84,22 @@ class Settings(BaseSettings):
     smtp_starttls: bool = True
     smtp_from: str = "ERMS <no-reply@erms.local>"
 
-    # --- Attachments (Sprint 3, demo mode) -------------------------------------
-    # Only the "local" backend exists for now: files go to the server disk. On Railway that
-    # disk is ephemeral, so the UI labels photos as a demo until a provider is chosen.
+    # --- Attachments (ADR-023) ----------------------------------------------------------
+    # With the S3_* variables set (a Railway bucket in production) photos are durable.
+    # Without them files go to the server disk, which Railway erases on every deploy, so
+    # the UI labels photos as a demo.
     attachments_dir: str = Field(
         default="var/attachments", description="Directory for the local storage backend."
+    )
+    s3_bucket: str | None = Field(default=None, description="S3 bucket name (Railway: BUCKET).")
+    s3_endpoint: str | None = Field(
+        default=None, description="S3 endpoint URL (Railway: ENDPOINT)."
+    )
+    s3_region: str = Field(default="auto", description="S3 region (Railway: REGION).")
+    s3_access_key_id: str | None = None
+    s3_secret_access_key: SecretStr | None = None
+    s3_addressing_style: Literal["virtual", "path"] = Field(
+        default="virtual", description="Railway buckets use virtual-hosted style."
     )
     attachment_max_bytes: int = Field(default=10 * 1024 * 1024, ge=1024)
     attachment_max_per_order: int = Field(default=20, ge=1, le=100)
@@ -124,6 +135,22 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
+
+    @model_validator(mode="after")
+    def _complete_s3(self) -> Self:
+        """S3 is all or nothing: half a configuration would silently fall back to demo mode."""
+        values = (self.s3_bucket, self.s3_endpoint, self.s3_access_key_id)
+        given = [*values, self.s3_secret_access_key]
+        if any(given) and not all(given):
+            raise ValueError(
+                "S3 storage needs S3_BUCKET, S3_ENDPOINT, S3_ACCESS_KEY_ID and "
+                "S3_SECRET_ACCESS_KEY together"
+            )
+        return self
+
+    @property
+    def uses_s3(self) -> bool:
+        return self.s3_bucket is not None
 
     @property
     def is_production(self) -> bool:

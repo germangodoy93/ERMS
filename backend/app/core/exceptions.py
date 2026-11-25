@@ -83,6 +83,14 @@ class BusinessRuleError(AppError):
     title = "Operación no permitida"
 
 
+class ServiceUnavailableError(AppError):
+    """An external service (e.g. file storage) failed; the action can be retried."""
+
+    status_code = HTTPStatus.SERVICE_UNAVAILABLE
+    code = "service_unavailable"
+    title = "Servicio no disponible"
+
+
 def problem_response(
     request: Request,
     *,

@@ -5,6 +5,7 @@ description = "ERMS – Electronic Repair Management System: API backend"
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "alembic>=1.20.1",
+    "boto3>=1.44.12",
     "email-validator>=2.4.0",
     "fastapi>=0.165.0",
     "psycopg[binary]>=3.3.9",
@@ -50,6 +51,11 @@ exclude = ["alembic/versions"]
 module = ["reportlab.*"]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+# boto3/botocore ship no type hints; only app/core/storage.py uses them (and its tests).
+module = ["boto3.*", "botocore.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
@@ -70,6 +76,7 @@ branch = true
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
+    "moto[s3]>=5.2.6",
     "mypy>=2.4.1",
     "pytest>=9.2.0",
     "pytest-cov>=7.1.0",

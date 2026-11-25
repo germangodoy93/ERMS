@@ -16,6 +16,7 @@ from redis.exceptions import RedisError
 from sqlalchemy import Engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.core.storage import S3Storage, Storage, StorageError
 from app.modules.health.schemas import ComponentHealth, ComponentStatus
 
 logger = logging.getLogger(__name__)
@@ -127,4 +128,42 @@ class RedisCheck:
             critical=self.critical,
             latency_ms=_elapsed_ms(start),
             detail="Redis disponible",
+        )
+
+
+class StorageCheck:
+    """File storage for photos. Not critical: the rest of the workshop keeps working."""
+
+    name = "storage"
+    critical = False
+
+    def __init__(self, storage: Storage) -> None:
+        self._storage = storage
+
+    def run(self) -> ComponentHealth:
+        if not isinstance(self._storage, S3Storage):
+            return ComponentHealth(
+                name=self.name,
+                status=ComponentStatus.NOT_CONFIGURED,
+                critical=self.critical,
+                detail="Fotos en modo demostración (disco del servidor; S3_* no configurado).",
+            )
+        start = time.perf_counter()
+        try:
+            self._storage.ping()
+        except StorageError:
+            logger.warning("Storage health check failed")
+            return ComponentHealth(
+                name=self.name,
+                status=ComponentStatus.ERROR,
+                critical=self.critical,
+                latency_ms=_elapsed_ms(start),
+                detail="No fue posible conectar con el bucket de fotos.",
+            )
+        return ComponentHealth(
+            name=self.name,
+            status=ComponentStatus.OK,
+            critical=self.critical,
+            latency_ms=_elapsed_ms(start),
+            detail="Bucket de fotos disponible",
         )

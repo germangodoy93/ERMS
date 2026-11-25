@@ -196,6 +196,17 @@ cuarto con escritorio recto y en L, y la orden con la placa en la mesa; sin erro
 En jsdom (pruebas unitarias) no hay WebGL y el configurador usa la vista 2D, igual que el
 simulador.
 
+## 12. Pruebas del Sprint 2 posterior al MVP (fotos guardadas)
+
+El bucket se simula con `moto`. `backend/tests/unit/test_storage.py`: ida y vuelta en S3, tipo
+`image/jpeg`, claves inseguras rechazadas, errores de S3 convertidos en `StorageError`,
+configuración `S3_*` todo o nada, selección automática del almacenamiento y chequeo de salud
+(`storage`: no crítico; OK, ERROR o sin configurar). `backend/tests/integration/test_photo_storage_s3.py`:
+la foto queda en el bucket con su clave por organización/orden, la API la sirve igual y
+`demo` es falso; borrarla elimina el objeto; una subida fallida responde 503 sin dejar fila;
+un borrado fallido responde 503 y conserva la foto. En producción: subir una foto, volver a
+desplegar y comprobar que sigue disponible.
+
 **Windows:** si la terminal abre la carpeta como `c:\...` (minúscula), Vitest carga dos copias de
 sí mismo y las pruebas de interfaz fallan con `Invalid Chai property: toBeInTheDocument`.
 Ejecute las pruebas desde una terminal en `C:\...` (ver ERMS-DEVOPS).
