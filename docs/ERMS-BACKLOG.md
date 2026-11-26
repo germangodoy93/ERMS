@@ -124,6 +124,22 @@ de pago y almacenamiento definitivo; sus resultados serán `AI_SUGGESTION`, nunc
 | W-03 | Como administrador, quiero ajustar los mensajes | Textos editables en Datos del taller con campos `{cliente}`, `{orden}`, `{saldo}`…; validación de campos; restaurar el original | ✅ |
 | W-04 | Como dueño, quiero saber qué se le dijo al cliente | Cada aviso preparado queda en la orden (texto, quién y cuándo) y en la auditoría; permiso `customers:notify` para administrador, supervisor y recepción | ✅ |
 
+## Sprint R1 – Agenda remota y en sitio (puesto 4, PM-04 parte 1)
+
+PM-04 se divide en R1 (agenda), R2 (ejecución de la visita y la sesión remota), R3 (cobro por
+etapas) y R4 (recogida y envío). Decisiones del dueño (2026-11-26): el catálogo empieza con
+"Visita técnica" (en sitio se hace el diagnóstico y se sigue el proceso normal de la orden) y el
+horario de servicio es independiente del horario del taller.
+
+| ID | Historia | Criterios de aceptación | Estado |
+|---|---|---|---|
+| R1-01 | Como asesor, quiero agendar una visita o una atención remota | Cliente, servicio, fecha, hora, duración, técnico, motivo; dirección y localidad en sitio; número `CT-`; solo dentro del horario, sin festivos ni fechas pasadas | ✅ |
+| R1-02 | Como asesor, quiero que ERMS me avise si el técnico ya tiene otra cita | Aviso con la cita en conflicto; se puede agendar de todas formas con una razón escrita, que queda en la cita | ✅ |
+| R1-03 | Como taller, quiero ver la agenda por día y por semana | Página "Agenda" con horario y festivos de cada día, filtro por técnico, canceladas opcionales; el técnico ve solo las suyas | ✅ |
+| R1-04 | Como asesor, quiero mover o cancelar una cita | Mover, cambiar técnico o datos con las mismas reglas; cancelar con motivo | ✅ |
+| R1-05 | Como dueño, quiero definir los servicios y el horario | Catálogo con precio opcional e IVA 0/19 %, activo o no; horario por día independiente del taller | ✅ |
+| R1-06 | Como cliente, quiero autorizar el acceso remoto | Texto de autorización guardado con la cita y el medio (pantalla, papel o verbal); el código de la sesión nunca se guarda | ✅ |
+
 ## Requerimientos detectados
 
 Las historias se detallan en la planificación de cada sprint, a partir de los módulos 2 – 11
@@ -153,7 +169,7 @@ taller está obligado (responsabilidades 52, 48 o 47; ver la investigación del 
 | 1 | Ensamble de equipos | PM-03 ✅ (E1: configurador y venta; E2: 3D, RGB y setup) |
 | 2 | Fotos guardadas | ✅ Bucket privado de Railway (S3), ADR-053; verificado en producción el 2026-11-26 |
 | 3 | Avisos al cliente por WhatsApp | Fase A ✅ (sprint W; falta verificar en producción). Fase A sin costo: botón que abre WhatsApp con el mensaje listo (enlace `wa.me`), enviado por el asesor. Fase B en lista de espera (PM-07): envío automático con la API oficial de WhatsApp Cloud (plantillas de utilidad, cerca de USD 0,0009 por mensaje en Colombia; mismo número con coexistencia o número nuevo; requiere verificación del negocio en Meta) |
-| 4 | Atención remota, en sitio y recogida | PM-04 |
+| 4 | Atención remota, en sitio y recogida | PM-04. R1 agenda ✅ (falta verificar en producción); siguen R2 ejecución, R3 cobro y R4 recogida y envío |
 | 5 | Agente v2 – mantenimiento | PM-01 |
 | 6 | Asistente virtual en el chat de la landing | PM-05 |
 | 7 | Campañas publicitarias (provisional) | PM-06 |

@@ -6058,6 +6058,597 @@
           }
         }
       }
+    },
+    "/api/v1/appointments/options": {
+      "get": {
+        "tags": [
+          "appointments"
+        ],
+        "summary": "Datos para agendar",
+        "operationId": "get_options_api_v1_appointments_options_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgendaOptions"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/appointments/holidays": {
+      "get": {
+        "tags": [
+          "appointments"
+        ],
+        "summary": "Festivos de Colombia",
+        "operationId": "get_holidays_api_v1_appointments_holidays_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HolidayRead"
+                  },
+                  "title": "Response Get Holidays Api V1 Appointments Holidays Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appointments/hours": {
+      "get": {
+        "tags": [
+          "appointments"
+        ],
+        "summary": "Horario de servicio remoto y en sitio",
+        "operationId": "get_hours_api_v1_appointments_hours_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HoursRead"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "appointments"
+        ],
+        "summary": "Cambiar el horario de servicio",
+        "operationId": "save_hours_api_v1_appointments_hours_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HoursUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HoursRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/appointments/services": {
+      "get": {
+        "tags": [
+          "appointments"
+        ],
+        "summary": "Catálogo de servicios",
+        "operationId": "list_services_api_v1_appointments_services_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FieldServiceRead"
+                  },
+                  "type": "array",
+                  "title": "Response List Services Api V1 Appointments Services Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "appointments"
+        ],
+        "summary": "Crear un servicio",
+        "operationId": "create_service_api_v1_appointments_services_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FieldServiceWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldServiceRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/appointments/services/{service_id}": {
+      "put": {
+        "tags": [
+          "appointments"
+        ],
+        "summary": "Editar un servicio",
+        "operationId": "update_service_api_v1_appointments_services__service_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Service Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FieldServiceWrite"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldServiceRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appointments": {
+      "get": {
+        "tags": [
+          "appointments"
+        ],
+        "summary": "Citas en un rango de fechas",
+        "operationId": "list_appointments_api_v1_appointments_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "To"
+            }
+          },
+          {
+            "name": "technician_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Technician Id"
+            }
+          },
+          {
+            "name": "include_cancelled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Cancelled"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppointmentRead"
+                  },
+                  "title": "Response List Appointments Api V1 Appointments Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "appointments"
+        ],
+        "summary": "Agendar una cita remota o en sitio",
+        "operationId": "create_appointment_api_v1_appointments_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentRead"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El técnico ya tiene otra cita (`appointment_overlap`)"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appointments/{appointment_id}": {
+      "get": {
+        "tags": [
+          "appointments"
+        ],
+        "summary": "Detalle de una cita",
+        "operationId": "get_appointment_api_v1_appointments__appointment_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "appointment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Appointment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "appointments"
+        ],
+        "summary": "Mover, reasignar o corregir una cita",
+        "operationId": "update_appointment_api_v1_appointments__appointment_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "appointment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Appointment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentRead"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El técnico ya tiene otra cita (`appointment_overlap`)"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appointments/{appointment_id}/cancel": {
+      "post": {
+        "tags": [
+          "appointments"
+        ],
+        "summary": "Cancelar una cita",
+        "operationId": "cancel_appointment_api_v1_appointments__appointment_id__cancel_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "appointment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Appointment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentCancel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -6123,6 +6714,58 @@
         ],
         "title": "AdjustmentCreate",
         "description": "Physical count: the new quantity on the shelf, with the reason of the difference."
+      },
+      "AgendaOptions": {
+        "properties": {
+          "hours": {
+            "items": {
+              "$ref": "#/components/schemas/HoursDay"
+            },
+            "type": "array",
+            "title": "Hours"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/FieldServiceRead"
+            },
+            "type": "array",
+            "title": "Services",
+            "description": "Servicios activos"
+          },
+          "technicians": {
+            "items": {
+              "$ref": "#/components/schemas/PersonRef"
+            },
+            "type": "array",
+            "title": "Technicians"
+          },
+          "localities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Localities"
+          },
+          "remote_access_text": {
+            "type": "string",
+            "title": "Remote Access Text"
+          },
+          "can_manage": {
+            "type": "boolean",
+            "title": "Can Manage",
+            "description": "El usuario puede agendar, mover y cancelar citas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hours",
+          "services",
+          "technicians",
+          "localities",
+          "remote_access_text",
+          "can_manage"
+        ],
+        "title": "AgendaOptions"
       },
       "AgentReport": {
         "properties": {
@@ -6279,6 +6922,450 @@
           "channel"
         ],
         "title": "AnonymizeRequest"
+      },
+      "AppointmentCancel": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "AppointmentCancel"
+      },
+      "AppointmentCreate": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Customer Id"
+          },
+          "service_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Service Id"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "multipleOf": 5.0,
+                "maximum": 480.0,
+                "minimum": 15.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Minutes",
+            "description": "Por defecto, la duración del servicio"
+          },
+          "technician_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Technician Id"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 5,
+            "title": "Reason",
+            "description": "Qué necesita el cliente"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "locality": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locality"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "overlap_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overlap Reason",
+            "description": "Obligatorio si el técnico ya tiene otra cita"
+          },
+          "remote_consent_channel": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsentChannel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Obligatorio en las citas remotas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "service_id",
+          "starts_at",
+          "reason"
+        ],
+        "title": "AppointmentCreate"
+      },
+      "AppointmentRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "number": {
+            "type": "string",
+            "title": "Number"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AppointmentStatus"
+          },
+          "modality": {
+            "$ref": "#/components/schemas/Modality"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/CustomerSummary"
+          },
+          "service": {
+            "$ref": "#/components/schemas/ServiceRef"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ends At"
+          },
+          "duration_minutes": {
+            "type": "integer",
+            "title": "Duration Minutes"
+          },
+          "technician": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "locality": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locality"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "overlap_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overlap Reason"
+          },
+          "remote_consent_channel": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsentChannel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "remote_consent_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remote Consent Text"
+          },
+          "remote_consent_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remote Consent At"
+          },
+          "cancel_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancel Reason"
+          },
+          "cancelled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancelled At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "status",
+          "modality",
+          "customer",
+          "service",
+          "starts_at",
+          "ends_at",
+          "duration_minutes",
+          "technician",
+          "reason",
+          "address",
+          "locality",
+          "notes",
+          "overlap_reason",
+          "remote_consent_channel",
+          "remote_consent_text",
+          "remote_consent_at",
+          "cancel_reason",
+          "cancelled_at",
+          "created_by",
+          "created_at"
+        ],
+        "title": "AppointmentRead"
+      },
+      "AppointmentStatus": {
+        "type": "string",
+        "enum": [
+          "SCHEDULED",
+          "CANCELLED"
+        ],
+        "title": "AppointmentStatus"
+      },
+      "AppointmentUpdate": {
+        "properties": {
+          "starts_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "multipleOf": 5.0,
+                "maximum": 480.0,
+                "minimum": 15.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Minutes"
+          },
+          "technician_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Technician Id"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000,
+                "minLength": 5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "locality": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locality"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "overlap_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overlap Reason"
+          }
+        },
+        "type": "object",
+        "title": "AppointmentUpdate",
+        "description": "Only the fields present are changed (reschedule, reassign, correct the data)."
       },
       "AssemblyCategory": {
         "type": "string",
@@ -9232,6 +10319,144 @@
         ],
         "title": "EvaluationOut"
       },
+      "FieldServiceRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "modality": {
+            "$ref": "#/components/schemas/Modality"
+          },
+          "duration_minutes": {
+            "type": "integer",
+            "title": "Duration Minutes"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price",
+            "description": "Vacío: el precio se da tras el diagnóstico"
+          },
+          "tax_rate": {
+            "type": "integer",
+            "title": "Tax Rate"
+          },
+          "price_includes_tax": {
+            "type": "boolean",
+            "title": "Price Includes Tax"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "modality",
+          "duration_minutes",
+          "price",
+          "tax_rate",
+          "price_includes_tax",
+          "description",
+          "is_active"
+        ],
+        "title": "FieldServiceRead"
+      },
+      "FieldServiceWrite": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 3,
+            "title": "Name"
+          },
+          "modality": {
+            "$ref": "#/components/schemas/Modality"
+          },
+          "duration_minutes": {
+            "type": "integer",
+            "multipleOf": 5.0,
+            "maximum": 480.0,
+            "minimum": 15.0,
+            "title": "Duration Minutes"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "tax_rate": {
+            "type": "integer",
+            "title": "Tax Rate",
+            "description": "0 o 19 (IVA)",
+            "default": 0
+          },
+          "price_includes_tax": {
+            "type": "boolean",
+            "title": "Price Includes Tax",
+            "default": false
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "modality",
+          "duration_minutes"
+        ],
+        "title": "FieldServiceWrite"
+      },
       "ForgotPasswordRequest": {
         "properties": {
           "email": {
@@ -9300,6 +10525,108 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HolidayRead": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "name"
+        ],
+        "title": "HolidayRead"
+      },
+      "HoursDay": {
+        "properties": {
+          "weekday": {
+            "type": "integer",
+            "maximum": 6.0,
+            "minimum": 0.0,
+            "title": "Weekday",
+            "description": "0 = lunes … 6 = domingo"
+          },
+          "opens": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opens",
+            "description": "Vacío: no hay servicio ese día"
+          },
+          "closes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "weekday",
+          "opens",
+          "closes"
+        ],
+        "title": "HoursDay"
+      },
+      "HoursRead": {
+        "properties": {
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/HoursDay"
+            },
+            "type": "array",
+            "title": "Days"
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default",
+            "description": "True mientras el taller no ha cambiado el horario"
+          }
+        },
+        "type": "object",
+        "required": [
+          "days",
+          "is_default"
+        ],
+        "title": "HoursRead"
+      },
+      "HoursUpdate": {
+        "properties": {
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/HoursDay"
+            },
+            "type": "array",
+            "maxItems": 7,
+            "minItems": 7,
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "days"
+        ],
+        "title": "HoursUpdate"
       },
       "IdType": {
         "type": "string",
@@ -9587,6 +10914,14 @@
           "amount"
         ],
         "title": "MethodTotal"
+      },
+      "Modality": {
+        "type": "string",
+        "enum": [
+          "REMOTE",
+          "ON_SITE"
+        ],
+        "title": "Modality"
       },
       "MovementRead": {
         "properties": {
@@ -12398,6 +13733,47 @@
         },
         "type": "object",
         "title": "Selection"
+      },
+      "ServiceRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "tax_rate": {
+            "type": "integer",
+            "title": "Tax Rate"
+          },
+          "price_includes_tax": {
+            "type": "boolean",
+            "title": "Price Includes Tax"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "price",
+          "tax_rate",
+          "price_includes_tax"
+        ],
+        "title": "ServiceRef"
       },
       "SmartInfo": {
         "properties": {

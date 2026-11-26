@@ -414,6 +414,23 @@ ERMS arma el mensaje y el enlace `https://wa.me/<celular>?text=<mensaje>`; el as
 Campos: `{cliente}`, `{orden}`, `{equipo}`, `{taller}`, `{telefono_taller}`, `{direccion_taller}`, `{falla}`, `{total}`,
 `{saldo}`, `{diagnostico}`, `{fecha_estimada}`, `{motivo}`, `{dias_listo}`, `{garantia_dias}`, `{garantia_hasta}`.
 
+### Agenda remota y en sitio (`/appointments`, PM-04 sprint R1)
+
+Citas fuera del taller (ADR-055). Fechas con zona horaria; se validan en hora de Bogotá: dentro del
+horario de servicio del día, el mismo día, nunca en festivo ni en el pasado.
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET /appointments/options` | `work_orders:read` | 200 `{hours[], services[] (activos), technicians[], localities[], remote_access_text, can_manage}` |
+| `GET /appointments/holidays?from&to` | `work_orders:read` | 200 `[{date, name}]` festivos de Colombia (máximo 62 días) |
+| `GET /appointments?from&to&technician_id&include_cancelled` | `work_orders:read` | 200 citas del rango; el técnico sin `appointments:manage` ni `work_orders:assign` solo ve las suyas |
+| `POST /appointments` | `work_orders:read` + `appointments:manage` | 201 cita. 422 fuera de horario, festivo, pasado, sin dirección (en sitio) o sin autorización (remota). 409 `appointment_overlap` si el técnico ya tiene otra cita (con `errors[]` de las citas); se agenda enviando `overlap_reason` |
+| `GET /appointments/{id}` | `work_orders:read` | 200; 403 si es de otro técnico |
+| `PATCH /appointments/{id}` | `work_orders:read` + `appointments:manage` | Mover, cambiar duración, técnico o datos; mismas reglas y 409 |
+| `POST /appointments/{id}/cancel` | `work_orders:read` + `appointments:manage` | `{reason}`; la hora queda libre |
+| `GET/PUT /appointments/hours` | lectura `work_orders:read`; cambio `organization:manage` | `{days[7]{weekday, opens, closes}}`; vacío = sin servicio |
+| `GET /appointments/services` · `POST` · `PUT /{id}` | lectura `work_orders:read`; cambios `organization:manage` | Catálogo `{name, modality, duration_minutes, price?, tax_rate (0/19), price_includes_tax, description, is_active}`; 409 nombre repetido |
+
 ### Salud
 
 ### `GET /api/v1/health/live`

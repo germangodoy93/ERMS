@@ -45,7 +45,7 @@ erDiagram
 
 | Tabla | Sprint | Columnas clave | Restricciones |
 |---|---|---|---|
-| `organizations` | ✅ 0 · 2 | name, slug, tax_id (NIT), timezone, is_active; desde el Sprint 2: legal_name, address, city, phone, email (responsable del tratamiento); desde el Sprint 6: warranty_days (90 por defecto); desde E1: assembly_bottleneck_gap (25), assembly_min_ram_gb (16) y, desde 0009, assembly_margin_percent (15) | `uq(slug)` |
+| `organizations` | ✅ 0 · 2 | name, slug, tax_id (NIT), timezone, is_active; desde el Sprint 2: legal_name, address, city, phone, email (responsable del tratamiento); desde el Sprint 6: warranty_days (90 por defecto); desde E1: assembly_bottleneck_gap (25), assembly_min_ram_gb (16) y, desde 0009, assembly_margin_percent (15); desde 0012: field_service_hours (JSONB; vacío = horario por defecto de la agenda) | `uq(slug)` |
 | `branches` | ✅ 1 | name, city, address, phone, is_active | `uq(organization_id, name)` |
 | `users` | ✅ 1 | email, full_name, phone, password_hash, must_change_password, is_active, failed_login_count, locked_until, last_login_at, password_changed_at | `uq(email)` **global**; `ck(email = lower(email))` |
 | `roles` | ✅ 1 | code (ADMIN, SUPERVISOR, TECHNICIAN, RECEPTIONIST), name, is_system | `uq(organization_id, code)` |
@@ -133,6 +133,8 @@ asignar (al moverla se le asigna).
 | `assembly_builds` | ✅ E1 · E2 | name, profile (OFFICE, DESIGN, GAMING), status (DRAFT, ORDERED), ram_units (1-4), desk_shape (STRAIGHT, L), pc_position (AUTO, DESK, FLOOR), labor_price, notes, work_order_id, steps_done JSONB, created_by_id | `uq(work_order_id)`; ORDERED ⇔ tiene orden |
 | `assembly_build_items` | ✅ E1 | build_id, part_id | La categoría sale del repuesto; la RAM usa `ram_units` |
 | `notice_templates` | ✅ Avisos | organization_id, kind, body, updated_by_id, updated_at | PK `(organization_id, kind)`; solo los textos que el taller cambió (los demás usan el texto por defecto del código) |
+| `field_services` | ✅ R1 | name, modality (REMOTE, ON_SITE), duration_minutes (15-480), price (vacío = según el diagnóstico), tax_rate (0, 19), price_includes_tax, description, is_active | `uq(organization_id, name)`; cada taller empieza con "Visita técnica" |
+| `appointments` | ✅ R1 | number (`CT-AAAA-NNNNNN`), customer_id, service_id, modality, status (SCHEDULED, CANCELLED), starts_at, ends_at, technician_id, reason, address, locality, notes, overlap_reason, remote_consent_channel/text/at, cancel_reason, cancelled_at, created_by_id | `uq(organization_id, number)`; índices `(organization_id, starts_at)` y `(technician_id, starts_at)`; en sitio exige dirección y localidad; remota exige la autorización de acceso; cancelada exige motivo |
 | `work_order_notices` | ✅ Avisos | work_order_id, kind (RECEIVED, QUOTE_READY, READY, NOT_REPAIRED, REMINDER, DELIVERED, FREE), phone, body, prepared_by_id, prepared_at | Índice `(work_order_id, prepared_at)`; registro de avisos *preparados* por WhatsApp |
 
 **Transacción de consumo de repuestos (Sprint 5):** en una sola transacción se ejecuta

@@ -24,7 +24,7 @@ Celery pueden pasar al Sprint 4 si la capacidad es baja.
 - Agente v2 – mantenimiento: antivirus (Microsoft Defender) y limpieza del sistema con
   autorización y confirmación explícitas (PM-01 en el backlog).
 - Atención remota (Quick Assist), en sitio y recogida/envío, con agenda y cobro por etapas
-  (PM-04), después de los avisos por WhatsApp.
+  (PM-04): ✅ R1 agenda con horario propio, festivos y aviso de cruce (2026-11-26, ADR-055). Siguen R2 ejecución, R3 cobro y R4 recogida y envío.
 - Ensamble de equipos de escritorio (PM-03): ✅ E1 configurador, compatibilidad, cuellos de
   botella, orden de ensamble y lista de chequeo (2026-11-23). ✅ E2 visor 3D, iluminación RGB, modo Setup y 3D en la lista de chequeo (2026-11-23).
 - Asistente virtual de IA en el chat de la landing (PM-05): orienta al cliente, da rangos de

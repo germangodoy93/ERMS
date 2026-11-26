@@ -221,6 +221,22 @@ permisos (el técnico ve pero no prepara) y aislamiento entre talleres. Frontend
 `notices.test.tsx` (aviso sugerido, mensaje editado, enlace y QR; fijo; permisos; tarjeta "Por
 avisar"). E2E: al quedar listo para entrega, el flujo prepara el aviso y verifica el enlace y el QR.
 
+## 14. Pruebas del sprint R1 (agenda remota y en sitio, PM-04)
+
+`backend/tests/unit/test_appointments.py`: festivos de 2026 iguales al calendario oficial, Pascua
+de varios años, traslados al lunes en 2027; horario por defecto y guardado; reglas de hora (dentro
+del horario, sábado hasta mediodía, domingo sin servicio, festivo, mismo día, hora UTC leída en
+Bogotá); validaciones de entrada. `backend/tests/integration/test_appointments_api.py`: "Visita
+técnica" y horario por defecto en un taller nuevo; cita en sitio con número `CT-`, duración del
+servicio y auditoría sin texto libre; dirección obligatoria, fuera de horario, domingo, festivo y
+pasado rechazados; remota exige autorización; cruce 409 con la cita en conflicto, citas seguidas
+sin cruce y razón escrita para agendar; mover, reasignar, cancelar (motivo obligatorio, cancelada
+no editable, la hora queda libre); el técnico solo ve sus citas y no agenda; catálogo y horario
+solo los cambia el administrador; rangos limitados y aislamiento entre talleres. Frontend:
+`presentation.test.ts` (fechas en Bogotá, semanas desde el lunes, formularios) y `agenda.test.tsx`
+(semana con horario y festivos, detalle, permisos, razón del cruce). E2E `agenda.spec.ts`: agenda una
+visita, la ve en la semana y la cancela.
+
 **Windows:** si la terminal abre la carpeta como `c:\...` (minúscula), Vitest carga dos copias de
 sí mismo y las pruebas de interfaz fallan con `Invalid Chai property: toBeInTheDocument`.
 Ejecute las pruebas desde una terminal en `C:\...` (ver ERMS-DEVOPS).
