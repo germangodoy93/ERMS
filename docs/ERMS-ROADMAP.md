@@ -34,5 +34,6 @@ Celery pueden pasar al Sprint 4 si la capacidad es baja.
 - Adaptador Android (ADB) y adaptador Linux.
 - Capa de IA con proveedor real, base de conocimiento y patrones de fallas.
 - Facturación electrónica DIAN mediante proveedor autorizado.
-- Notificaciones al cliente (WhatsApp/SMS/correo).
+- ✅ Avisos al cliente por WhatsApp, fase A (enlace y QR, ADR-054). Pendiente: fase B con la API
+  oficial (envío automático) y avisos por correo.
 - Múltiples sedes en operación y RLS de PostgreSQL.

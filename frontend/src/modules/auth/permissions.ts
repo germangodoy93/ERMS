@@ -28,6 +28,7 @@ export const PERMS = {
   REPORTS_READ: "reports:read",
   WARRANTIES_MANAGE: "warranties:manage",
   ASSEMBLY_MANAGE: "assembly:manage",
+  CUSTOMERS_NOTIFY: "customers:notify",
 } as const;
 
 export type PermissionCode = (typeof PERMS)[keyof typeof PERMS];

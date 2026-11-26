@@ -115,6 +115,15 @@ de pago y almacenamiento definitivo; sus resultados serán `AI_SUGGESTION`, nunc
 | E2-04 | Como técnico, quiero ver el armado en 3D | En la orden, el modelo muestra cada pieza al marcar su paso (placa en la mesa hasta montarla) | ✅ |
 | E2-05 | Como dueño, quiero que los detalles visuales sean datos | `specs.style` (colores, RGB, ventiladores, marca) cargado desde el simulador y editable por importación | ✅ |
 
+## Sprint W – Avisos al cliente por WhatsApp (puesto 3, fase A)
+
+| ID | Historia | Criterios de aceptación | Estado |
+|---|---|---|---|
+| W-01 | Como asesor, quiero avisar al cliente por WhatsApp sin escribir el mensaje | Botón en la orden; aviso sugerido según el estado con los datos de la orden; editable; abre WhatsApp con el chat y el mensaje (enlace `wa.me`) o muestra un QR para el celular del taller; solo celulares | ✅ |
+| W-02 | Como asesor, quiero saber a quién debo avisar | Tarjeta "Por avisar" en el inicio: cotización enviada, equipo listo, no reparado o cancelado, y recordatorio cada 7 días si no lo han retirado | ✅ |
+| W-03 | Como administrador, quiero ajustar los mensajes | Textos editables en Datos del taller con campos `{cliente}`, `{orden}`, `{saldo}`…; validación de campos; restaurar el original | ✅ |
+| W-04 | Como dueño, quiero saber qué se le dijo al cliente | Cada aviso preparado queda en la orden (texto, quién y cuándo) y en la auditoría; permiso `customers:notify` para administrador, supervisor y recepción | ✅ |
+
 ## Requerimientos detectados
 
 Las historias se detallan en la planificación de cada sprint, a partir de los módulos 2 – 11
@@ -143,7 +152,7 @@ taller está obligado (responsabilidades 52, 48 o 47; ver la investigación del 
 |---|---|---|
 | 1 | Ensamble de equipos | PM-03 ✅ (E1: configurador y venta; E2: 3D, RGB y setup) |
 | 2 | Fotos guardadas | ✅ Bucket privado de Railway (S3), ADR-053; verificado en producción el 2026-11-26 |
-| 3 | Avisos al cliente por WhatsApp | Fase A sin costo: botón que abre WhatsApp con el mensaje listo (enlace `wa.me`), enviado por el asesor. Fase B: envío automático con la API oficial de WhatsApp Cloud (plantillas de utilidad, cerca de USD 0,0008 por mensaje en Colombia; requiere número dedicado y verificación del negocio en Meta) |
+| 3 | Avisos al cliente por WhatsApp | Fase A ✅ (sprint W; falta verificar en producción). Fase A sin costo: botón que abre WhatsApp con el mensaje listo (enlace `wa.me`), enviado por el asesor. Fase B: envío automático con la API oficial de WhatsApp Cloud (plantillas de utilidad, cerca de USD 0,0008 por mensaje en Colombia; requiere número dedicado y verificación del negocio en Meta) |
 | 4 | Atención remota, en sitio y recogida | PM-04 |
 | 5 | Agente v2 – mantenimiento | PM-01 |
 | 6 | Asistente virtual en el chat de la landing | PM-05 |

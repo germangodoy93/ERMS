@@ -11,9 +11,9 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 
 from app.modules.organizations.models import Organization
 from app.modules.reports.schemas import Report
-from app.modules.reports.service import format_money
 from app.modules.workorders.pdf import CENTER, LABEL, SECTION, SMALL, TITLE, _grid, _p
 from app.shared.context import BOGOTA, utcnow
+from app.shared.money import format_money
 
 
 def money_label(value: object) -> str:

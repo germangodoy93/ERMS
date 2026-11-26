@@ -207,6 +207,20 @@ la foto queda en el bucket con su clave por organización/orden, la API la sirve
 un borrado fallido responde 503 y conserva la foto. En producción (2026-11-26): chequeo `storage` en OK, foto subida desde una orden y todavía
 disponible tras volver a desplegar el backend.
 
+## 13. Pruebas del sprint 3 posterior al MVP (avisos por WhatsApp)
+
+`backend/tests/unit/test_notices.py`: los textos por defecto son válidos y completos; campos
+inexistentes, con formato o con llaves sueltas se rechazan; los valores nunca se vuelven a
+formatear; celular sí, fijo no; el enlace `wa.me` codifica todo el mensaje (tildes, `&`, `#`,
+saltos de línea); sugerencia por estado (recepción y entrega nunca pendientes; cotización
+pendiente hasta un aviso posterior al envío; equipo listo y recordatorio cada 7 días; no reparado
+o cancelado cuenta el aviso dado antes de quedar listo). `backend/tests/integration/test_notices_api.py`:
+borradores con los datos de la orden, enlace y registro en la orden y en la auditoría, fijo
+rechazado, pendientes y recordatorio, motivo de "no reparable", edición y restauración de textos,
+permisos (el técnico ve pero no prepara) y aislamiento entre talleres. Frontend:
+`notices.test.tsx` (aviso sugerido, mensaje editado, enlace y QR; fijo; permisos; tarjeta "Por
+avisar"). E2E: al quedar listo para entrega, el flujo prepara el aviso y verifica el enlace y el QR.
+
 **Windows:** si la terminal abre la carpeta como `c:\...` (minúscula), Vitest carga dos copias de
 sí mismo y las pruebas de interfaz fallan con `Invalid Chai property: toBeInTheDocument`.
 Ejecute las pruebas desde una terminal en `C:\...` (ver ERMS-DEVOPS).

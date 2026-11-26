@@ -11,6 +11,7 @@ from app.modules.customers import models as customers_models
 from app.modules.devices import models as devices_models
 from app.modules.diagnostics import models as diagnostics_models
 from app.modules.inventory import models as inventory_models
+from app.modules.notices import models as notices_models
 from app.modules.organizations import models as organizations_models
 from app.modules.payments import models as payments_models
 from app.modules.privacy import models as privacy_models
@@ -32,6 +33,7 @@ __all__ = [
     "devices_models",
     "diagnostics_models",
     "inventory_models",
+    "notices_models",
     "organizations_models",
     "payments_models",
     "privacy_models",

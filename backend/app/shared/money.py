@@ -17,6 +17,13 @@ def money(value: Decimal | int | str) -> Decimal:
     return Decimal(value).quantize(CENT, rounding=ROUND_HALF_UP)
 
 
+def format_money(value: Decimal) -> str:
+    """Colombian format: $ 1.234.567 (cents only when there are any)."""
+    integer, _, cents = f"{money(value):,.2f}".partition(".")
+    text = integer.replace(",", ".")
+    return f"$ {text}" if cents == "00" else f"$ {text},{cents}"
+
+
 @dataclass(frozen=True, slots=True)
 class LineAmounts:
     gross: Decimal  # quantity * unit price, as entered

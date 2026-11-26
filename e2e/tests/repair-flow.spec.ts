@@ -140,6 +140,20 @@ test("reception → diagnostic → quote → repair → QC → payment → deliv
   await save(page, page.getByRole("button", { name: "Registrar control de calidad" }));
   await transition(page, "Marcar listo para entrega", "Listo para entrega");
 
+  // --- WhatsApp notice: suggested, prepared and turned into a wa.me link. ----------------
+  await expect(page.getByText("Aviso pendiente:")).toBeVisible();
+  await page.getByRole("button", { name: /Avisar por WhatsApp/ }).click();
+  dialog = page.getByRole("dialog");
+  await expect(dialog.getByLabel("Mensaje")).toHaveValue(new RegExp(orderNumber));
+  await save(page, dialog.getByRole("button", { name: /Preparar mensaje/ }));
+  await expect(dialog.getByRole("link", { name: /Abrir WhatsApp aquí/ })).toHaveAttribute(
+    "href",
+    /^https:\/\/wa\.me\/573001234567\?text=/,
+  );
+  await expect(dialog.getByAltText(/Código QR/)).toBeVisible();
+  await dialog.getByRole("button", { name: "Listo" }).click();
+  await expect(page.getByText("Aviso pendiente:")).toBeHidden();
+
   // --- Payment of the balance and delivery with a 30-day warranty. -----------------------
   // The panels refetch after the status change and the payment form remounts with the new
   // balance: wait until everything settled before paying (cash is the default method).

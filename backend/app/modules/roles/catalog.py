@@ -41,6 +41,7 @@ class Perm(StrEnum):
     REPORTS_READ = "reports:read"
     WARRANTIES_MANAGE = "warranties:manage"
     ASSEMBLY_MANAGE = "assembly:manage"
+    CUSTOMERS_NOTIFY = "customers:notify"
 
 
 PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
@@ -69,6 +70,7 @@ PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
     Perm.REPORTS_READ: "Consultar el tablero del taller y los reportes",
     Perm.WARRANTIES_MANAGE: "Abrir y resolver reclamos de garantía",
     Perm.ASSEMBLY_MANAGE: "Configurar y vender PC armadas a la medida",
+    Perm.CUSTOMERS_NOTIFY: "Preparar avisos al cliente por WhatsApp",
 }
 
 SYSTEM_ROLES: dict[RoleCode, tuple[str, frozenset[Perm]]] = {
@@ -98,6 +100,7 @@ SYSTEM_ROLES: dict[RoleCode, tuple[str, frozenset[Perm]]] = {
                 Perm.PAYMENTS_MANAGE,
                 Perm.REPORTS_READ,
                 Perm.WARRANTIES_MANAGE,
+                Perm.CUSTOMERS_NOTIFY,
             }
         ),
     ),
@@ -132,6 +135,7 @@ SYSTEM_ROLES: dict[RoleCode, tuple[str, frozenset[Perm]]] = {
                 Perm.PAYMENTS_MANAGE,
                 Perm.REPORTS_READ,
                 Perm.WARRANTIES_MANAGE,
+                Perm.CUSTOMERS_NOTIFY,
             }
         ),
     ),

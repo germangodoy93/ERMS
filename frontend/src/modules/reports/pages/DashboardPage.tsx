@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { PendingNoticesCard } from "@/modules/notices/components/PendingNoticesCard";
 import { WorkOrderStatusBadge } from "@/modules/workorders/components/WorkOrderStatusBadge";
 import { formatMoney, PAYMENT_LABELS } from "@/modules/workorders/presentation";
 import { errorMessage } from "@/services/errors";
@@ -119,6 +120,7 @@ function DashboardBody({ data }: { data: NonNullable<ReturnType<typeof useDashbo
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
+        <PendingNoticesCard />
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Órdenes abiertas por estado</CardTitle>

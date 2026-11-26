@@ -132,6 +132,8 @@ asignar (al moverla se le asigna).
 | `warranty_claims` | ✅ 6 | warranty_id, claim_order_id, reported_issue, status (OPEN, ACCEPTED, REJECTED), resolution, decided_by_id, decided_at, created_by_id | `uq(claim_order_id)`; el reclamo abre una orden nueva |
 | `assembly_builds` | ✅ E1 · E2 | name, profile (OFFICE, DESIGN, GAMING), status (DRAFT, ORDERED), ram_units (1-4), desk_shape (STRAIGHT, L), pc_position (AUTO, DESK, FLOOR), labor_price, notes, work_order_id, steps_done JSONB, created_by_id | `uq(work_order_id)`; ORDERED ⇔ tiene orden |
 | `assembly_build_items` | ✅ E1 | build_id, part_id | La categoría sale del repuesto; la RAM usa `ram_units` |
+| `notice_templates` | ✅ Avisos | organization_id, kind, body, updated_by_id, updated_at | PK `(organization_id, kind)`; solo los textos que el taller cambió (los demás usan el texto por defecto del código) |
+| `work_order_notices` | ✅ Avisos | work_order_id, kind (RECEIVED, QUOTE_READY, READY, NOT_REPAIRED, REMINDER, DELIVERED, FREE), phone, body, prepared_by_id, prepared_at | Índice `(work_order_id, prepared_at)`; registro de avisos *preparados* por WhatsApp |
 
 **Transacción de consumo de repuestos (Sprint 5):** en una sola transacción se ejecuta
 `SELECT … FOR UPDATE` sobre `stock_levels`, se valida la cantidad, se inserta el registro en

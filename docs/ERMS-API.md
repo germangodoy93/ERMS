@@ -397,6 +397,23 @@ arriba al siguiente múltiplo de $1.000, salvo `price_locked`. Se recalcula al i
 una entrada de inventario y al cambiar el margen. `PartRead.unit_cost` (y el costo de los movimientos) es `null` para
 quien no tiene `inventory:manage`.
 
+### Avisos al cliente por WhatsApp (`/notices`, sprint 3 posterior al MVP)
+
+ERMS arma el mensaje y el enlace `https://wa.me/<celular>?text=<mensaje>`; el asesor lo envía desde WhatsApp Business
+(ADR-054). Solo celulares: un teléfono fijo (`+5760…`) o vacío no permite avisar.
+
+| Método y ruta | Permiso | Respuesta |
+|---|---|---|
+| `GET /work-orders/{id}/notices` | `work_orders:read` | 200 `{phone, can_whatsapp, blocked_reason, can_prepare, suggested, pending, drafts[{kind, label, body}], history[]}` |
+| `POST /work-orders/{id}/notices` | `work_orders:read` + `customers:notify` | 201 `{notice, url}`: `{kind, body}` (≤ 1500, editable). 422 si el cliente no tiene celular |
+| `GET /notices/pending` | `work_orders:read` + `customers:notify` | 200 órdenes por avisar: cotización enviada, equipo listo, no reparado o cancelado, y recordatorio cada 7 días si el equipo sigue sin retirar |
+| `GET /notices/templates` | `organization:manage` | 200 `{templates[{kind, label, body, default_body, is_default}], placeholders[], reminder_days}` |
+| `PUT /notices/templates/{kind}` | `organization:manage` | `{body}`; 422 si usa un campo que no existe o con formato (`{total:>5}`) |
+| `DELETE /notices/templates/{kind}` | `organization:manage` | Restaura el texto original |
+
+Campos: `{cliente}`, `{orden}`, `{equipo}`, `{taller}`, `{telefono_taller}`, `{direccion_taller}`, `{falla}`, `{total}`,
+`{saldo}`, `{diagnostico}`, `{fecha_estimada}`, `{motivo}`, `{dias_listo}`, `{garantia_dias}`, `{garantia_hasta}`.
+
 ### Salud
 
 ### `GET /api/v1/health/live`

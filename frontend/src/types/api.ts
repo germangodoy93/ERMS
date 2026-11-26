@@ -1057,3 +1057,65 @@ export interface CostUpdateResult {
   unknown: string[];
   errors: string[];
 }
+
+// --- Customer notices by WhatsApp (post-MVP sprint 3) -----------------------------------
+
+export type NoticeKind =
+  "RECEIVED" | "QUOTE_READY" | "READY" | "NOT_REPAIRED" | "REMINDER" | "DELIVERED" | "FREE";
+
+export interface NoticeDraft {
+  kind: NoticeKind;
+  label: string;
+  body: string;
+}
+
+export interface NoticeRead {
+  id: string;
+  kind: NoticeKind;
+  label: string;
+  phone: string;
+  body: string;
+  prepared_by: PersonRef | null;
+  prepared_at: string;
+}
+
+export interface NoticePanel {
+  phone: string | null;
+  can_whatsapp: boolean;
+  blocked_reason: string | null;
+  can_prepare: boolean;
+  suggested: NoticeKind;
+  pending: boolean;
+  drafts: NoticeDraft[];
+  history: NoticeRead[];
+}
+
+export interface PreparedNotice {
+  notice: NoticeRead;
+  url: string;
+}
+
+export interface PendingNotice {
+  work_order_id: string;
+  number: string;
+  customer_name: string;
+  status: WorkOrderStatus;
+  kind: NoticeKind;
+  label: string;
+  since: string;
+  can_whatsapp: boolean;
+}
+
+export interface NoticeTemplate {
+  kind: NoticeKind;
+  label: string;
+  body: string;
+  default_body: string;
+  is_default: boolean;
+}
+
+export interface NoticeTemplates {
+  templates: NoticeTemplate[];
+  placeholders: { name: string; description: string }[];
+  reminder_days: number;
+}

@@ -16,6 +16,8 @@ from app.modules.diagnostics.router import agent_router as diagnostic_agent_rout
 from app.modules.diagnostics.router import router as diagnostics_router
 from app.modules.health.router import router as health_router
 from app.modules.inventory.router import router as inventory_router
+from app.modules.notices.router import order_router as notices_order_router
+from app.modules.notices.router import router as notices_router
 from app.modules.organizations.router import router as organization_router
 from app.modules.payments.router import router as payments_router
 from app.modules.privacy.router import router as privacy_router
@@ -78,6 +80,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         reports_router,
         assembly_router,
         assembly_order_router,
+        notices_router,
+        notices_order_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)
     return app

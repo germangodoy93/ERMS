@@ -23,6 +23,8 @@ import { formatDateTime } from "@/lib/format";
 import { errorMessage } from "@/services/errors";
 import type { Organization, OrganizationUpdate } from "@/types/api";
 
+import { NoticeTemplatesCard } from "@/modules/notices/components/NoticeTemplatesCard";
+
 import { ReceptionTermsCard } from "../components/ReceptionTermsCard";
 import {
   useCurrentPolicy,
@@ -57,6 +59,7 @@ export function OrganizationPage() {
           <OrganizationForm key={organization.data.id} organization={organization.data} />
           <PolicyCard />
           <ReceptionTermsCard />
+          <NoticeTemplatesCard />
         </>
       )}
     </div>

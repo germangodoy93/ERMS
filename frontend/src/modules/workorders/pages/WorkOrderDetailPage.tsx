@@ -13,6 +13,7 @@ import { formatDateTime, formatPhone } from "@/lib/format";
 import { PERMS, useCan } from "@/modules/auth/permissions";
 import { AssemblyChecklistPanel } from "@/modules/assembly/components/AssemblyChecklistPanel";
 import { DiagnosticPanel } from "@/modules/diagnostics/components/DiagnosticPanel";
+import { OrderNoticesCard } from "@/modules/notices/components/OrderNoticesCard";
 import { WarrantyPanel } from "@/modules/reports/components/WarrantyPanel";
 import { BillingPanel } from "@/modules/workshop/components/BillingPanel";
 import { QuotesPanel } from "@/modules/workshop/components/QuotesPanel";
@@ -188,6 +189,8 @@ function OrderDetail({ order }: { order: WorkOrder }) {
           </CardContent>
         </Card>
       </div>
+
+      <OrderNoticesCard orderId={order.id} />
 
       <Card>
         <CardHeader>

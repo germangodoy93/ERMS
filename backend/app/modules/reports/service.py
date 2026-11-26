@@ -41,7 +41,7 @@ from app.modules.workorders.catalog import (
 from app.modules.workorders.models import WorkOrder
 from app.modules.workorders.schemas import PersonRef
 from app.shared.context import BOGOTA, utcnow
-from app.shared.money import ZERO, money
+from app.shared.money import ZERO, format_money, money
 from app.shared.spreadsheet import safe_cell
 
 MAX_RANGE_DAYS = 366
@@ -63,12 +63,6 @@ OVERDUE = [
 
 def _start(day: date) -> datetime:
     return datetime.combine(day, time.min, tzinfo=BOGOTA)
-
-
-def format_money(value: Decimal) -> str:
-    integer, _, cents = f"{money(value):,.2f}".partition(".")
-    text = integer.replace(",", ".")
-    return f"$ {text}" if cents == "00" else f"$ {text},{cents}"
 
 
 class ReportService:
