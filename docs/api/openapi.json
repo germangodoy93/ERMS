@@ -5798,6 +5798,266 @@
           }
         }
       }
+    },
+    "/api/v1/notices/pending": {
+      "get": {
+        "tags": [
+          "notices"
+        ],
+        "summary": "Órdenes por avisar",
+        "operationId": "pending_notices_api_v1_notices_pending_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PendingNotice"
+                  },
+                  "type": "array",
+                  "title": "Response Pending Notices Api V1 Notices Pending Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/notices/templates": {
+      "get": {
+        "tags": [
+          "notices"
+        ],
+        "summary": "Textos de los avisos",
+        "operationId": "get_templates_api_v1_notices_templates_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplatesRead"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/notices/templates/{kind}": {
+      "put": {
+        "tags": [
+          "notices"
+        ],
+        "summary": "Editar un texto",
+        "operationId": "save_template_api_v1_notices_templates__kind__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NoticeKind"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplatesRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "notices"
+        ],
+        "summary": "Restaurar el texto original",
+        "operationId": "reset_template_api_v1_notices_templates__kind__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NoticeKind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplatesRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/work-orders/{order_id}/notices": {
+      "get": {
+        "tags": [
+          "notices"
+        ],
+        "summary": "Avisos al cliente de la orden",
+        "operationId": "get_panel_api_v1_work_orders__order_id__notices_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticePanel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "notices"
+        ],
+        "summary": "Preparar un aviso por WhatsApp (devuelve el enlace wa.me)",
+        "operationId": "prepare_notice_api_v1_work_orders__order_id__notices_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoticeCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreparedNotice"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -9441,6 +9701,181 @@
         ],
         "title": "MovementRead"
       },
+      "NoticeCreate": {
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/NoticeKind"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 1500,
+            "minLength": 1,
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "body"
+        ],
+        "title": "NoticeCreate"
+      },
+      "NoticeDraft": {
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/NoticeKind"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "label",
+          "body"
+        ],
+        "title": "NoticeDraft"
+      },
+      "NoticeKind": {
+        "type": "string",
+        "enum": [
+          "RECEIVED",
+          "QUOTE_READY",
+          "READY",
+          "NOT_REPAIRED",
+          "REMINDER",
+          "DELIVERED",
+          "FREE"
+        ],
+        "title": "NoticeKind"
+      },
+      "NoticePanel": {
+        "properties": {
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone",
+            "description": "Teléfono del cliente (E.164)"
+          },
+          "can_whatsapp": {
+            "type": "boolean",
+            "title": "Can Whatsapp"
+          },
+          "blocked_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocked Reason",
+            "description": "Por qué no se puede avisar por WhatsApp"
+          },
+          "can_prepare": {
+            "type": "boolean",
+            "title": "Can Prepare",
+            "description": "El usuario tiene permiso para preparar avisos"
+          },
+          "suggested": {
+            "$ref": "#/components/schemas/NoticeKind"
+          },
+          "pending": {
+            "type": "boolean",
+            "title": "Pending",
+            "description": "El aviso sugerido todavía no se ha preparado"
+          },
+          "drafts": {
+            "items": {
+              "$ref": "#/components/schemas/NoticeDraft"
+            },
+            "type": "array",
+            "title": "Drafts"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/NoticeRead"
+            },
+            "type": "array",
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "phone",
+          "can_whatsapp",
+          "blocked_reason",
+          "can_prepare",
+          "suggested",
+          "pending",
+          "drafts",
+          "history"
+        ],
+        "title": "NoticePanel"
+      },
+      "NoticeRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/NoticeKind"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "phone": {
+            "type": "string",
+            "title": "Phone"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "prepared_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prepared_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Prepared At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "label",
+          "phone",
+          "body",
+          "prepared_by",
+          "prepared_at"
+        ],
+        "title": "NoticeRead"
+      },
       "OrderRequest": {
         "properties": {
           "customer_id": {
@@ -10397,6 +10832,55 @@
         ],
         "title": "PcPosition"
       },
+      "PendingNotice": {
+        "properties": {
+          "work_order_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Work Order Id"
+          },
+          "number": {
+            "type": "string",
+            "title": "Number"
+          },
+          "customer_name": {
+            "type": "string",
+            "title": "Customer Name"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/NoticeKind"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Since",
+            "description": "Desde cuándo está pendiente el aviso"
+          },
+          "can_whatsapp": {
+            "type": "boolean",
+            "title": "Can Whatsapp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "work_order_id",
+          "number",
+          "customer_name",
+          "status",
+          "kind",
+          "label",
+          "since",
+          "can_whatsapp"
+        ],
+        "title": "PendingNotice"
+      },
       "PermissionRead": {
         "properties": {
           "code": {
@@ -10490,6 +10974,42 @@
           "created_at"
         ],
         "title": "PhotoRead"
+      },
+      "PlaceholderRead": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "description"
+        ],
+        "title": "PlaceholderRead"
+      },
+      "PreparedNotice": {
+        "properties": {
+          "notice": {
+            "$ref": "#/components/schemas/NoticeRead"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "Enlace wa.me con el mensaje (abrir o mostrar como QR)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "notice",
+          "url"
+        ],
+        "title": "PreparedNotice"
       },
       "Priority": {
         "type": "string",
@@ -12645,6 +13165,82 @@
           "open_orders"
         ],
         "title": "TechnicianLoad"
+      },
+      "TemplateRead": {
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/NoticeKind"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "default_body": {
+            "type": "string",
+            "title": "Default Body"
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "label",
+          "body",
+          "default_body",
+          "is_default"
+        ],
+        "title": "TemplateRead"
+      },
+      "TemplateUpdate": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "maxLength": 1500,
+            "minLength": 1,
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "TemplateUpdate"
+      },
+      "TemplatesRead": {
+        "properties": {
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/TemplateRead"
+            },
+            "type": "array",
+            "title": "Templates"
+          },
+          "placeholders": {
+            "items": {
+              "$ref": "#/components/schemas/PlaceholderRead"
+            },
+            "type": "array",
+            "title": "Placeholders"
+          },
+          "reminder_days": {
+            "type": "integer",
+            "title": "Reminder Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "templates",
+          "placeholders",
+          "reminder_days"
+        ],
+        "title": "TemplatesRead"
       },
       "TemporaryPasswordSet": {
         "properties": {
