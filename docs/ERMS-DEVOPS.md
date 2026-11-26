@@ -90,6 +90,7 @@ verificadas el 2026-11-19:
 | `FRONTEND_URL` | Sí en producción | Base de los enlaces enviados por correo (p. ej. el dominio de `web` en Railway) |
 | `SMTP_HOST` · `SMTP_PORT` · `SMTP_USERNAME` · `SMTP_PASSWORD` · `SMTP_STARTTLS` · `SMTP_FROM` | Para recuperar contraseñas | Sin `SMTP_HOST` no se envían correos: se registra el intento sin el enlace. |
 | `S3_BUCKET` · `S3_ENDPOINT` · `S3_ACCESS_KEY_ID` · `S3_SECRET_ACCESS_KEY` | Para guardar fotos | Bucket de Railway (ADR-053). Van juntas: si falta una, la API no arranca. En Railway se referencian desde el bucket: `${{Bucket.BUCKET}}`, `${{Bucket.ENDPOINT}}`, `${{Bucket.ACCESS_KEY_ID}}`, `${{Bucket.SECRET_ACCESS_KEY}}`. |
+| — | — | **Configuración en Railway:** las referencias `${{...}}` deben usar el nombre exacto del bucket en el lienzo; si quedan vacías, copiar los valores desde la pestaña *Credentials* del bucket (entorno correcto) con el botón de copiar. El chequeo `storage` de `/api/v1/health/ready` muestra el código de error de S3 (por ejemplo, HTTP 403 = credenciales). |
 | `S3_REGION` · `S3_ADDRESSING_STYLE` | No | `auto` · `virtual` (usar `path` solo si la pestaña *Credentials* del bucket lo indica) |
 | `ATTACHMENTS_DIR` | No | Sin `S3_*`: carpeta local de fotos (por defecto `var/attachments`). En Railway es efímera: **modo demostración**. |
 | `ATTACHMENT_MAX_BYTES` · `ATTACHMENT_MAX_PER_ORDER` | No | 10 MB · 20 |

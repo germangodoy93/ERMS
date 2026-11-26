@@ -142,7 +142,7 @@ taller está obligado (responsabilidades 52, 48 o 47; ver la investigación del 
 | Puesto | Sprint | Contenido |
 |---|---|---|
 | 1 | Ensamble de equipos | PM-03 ✅ (E1: configurador y venta; E2: 3D, RGB y setup) |
-| 2 | Fotos guardadas | Bucket privado de Railway (S3), ADR-053 — programado; falta verificar en producción |
+| 2 | Fotos guardadas | ✅ Bucket privado de Railway (S3), ADR-053; verificado en producción el 2026-11-26 |
 | 3 | Avisos al cliente por WhatsApp | Fase A sin costo: botón que abre WhatsApp con el mensaje listo (enlace `wa.me`), enviado por el asesor. Fase B: envío automático con la API oficial de WhatsApp Cloud (plantillas de utilidad, cerca de USD 0,0008 por mensaje en Colombia; requiere número dedicado y verificación del negocio en Meta) |
 | 4 | Atención remota, en sitio y recogida | PM-04 |
 | 5 | Agente v2 – mantenimiento | PM-01 |

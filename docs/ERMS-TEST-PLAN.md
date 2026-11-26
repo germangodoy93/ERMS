@@ -204,8 +204,8 @@ configuración `S3_*` todo o nada, selección automática del almacenamiento y c
 (`storage`: no crítico; OK, ERROR o sin configurar). `backend/tests/integration/test_photo_storage_s3.py`:
 la foto queda en el bucket con su clave por organización/orden, la API la sirve igual y
 `demo` es falso; borrarla elimina el objeto; una subida fallida responde 503 sin dejar fila;
-un borrado fallido responde 503 y conserva la foto. En producción: subir una foto, volver a
-desplegar y comprobar que sigue disponible.
+un borrado fallido responde 503 y conserva la foto. En producción (2026-11-26): chequeo `storage` en OK, foto subida desde una orden y todavía
+disponible tras volver a desplegar el backend.
 
 **Windows:** si la terminal abre la carpeta como `c:\...` (minúscula), Vitest carga dos copias de
 sí mismo y las pruebas de interfaz fallan con `Invalid Chai property: toBeInTheDocument`.
