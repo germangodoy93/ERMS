@@ -1,37 +1,14 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { apiLogin, seed } from "./api";
+import { EMAIL, login } from "./auth";
 
-// Credentials of a disposable admin (CI bootstraps one; locally use the E2E user).
-const EMAIL = process.env.E2E_EMAIL ?? "e2e-admin@example.com";
-const PASSWORD = process.env.E2E_PASSWORD ?? "Definitiva-E2E-Sprint2";
-// When the admin still has a temporary password, the flow changes it to this one.
-const NEW_PASSWORD = process.env.E2E_NEW_PASSWORD ?? "Definitiva-Navegador-2026";
 const RUN = Date.now().toString(36);
 
 async function selectOption(scope: Page | Locator, label: string, option: string | RegExp) {
   await scope.getByLabel(label, { exact: true }).click();
   const page = "page" in scope ? scope.page() : scope;
   await page.getByRole("option", { name: option }).first().click();
-}
-
-async function login(page: Page): Promise<string> {
-  await page.goto("/login");
-  await page.getByLabel("Correo electrónico").fill(EMAIL);
-  await page.getByLabel("Contraseña").fill(PASSWORD);
-  await page.getByRole("button", { name: "Ingresar" }).click();
-  // The app may land on "/" first and then redirect to the password change.
-  const current = page.getByLabel("Contraseña actual");
-  await expect(current.or(page.getByRole("link", { name: "Inicio" }))).toBeVisible();
-  if (await current.isVisible()) {
-    await page.getByLabel("Contraseña actual").fill(PASSWORD);
-    await page.getByLabel("Nueva contraseña", { exact: true }).fill(NEW_PASSWORD);
-    await page.getByLabel("Confirmar nueva contraseña").fill(NEW_PASSWORD);
-    await page.getByRole("button", { name: "Cambiar contraseña" }).click();
-    await page.waitForURL((url) => !url.pathname.startsWith("/cambiar-contrasena"));
-    return NEW_PASSWORD;
-  }
-  return PASSWORD;
 }
 
 /**
@@ -64,7 +41,7 @@ test("reception → diagnostic → quote → repair → QC → payment → deliv
   page,
   request,
 }) => {
-  const password = await login(page);
+  const password = await login(page, request);
   const data = await seed(request, await apiLogin(request, EMAIL, password), RUN);
 
   // --- Reception: new customer and device from the wizard. -------------------------------

@@ -23,6 +23,7 @@ from app.core.email import OutgoingEmail, get_mailer
 from app.core.security import hash_password
 from app.core.storage import LocalStorage, get_storage
 from app.main import create_app
+from app.modules.appointments.service import seed_field_services
 from app.modules.auth import router as auth_router
 from app.modules.devices.catalog import seed_manufacturers
 from app.modules.health.checks import BACKEND_ROOT
@@ -36,6 +37,8 @@ TEST_DB_URL = os.environ.get("ERMS_TEST_DATABASE_URL")
 PASSWORD = "Contraseña-de-prueba-123"
 
 BUSINESS_TABLES = (
+    "appointments",
+    "field_services",
     "work_order_notices",
     "notice_templates",
     "assembly_build_items",
@@ -170,6 +173,7 @@ def make_tenant(db: Session, slug: str = "taller-prueba") -> Tenant:
     db.add(Branch(organization_id=organization.id, name="Sede Bogotá", city="Bogotá"))
     roles = create_system_roles(db, organization.id)
     seed_manufacturers(db, organization.id)
+    seed_field_services(db, organization.id)
     db.commit()
     return Tenant(organization=organization, roles=roles)
 

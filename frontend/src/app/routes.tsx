@@ -11,6 +11,7 @@ import { PERMS, type PermissionCode } from "@/modules/auth/permissions";
 
 import { NotFoundPage } from "./NotFoundPage";
 import {
+  AgendaPage,
   AssemblyBuilderPage,
   AssemblyPage,
   AuditPage,
@@ -61,6 +62,7 @@ export const routes: RouteObject[] = [
           guarded("ordenes", PERMS.WORK_ORDERS_READ, <WorkOrdersPage />),
           guarded("ordenes/nueva", PERMS.WORK_ORDERS_CREATE, <NewWorkOrderPage />),
           guarded("ordenes/:orderId", PERMS.WORK_ORDERS_READ, <WorkOrderDetailPage />),
+          guarded("agenda", PERMS.WORK_ORDERS_READ, <AgendaPage />),
           guarded("clientes", PERMS.CUSTOMERS_READ, <CustomersPage />),
           guarded("clientes/:customerId", PERMS.CUSTOMERS_READ, <CustomerDetailPage />),
           guarded("dispositivos", PERMS.CUSTOMERS_READ, <DevicesPage />),

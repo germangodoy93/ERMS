@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import Settings, get_settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import configure_logging
+from app.modules.appointments.router import router as appointments_router
 from app.modules.assembly.router import order_router as assembly_order_router
 from app.modules.assembly.router import router as assembly_router
 from app.modules.audit.router import router as audit_router
@@ -82,6 +83,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         assembly_order_router,
         notices_router,
         notices_order_router,
+        appointments_router,
     ):
         app.include_router(router, prefix=settings.api_prefix)
     return app

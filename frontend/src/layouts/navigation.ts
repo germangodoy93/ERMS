@@ -1,6 +1,7 @@
 import {
   Activity,
   BarChart3,
+  CalendarDays,
   Building2,
   ClipboardList,
   Cpu,
@@ -43,6 +44,7 @@ export const NAVIGATION: NavSection[] = [
         to: "/ordenes",
         permission: PERMS.WORK_ORDERS_READ,
       },
+      { label: "Agenda", icon: CalendarDays, to: "/agenda", permission: PERMS.WORK_ORDERS_READ },
       { label: "Clientes", icon: Users, to: "/clientes", permission: PERMS.CUSTOMERS_READ },
       {
         label: "Dispositivos",

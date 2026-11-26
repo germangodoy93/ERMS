@@ -1119,3 +1119,110 @@ export interface NoticeTemplates {
   placeholders: { name: string; description: string }[];
   reminder_days: number;
 }
+
+// --- Agenda: remote and on-site appointments (PM-04, sprint R1) ----------------------------
+
+export type Modality = "REMOTE" | "ON_SITE";
+export type AppointmentStatus = "SCHEDULED" | "CANCELLED";
+export type ConsentChannelCode = "SCREEN" | "PAPER" | "VERBAL";
+
+export interface HoursDay {
+  /** 0 = lunes … 6 = domingo. */
+  weekday: number;
+  /** "HH:MM:SS"; null when there is no service that day. */
+  opens: string | null;
+  closes: string | null;
+}
+
+export interface HoursRead {
+  days: HoursDay[];
+  is_default: boolean;
+}
+
+export interface FieldService {
+  id: string;
+  name: string;
+  modality: Modality;
+  duration_minutes: number;
+  /** Null: the price is given after the diagnosis. */
+  price: string | null;
+  tax_rate: number;
+  price_includes_tax: boolean;
+  description: string | null;
+  is_active: boolean;
+}
+
+export type FieldServiceWrite = Omit<FieldService, "id">;
+
+export interface AppointmentRead {
+  id: string;
+  number: string;
+  status: AppointmentStatus;
+  modality: Modality;
+  customer: WorkOrderCustomer;
+  service: {
+    id: string;
+    name: string;
+    price: string | null;
+    tax_rate: number;
+    price_includes_tax: boolean;
+  };
+  starts_at: string;
+  ends_at: string;
+  duration_minutes: number;
+  technician: PersonRef | null;
+  reason: string;
+  address: string | null;
+  locality: string | null;
+  notes: string | null;
+  overlap_reason: string | null;
+  remote_consent_channel: ConsentChannelCode | null;
+  remote_consent_text: string | null;
+  remote_consent_at: string | null;
+  cancel_reason: string | null;
+  cancelled_at: string | null;
+  created_by: PersonRef | null;
+  created_at: string;
+}
+
+export interface AppointmentCreate {
+  customer_id: string;
+  service_id: string;
+  starts_at: string;
+  duration_minutes?: number | null;
+  technician_id?: string | null;
+  reason: string;
+  address?: string | null;
+  locality?: string | null;
+  notes?: string | null;
+  overlap_reason?: string | null;
+  remote_consent_channel?: ConsentChannelCode | null;
+}
+
+export type AppointmentUpdate = Partial<
+  Pick<
+    AppointmentCreate,
+    | "starts_at"
+    | "duration_minutes"
+    | "technician_id"
+    | "reason"
+    | "address"
+    | "locality"
+    | "notes"
+    | "overlap_reason"
+  >
+>;
+
+export interface Holiday {
+  date: string;
+  name: string;
+}
+
+export interface AgendaOptions {
+  hours: HoursDay[];
+  services: FieldService[];
+  technicians: PersonRef[];
+  localities: string[];
+  remote_access_text: string;
+  can_manage: boolean;
+}

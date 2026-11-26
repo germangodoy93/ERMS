@@ -19,6 +19,7 @@ from sqlalchemy import select
 from app.core.config import get_settings
 from app.core.database import get_session_factory
 from app.core.security import hash_password
+from app.modules.appointments.service import seed_field_services
 from app.modules.audit.service import AuditService
 from app.modules.devices.catalog import seed_manufacturers
 from app.modules.organizations.models import Branch, Organization
@@ -61,6 +62,7 @@ def bootstrap(args: argparse.Namespace) -> None:
         )
         roles = create_system_roles(session, organization.id)
         seed_manufacturers(session, organization.id)
+        seed_field_services(session, organization.id)
         admin = User(
             organization_id=organization.id,
             email=email,

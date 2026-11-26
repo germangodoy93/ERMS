@@ -2,8 +2,10 @@
 
 import uuid
 from decimal import Decimal
+from typing import Any
 
 from sqlalchemy import Boolean, ForeignKey, Integer, Numeric, String, UniqueConstraint
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.shared.models import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -35,6 +37,9 @@ class Organization(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     assembly_margin_percent: Mapped[Decimal] = mapped_column(
         Numeric(5, 2), nullable=False, default=Decimal("15"), server_default="15"
     )
+    # Remote and on-site service hours, independent of the workshop's opening hours.
+    # None: the defaults of appointments/catalog.py.
+    field_service_hours: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     timezone: Mapped[str] = mapped_column(
         String(64), nullable=False, default="America/Bogota", server_default="America/Bogota"
     )
